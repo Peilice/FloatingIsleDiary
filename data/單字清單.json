@@ -1,0 +1,4767 @@
+[
+ {
+  "word": "hello",
+  "zh": "哈囉",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "hi",
+  "zh": "嗨",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "goodbye",
+  "zh": "再見",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "thank",
+  "zh": "謝謝",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "please",
+  "zh": "請",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "yes",
+  "zh": "是",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "no",
+  "zh": "不是",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sorry",
+  "zh": "對不起",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "help",
+  "zh": "幫忙",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "want",
+  "zh": "想要",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "need",
+  "zh": "需要",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "like",
+  "zh": "喜歡",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "have",
+  "zh": "有",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "give",
+  "zh": "給",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "take",
+  "zh": "拿",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "put",
+  "zh": "放",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "make",
+  "zh": "製作",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "go",
+  "zh": "去",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "come",
+  "zh": "來",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "look",
+  "zh": "看",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "see",
+  "zh": "看見",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "open",
+  "zh": "打開",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "close",
+  "zh": "關閉",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "stop",
+  "zh": "停止",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "wait",
+  "zh": "等待",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "here",
+  "zh": "這裡",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "there",
+  "zh": "那裡",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "this",
+  "zh": "這個",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "that",
+  "zh": "那個",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "what",
+  "zh": "什麼",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "where",
+  "zh": "哪裡",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "how",
+  "zh": "如何",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "who",
+  "zh": "誰",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "can",
+  "zh": "能夠",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "good",
+  "zh": "好的",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "nice",
+  "zh": "好的",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "happy",
+  "zh": "開心",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sad",
+  "zh": "難過",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "hungry",
+  "zh": "餓",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "thirsty",
+  "zh": "渴",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "tired",
+  "zh": "累",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "find",
+  "zh": "找到",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "use",
+  "zh": "使用",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "today",
+  "zh": "今天",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "day",
+  "zh": "天",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "night",
+  "zh": "夜晚",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "morning",
+  "zh": "早上",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "afternoon",
+  "zh": "下午",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "evening",
+  "zh": "傍晚",
+  "modules": [
+   "通用"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "one",
+  "zh": "一",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "two",
+  "zh": "二",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "three",
+  "zh": "三",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "four",
+  "zh": "四",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "five",
+  "zh": "五",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "six",
+  "zh": "六",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "seven",
+  "zh": "七",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "eight",
+  "zh": "八",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "nine",
+  "zh": "九",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "ten",
+  "zh": "十",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "eleven",
+  "zh": "十一",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "twelve",
+  "zh": "十二",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "twenty",
+  "zh": "二十",
+  "modules": [
+   "數字"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "hundred",
+  "zh": "百",
+  "modules": [
+   "數字"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "red",
+  "zh": "紅色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "blue",
+  "zh": "藍色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "yellow",
+  "zh": "黃色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "green",
+  "zh": "綠色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "orange",
+  "zh": "橘色；柳橙",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "purple",
+  "zh": "紫色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "pink",
+  "zh": "粉紅色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "black",
+  "zh": "黑色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "white",
+  "zh": "白色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "brown",
+  "zh": "棕色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "gray",
+  "zh": "灰色",
+  "modules": [
+   "顏色"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "father",
+  "zh": "爸爸",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "mother",
+  "zh": "媽媽",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "brother",
+  "zh": "兄弟",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sister",
+  "zh": "姊妹",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "grandfather",
+  "zh": "祖父",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "grandmother",
+  "zh": "祖母",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "baby",
+  "zh": "嬰兒",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "friend",
+  "zh": "朋友",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "family",
+  "zh": "家庭",
+  "modules": [
+   "家人"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "boy",
+  "zh": "男孩",
+  "modules": [
+   "人物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "girl",
+  "zh": "女孩",
+  "modules": [
+   "人物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "man",
+  "zh": "男人",
+  "modules": [
+   "人物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "woman",
+  "zh": "女人",
+  "modules": [
+   "人物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "teacher",
+  "zh": "老師",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "student",
+  "zh": "學生",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "school",
+  "zh": "學校",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "classroom",
+  "zh": "教室",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "book",
+  "zh": "書",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "pen",
+  "zh": "筆",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "pencil",
+  "zh": "鉛筆",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "desk",
+  "zh": "書桌",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "chair",
+  "zh": "椅子",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "ruler",
+  "zh": "尺",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "eraser",
+  "zh": "橡皮擦",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "bag",
+  "zh": "袋子",
+  "modules": [
+   "學校"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "head",
+  "zh": "頭",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "eye",
+  "zh": "眼睛",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "ear",
+  "zh": "耳朵",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "nose",
+  "zh": "鼻子",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "mouth",
+  "zh": "嘴巴",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "hand",
+  "zh": "手",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "foot",
+  "zh": "腳",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "leg",
+  "zh": "腿",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "arm",
+  "zh": "手臂",
+  "modules": [
+   "身體"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "tail",
+  "zh": "尾巴",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "wing",
+  "zh": "翅膀",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "animal",
+  "zh": "動物",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bird",
+  "zh": "鳥",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "fish",
+  "zh": "魚",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "insect",
+  "zh": "昆蟲",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "dog",
+  "zh": "狗",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cat",
+  "zh": "貓",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "rabbit",
+  "zh": "兔子",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "frog",
+  "zh": "青蛙",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "duck",
+  "zh": "鴨子",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "chicken",
+  "zh": "雞",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "cow",
+  "zh": "牛",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "pig",
+  "zh": "豬",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "horse",
+  "zh": "馬",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "monkey",
+  "zh": "猴子",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "elephant",
+  "zh": "大象",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "lion",
+  "zh": "獅子",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "tiger",
+  "zh": "老虎",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "bear",
+  "zh": "熊",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "panda",
+  "zh": "貓熊",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "snake",
+  "zh": "蛇",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "butterfly",
+  "zh": "蝴蝶",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "bee",
+  "zh": "蜜蜂",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "ant",
+  "zh": "螞蟻",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "fox",
+  "zh": "狐狸",
+  "modules": [
+   "動物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "deer",
+  "zh": "鹿",
+  "modules": [
+   "動物"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "dolphin",
+  "zh": "海豚",
+  "modules": [
+   "動物"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "whale",
+  "zh": "鯨魚",
+  "modules": [
+   "動物"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "swim",
+  "zh": "游泳",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "fly",
+  "zh": "飛",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "run",
+  "zh": "跑",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "jump",
+  "zh": "跳",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "walk",
+  "zh": "走",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "eat",
+  "zh": "吃",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "drink",
+  "zh": "喝",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sleep",
+  "zh": "睡覺",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sit",
+  "zh": "坐",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "stand",
+  "zh": "站",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "read",
+  "zh": "讀",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "write",
+  "zh": "寫",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "draw",
+  "zh": "畫",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sing",
+  "zh": "唱",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "dance",
+  "zh": "跳舞",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "play",
+  "zh": "玩",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "cook",
+  "zh": "煮；廚師",
+  "modules": [
+   "動作",
+   "職業"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "wash",
+  "zh": "洗",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "climb",
+  "zh": "爬",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "catch",
+  "zh": "抓",
+  "modules": [
+   "動作"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "plant",
+  "zh": "植物；種植",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "root",
+  "zh": "根",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "leaf",
+  "zh": "葉子",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "flower",
+  "zh": "花",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "fruit",
+  "zh": "水果；果實",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "seed",
+  "zh": "種子",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "tree",
+  "zh": "樹",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "grass",
+  "zh": "草",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "grow",
+  "zh": "生長",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "garden",
+  "zh": "花園",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "farm",
+  "zh": "農場",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "farmer",
+  "zh": "農夫",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "rose",
+  "zh": "玫瑰",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "pick",
+  "zh": "摘",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "apple",
+  "zh": "蘋果",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "banana",
+  "zh": "香蕉",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "grape",
+  "zh": "葡萄",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "lemon",
+  "zh": "檸檬",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "carrot",
+  "zh": "紅蘿蔔",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "potato",
+  "zh": "馬鈴薯",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "corn",
+  "zh": "玉米",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "bean",
+  "zh": "豆子",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "rice",
+  "zh": "米飯",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bread",
+  "zh": "麵包",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "egg",
+  "zh": "蛋",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "cake",
+  "zh": "蛋糕",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "milk",
+  "zh": "牛奶",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "juice",
+  "zh": "果汁",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "soup",
+  "zh": "湯",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "tea",
+  "zh": "茶",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sugar",
+  "zh": "糖",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "salt",
+  "zh": "鹽",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sweet",
+  "zh": "甜的",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sour",
+  "zh": "酸的",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "bitter",
+  "zh": "苦的",
+  "modules": [
+   "食物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "weather",
+  "zh": "天氣",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sunny",
+  "zh": "晴朗的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cloudy",
+  "zh": "多雲的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "rainy",
+  "zh": "下雨的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "windy",
+  "zh": "有風的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "snowy",
+  "zh": "下雪的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "rain",
+  "zh": "雨",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "snow",
+  "zh": "雪",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "cloud",
+  "zh": "雲",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "wind",
+  "zh": "風",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sun",
+  "zh": "太陽",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "rainbow",
+  "zh": "彩虹",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "umbrella",
+  "zh": "雨傘",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "raincoat",
+  "zh": "雨衣",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "fog",
+  "zh": "霧",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "foggy",
+  "zh": "有霧的",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "spring",
+  "zh": "春天",
+  "modules": [
+   "季節"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "summer",
+  "zh": "夏天",
+  "modules": [
+   "季節"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "autumn",
+  "zh": "秋天",
+  "modules": [
+   "季節"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "winter",
+  "zh": "冬天",
+  "modules": [
+   "季節"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "hot",
+  "zh": "熱的",
+  "modules": [
+   "溫度"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cold",
+  "zh": "冷的",
+  "modules": [
+   "溫度"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "warm",
+  "zh": "溫暖的",
+  "modules": [
+   "溫度"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cool",
+  "zh": "涼的",
+  "modules": [
+   "溫度"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "water",
+  "zh": "水",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "ice",
+  "zh": "冰",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "steam",
+  "zh": "蒸氣",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "fire",
+  "zh": "火",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "boil",
+  "zh": "煮沸",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "lake",
+  "zh": "湖",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "river",
+  "zh": "河流",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sea",
+  "zh": "海",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "ocean",
+  "zh": "海洋",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "pond",
+  "zh": "池塘",
+  "modules": [
+   "水"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "wood",
+  "zh": "木頭",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "stone",
+  "zh": "石頭",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "metal",
+  "zh": "金屬",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "glass",
+  "zh": "玻璃",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "paper",
+  "zh": "紙",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "gold",
+  "zh": "黃金",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "iron",
+  "zh": "鐵",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "box",
+  "zh": "箱子",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bottle",
+  "zh": "瓶子",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "heavy",
+  "zh": "重的",
+  "modules": [
+   "物質"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "big",
+  "zh": "大的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "small",
+  "zh": "小的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "long",
+  "zh": "長的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "short",
+  "zh": "短的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "tall",
+  "zh": "高的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "thin",
+  "zh": "瘦的；薄的",
+  "modules": [
+   "大小"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "light",
+  "zh": "光；輕的",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "lamp",
+  "zh": "檯燈",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "moon",
+  "zh": "月亮",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "star",
+  "zh": "星星",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sky",
+  "zh": "天空",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "dark",
+  "zh": "黑暗的",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bright",
+  "zh": "明亮的",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "mirror",
+  "zh": "鏡子",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "planet",
+  "zh": "行星",
+  "modules": [
+   "光"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "left",
+  "zh": "左邊",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "right",
+  "zh": "右邊",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "near",
+  "zh": "近的",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "far",
+  "zh": "遠的",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "east",
+  "zh": "東",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "west",
+  "zh": "西",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "north",
+  "zh": "北",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "south",
+  "zh": "南",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "up",
+  "zh": "向上",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "down",
+  "zh": "向下",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "in",
+  "zh": "在裡面",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "on",
+  "zh": "在上面",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "under",
+  "zh": "在下面",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "behind",
+  "zh": "在後面",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "front",
+  "zh": "前面",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "next",
+  "zh": "隔壁；下一個",
+  "modules": [
+   "方位"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "sound",
+  "zh": "聲音",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bell",
+  "zh": "鈴",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "drum",
+  "zh": "鼓",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "piano",
+  "zh": "鋼琴",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "guitar",
+  "zh": "吉他",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "flute",
+  "zh": "笛子",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "music",
+  "zh": "音樂",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "song",
+  "zh": "歌",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "loud",
+  "zh": "大聲的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "soft",
+  "zh": "輕柔的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "quiet",
+  "zh": "安靜的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "noise",
+  "zh": "噪音",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "noisy",
+  "zh": "吵鬧的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "listen",
+  "zh": "聽",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "hear",
+  "zh": "聽見",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "high",
+  "zh": "高的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "low",
+  "zh": "低的",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "push",
+  "zh": "推",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "pull",
+  "zh": "拉",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "move",
+  "zh": "移動",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "fast",
+  "zh": "快的",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "slow",
+  "zh": "慢的",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "ball",
+  "zh": "球",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "kick",
+  "zh": "踢",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "throw",
+  "zh": "丟",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "rope",
+  "zh": "繩子",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "bridge",
+  "zh": "橋",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "bike",
+  "zh": "腳踏車",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "boat",
+  "zh": "船",
+  "modules": [
+   "力"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "machine",
+  "zh": "機器",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "electric",
+  "zh": "電的",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "robot",
+  "zh": "機器人",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "radio",
+  "zh": "收音機",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "clock",
+  "zh": "時鐘",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "fan",
+  "zh": "風扇",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "computer",
+  "zh": "電腦",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "turn",
+  "zh": "轉；打開(開關)",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "off",
+  "zh": "關掉",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "rock",
+  "zh": "岩石",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "sand",
+  "zh": "沙",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "mud",
+  "zh": "泥巴",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "mountain",
+  "zh": "山",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "hill",
+  "zh": "山丘",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "beach",
+  "zh": "海灘",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "island",
+  "zh": "島",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "road",
+  "zh": "道路",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "hole",
+  "zh": "洞",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "dig",
+  "zh": "挖",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "field",
+  "zh": "田野",
+  "modules": [
+   "地表"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "shake",
+  "zh": "搖晃",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "drop",
+  "zh": "趴下；掉落",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cover",
+  "zh": "掩護；覆蓋",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "safe",
+  "zh": "安全的",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "danger",
+  "zh": "危險",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "dangerous",
+  "zh": "危險的",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "flashlight",
+  "zh": "手電筒",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "stay",
+  "zh": "待著",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "careful",
+  "zh": "小心的",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "clean",
+  "zh": "乾淨的；打掃",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "dirty",
+  "zh": "髒的",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "recycle",
+  "zh": "回收",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "garbage",
+  "zh": "垃圾",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "air",
+  "zh": "空氣",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "save",
+  "zh": "節省；拯救",
+  "modules": [
+   "環境"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "protect",
+  "zh": "保護",
+  "modules": [
+   "環境"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "pollution",
+  "zh": "汙染",
+  "modules": [
+   "環境"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "environment",
+  "zh": "環境",
+  "modules": [
+   "環境"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "hat",
+  "zh": "帽子",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "shirt",
+  "zh": "襯衫",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "pants",
+  "zh": "褲子",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "shoes",
+  "zh": "鞋子",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "coat",
+  "zh": "外套",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "dress",
+  "zh": "洋裝",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "cap",
+  "zh": "帽子(有帽簷)",
+  "modules": [
+   "衣物"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "house",
+  "zh": "房子",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "kitchen",
+  "zh": "廚房",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "bedroom",
+  "zh": "臥室",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "park",
+  "zh": "公園",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "zoo",
+  "zh": "動物園",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "library",
+  "zh": "圖書館",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "hospital",
+  "zh": "醫院",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "market",
+  "zh": "市場",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "store",
+  "zh": "商店",
+  "modules": [
+   "地點"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "doctor",
+  "zh": "醫生",
+  "modules": [
+   "職業"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "nurse",
+  "zh": "護士",
+  "modules": [
+   "職業"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "police",
+  "zh": "警察",
+  "modules": [
+   "職業"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "driver",
+  "zh": "司機",
+  "modules": [
+   "職業"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "Monday",
+  "zh": "星期一",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Tuesday",
+  "zh": "星期二",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Wednesday",
+  "zh": "星期三",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Thursday",
+  "zh": "星期四",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Friday",
+  "zh": "星期五",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Saturday",
+  "zh": "星期六",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Sunday",
+  "zh": "星期日",
+  "modules": [
+   "時間"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "January",
+  "zh": "一月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "February",
+  "zh": "二月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "March",
+  "zh": "三月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "April",
+  "zh": "四月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "May",
+  "zh": "五月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "June",
+  "zh": "六月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "July",
+  "zh": "七月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "August",
+  "zh": "八月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "September",
+  "zh": "九月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "October",
+  "zh": "十月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "November",
+  "zh": "十一月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "December",
+  "zh": "十二月",
+  "modules": [
+   "時間"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Halloween",
+  "zh": "萬聖節",
+  "modules": [
+   "節慶"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "Christmas",
+  "zh": "聖誕節",
+  "modules": [
+   "節慶"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "birthday",
+  "zh": "生日",
+  "modules": [
+   "節慶"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "party",
+  "zh": "派對",
+  "modules": [
+   "節慶"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "gift",
+  "zh": "禮物",
+  "modules": [
+   "節慶"
+  ],
+  "layer": "core",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": true
+ },
+ {
+  "word": "earthquake",
+  "zh": "地震",
+  "modules": [
+   "地震"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "magnet",
+  "zh": "磁鐵",
+  "modules": [
+   "磁鐵"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "battery",
+  "zh": "電池",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "bulb",
+  "zh": "燈泡",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "wire",
+  "zh": "電線",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "switch",
+  "zh": "開關",
+  "modules": [
+   "電"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "shadow",
+  "zh": "影子",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "stem",
+  "zh": "莖",
+  "modules": [
+   "植物"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "soil",
+  "zh": "土壤",
+  "modules": [
+   "地表"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "thermometer",
+  "zh": "溫度計",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "telescope",
+  "zh": "望遠鏡",
+  "modules": [
+   "光"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "compass",
+  "zh": "指北針",
+  "modules": [
+   "磁鐵"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "typhoon",
+  "zh": "颱風",
+  "modules": [
+   "天氣"
+  ],
+  "layer": "extension",
+  "mode": "active",
+  "inOfficialList": true,
+  "basic1200": true,
+  "spell": false
+ },
+ {
+  "word": "evaporate",
+  "zh": "蒸發",
+  "modules": [
+   "水"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "mineral",
+  "zh": "礦物",
+  "modules": [
+   "地表"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "fossil",
+  "zh": "化石",
+  "modules": [
+   "地表"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "lever",
+  "zh": "槓桿",
+  "modules": [
+   "力"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "prism",
+  "zh": "三稜鏡",
+  "modules": [
+   "光"
+  ],
+  "layer": "extension",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ },
+ {
+  "word": "vibrate",
+  "zh": "振動",
+  "modules": [
+   "聲音"
+  ],
+  "layer": "core",
+  "mode": "passive",
+  "inOfficialList": false,
+  "basic1200": false,
+  "spell": false
+ }
+]
