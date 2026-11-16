@@ -34,7 +34,7 @@
       const o = sc.mo;
       if (!o || o.done) { if ((A.orders = (A.orders || 0) + 1) > 2) { sc.closeModal(); A.orders = 0; } return; }
       if (o.type === 'fruit') { sc.clearFruit(); for (let i = 0; i < o.n; i++) sc.addFruit(o.bin); sc.giveFruit(); }
-      else if (o.type === 'way') sc.pickWay(o.spots.indexOf(o.answer));
+      else if (o.pick) sc.pickWay(o.spots.indexOf(o.answer));
       else sc.pickCloth(o.rack.indexOf(o.answer));
       return;
     }

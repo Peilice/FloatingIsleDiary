@@ -244,7 +244,7 @@
     { name: '音調', codes: 'INe-Ⅲ-6', keys: ['pitch'] },
     { name: '化石與地層', codes: 'INc-Ⅲ-11、INd-Ⅲ-8～10', keys: ['fossil'] },
     { name: '英語：生活對話（市集、日曆）', codes: '英語 B-Ⅱ-1、C-Ⅱ-2、D-Ⅱ-1', keys: ['market', 'calendar'] },
-    { name: '英語：家人、地點、節慶', codes: '英語 B-Ⅱ-1、C-Ⅱ-2', keys: ['family', 'way', 'festival'] },
+    { name: '英語：家人、地點、節慶、職業、學校用品、月份', codes: '英語 B-Ⅱ-1、C-Ⅱ-2', keys: ['family', 'way', 'festival', 'job', 'school', 'month'] },
     { name: '英語：句子回顧（日記）', codes: '英語 Ae-Ⅲ-12、B-Ⅲ-1、Ad-Ⅲ-11', keys: ['diary'] },
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
@@ -271,6 +271,17 @@
 
   // 指路（§4.17）：市集的第三種訂單 Where is the zoo?，十字路口四個方向各有一個地點
   const PLACES = ['zoo', 'park', 'library', 'hospital', 'school', 'store'];
+  // 市集的「找人／找東西」訂單（§4.17）：和指路共用 4 張圖卡，ok 記在問的那個字（4 選 1）
+  const JOBS = ['doctor', 'nurse', 'police', 'driver', 'teacher', 'farmer', 'cook', 'student'];
+  const SCHOOL = ['book', 'pen', 'pencil', 'ruler', 'eraser', 'bag', 'desk', 'chair'];
+  const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+  const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+  const PICK_ORDERS = {
+    way:    { list: PLACES, draw: (g, k) => drawPlace(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'This is the ' + k + '. Thank you!' },
+    job:    { list: JOBS, draw: (g, k) => drawJob(g, k), say: (k) => 'Who is the ' + (k === 'police' ? 'police officer' : k) + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Thank you for your help!' },
+    school: { list: SCHOOL, draw: (g, k) => drawSchool(g, k), say: (k) => 'I need ' + (k === 'eraser' ? 'an ' : 'a ') + k + ' for school.', zh: (k) => '上學要用' + zhOf(k) + '，是哪一個？', thanks: () => 'Thank you! I am ready for school.' },
+    month:  { list: MONTHS, draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
+  };
   // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
   const FAMILY = ['grandfather', 'grandmother', 'father', 'mother', 'brother', 'sister', 'baby'];
   // 節慶（§4.17）：每 30 天一輪，第 10 天萬聖節、第 20 天兔子生日、第 30 天聖誕節
@@ -905,6 +916,42 @@
     else { house(0xe0f7fa, 0x00897b); g.fillStyle(0xef5350, 1); for (let i = 0; i < 4; i++) g.fillRect(-26 + i * 13, -12, 7, 6); g.fillStyle(0xffffff, 1); for (let i = 0; i < 4; i++) g.fillRect(-19 + i * 13, -12, 6, 6); }
   }
   // 家人：兔子造型，靠配件分辨（祖父母灰毛戴眼鏡、爸爸領帶、媽媽蝴蝶結、哥哥帽子、妹妹髮帶、寶寶奶嘴）
+  // 職業：同一個人形，靠衣服顏色和配件分辨
+  function drawJob(g, k) {
+    g.clear();
+    const coat = { doctor: 0xffffff, nurse: 0xf8bbd0, police: 0x1a237e, driver: 0x546e7a, teacher: 0x8e24aa, farmer: 0x689f38, cook: 0xffffff, student: 0xffb300 }[k];
+    g.fillStyle(coat, 1); g.fillRoundedRect(-16, -2, 32, 30, 6);
+    g.lineStyle(2, 0x90a4ae, 1); g.strokeRoundedRect(-16, -2, 32, 30, 6);
+    g.fillStyle(0xffcc99, 1); g.fillCircle(0, -14, 12);
+    g.fillStyle(0x333333, 1); g.fillCircle(-4, -15, 1.6); g.fillCircle(4, -15, 1.6);
+    if (k === 'doctor') { g.lineStyle(2, 0x37474f, 1); g.beginPath(); g.arc(0, 4, 9, 0, Math.PI, false); g.strokePath(); g.fillStyle(0x90a4ae, 1); g.fillCircle(0, 14, 3); }
+    else if (k === 'nurse') { g.fillStyle(0xffffff, 1); g.fillRect(-10, -32, 20, 8); g.fillStyle(0xe53935, 1); g.fillRect(-1.5, -31, 3, 6); g.fillRect(-4, -29.5, 8, 3); }
+    else if (k === 'police') { g.fillStyle(0x1a237e, 1); g.fillRect(-13, -30, 26, 6); g.fillRect(-9, -36, 18, 7); g.fillStyle(0xffd54a, 1); g.fillCircle(0, -32, 2.5); g.fillCircle(-8, 8, 3); }
+    else if (k === 'driver') { g.lineStyle(4, 0x37474f, 1); g.strokeCircle(26, 12, 11); g.lineBetween(26, 1, 26, 23); g.fillStyle(0x546e7a, 1); g.fillRect(-12, -30, 24, 5); }
+    else if (k === 'teacher') { g.fillStyle(0x2e7d32, 1); g.fillRect(-48, -30, 26, 20); g.lineStyle(1, 0xffffff, 1); g.lineBetween(-44, -24, -28, -24); g.lineBetween(-44, -18, -32, -18); g.lineStyle(2, 0x6d4c41, 1); g.lineBetween(-16, 4, -24, -10); }
+    else if (k === 'farmer') { g.fillStyle(0xfdd835, 1); g.fillEllipse(0, -26, 36, 8); g.fillRect(-9, -34, 18, 9); g.lineStyle(2, 0x6d4c41, 1); g.lineBetween(24, -16, 24, 28); g.lineBetween(20, -16, 28, -16); g.lineBetween(20, -16, 20, -24); g.lineBetween(28, -16, 28, -24); }
+    else if (k === 'cook') { g.fillStyle(0xffffff, 1); g.fillCircle(-6, -34, 7); g.fillCircle(6, -34, 7); g.fillCircle(0, -38, 7); g.fillRect(-9, -32, 18, 6); g.lineStyle(1, 0xbdbdbd, 1); g.strokeRect(-9, -32, 18, 6); g.fillStyle(0x9e9e9e, 1); g.fillCircle(24, 10, 6); g.fillRect(28, 8, 12, 3); }
+    else if (k === 'student') { g.fillStyle(0xe53935, 1); g.fillRoundedRect(14, -2, 14, 24, 4); g.fillStyle(0x5d4037, 1); g.fillRect(-12, -27, 24, 6); }
+  }
+  // 學校用品
+  function drawSchool(g, k) {
+    g.clear();
+    if (k === 'book') { g.fillStyle(0x1e88e5, 1); g.fillRect(-24, -18, 22, 32); g.fillStyle(0x43a047, 1); g.fillRect(2, -18, 22, 32); g.fillStyle(0xffffff, 1); g.fillRect(-2, -18, 4, 32); }
+    else if (k === 'pen') { g.fillStyle(0x1e88e5, 1); g.fillRect(-28, -4, 46, 8); g.fillStyle(0x0d47a1, 1); g.fillRect(-28, -6, 12, 12); g.fillStyle(0x90a4ae, 1); g.fillTriangle(18, -4, 18, 4, 30, 0); }
+    else if (k === 'pencil') { g.fillStyle(0xfdd835, 1); g.fillRect(-28, -5, 44, 10); g.fillStyle(0xf48fb1, 1); g.fillRect(-34, -5, 7, 10); g.fillStyle(0xffcc99, 1); g.fillTriangle(16, -5, 16, 5, 28, 0); g.fillStyle(0x333333, 1); g.fillTriangle(24, -1.6, 24, 1.6, 28, 0); }
+    else if (k === 'ruler') { g.fillStyle(0xffe082, 1); g.fillRect(-36, -8, 72, 16); g.lineStyle(1, 0x6d4c41, 1); for (let x = -32; x <= 32; x += 8) g.lineBetween(x, -8, x, x % 16 === 0 ? 2 : -2); }
+    else if (k === 'eraser') { g.fillStyle(0xf48fb1, 1); g.fillRoundedRect(-18, -8, 22, 18, 3); g.fillStyle(0x4fc3f7, 1); g.fillRoundedRect(2, -8, 16, 18, 3); }
+    else if (k === 'bag') { g.fillStyle(0xe53935, 1); g.fillRoundedRect(-20, -14, 40, 38, 8); g.lineStyle(4, 0xb71c1c, 1); g.beginPath(); g.arc(0, -14, 10, Math.PI, 0, false); g.strokePath(); g.fillStyle(0xffcdd2, 1); g.fillRect(-12, 2, 24, 10); }
+    else if (k === 'desk') { g.fillStyle(0xa1887f, 1); g.fillRect(-34, -12, 68, 8); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -4, 6, 30); g.fillRect(24, -4, 6, 30); g.fillStyle(0x8d6e63, 1); g.fillRect(-24, -4, 22, 12); }
+    else if (k === 'chair') { g.fillStyle(0x6d4c41, 1); g.fillRect(-14, -26, 6, 50); g.fillRect(-14, -26, 26, 6); g.fillRect(-14, 0, 30, 6); g.fillRect(10, 0, 6, 24); g.fillRect(-14, -14, 26, 4); }
+  }
+  // 月曆頁（上面的月份名稱是另外放的文字）
+  function drawMonth(g) {
+    g.clear();
+    g.fillStyle(0xffffff, 1); g.fillRect(-34, -30, 68, 54); g.lineStyle(2, 0xb0bec5, 1); g.strokeRect(-34, -30, 68, 54);
+    g.fillStyle(0xe53935, 1); g.fillRect(-34, -30, 68, 12);
+    g.fillStyle(0xcfd8dc, 1); for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) g.fillRect(-28 + c * 10, 4 + r * 7, 6, 4);
+  }
   function drawFamily(g, k) {
     g.clear();
     const old = k === 'grandfather' || k === 'grandmother';
@@ -2752,11 +2799,12 @@
         const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-62, -48, 124, 96, 14); bg.lineStyle(3, 0xb0bec5, 1); bg.strokeRoundedRect(-62, -48, 124, 96, 14);
         const pic = this.add.graphics({ y: -6 }).setScale(1.1);
         const zh = txt(this, 0, 36, '', 16, '#6b7c8c').setOrigin(0.5);
-        card.add([bg, pic, zh]);
+        const en = txt(this, 0, -6, '', 17, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        card.add([bg, pic, zh, en]);
         card.setSize(124, 96).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickWay(i));
         c.add(card);
-        return { card, pic, zh, x };
+        return { card, pic, zh, en, x };
       });
       this.mkHint = this.add.graphics({ x: 330, y: 615 });
       this.mkHintT = txt(this, 360, 615, '', 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0, 0.5);
@@ -2777,13 +2825,17 @@
       const s = this.s;
       const who = L.shuffle(['rabbit'].concat(this.residents()))[0];
       let o;
-      const r = Math.random();
-      if (r < 0.25) {
-        // 指路：Where is the zoo? 十字路口四個方向各一個地點
-        const spots = L.shuffle(PLACES).slice(0, 4);
+      // 權重：水果 3、衣物 2、指路 1.2、職業 1、學校用品 1、月份 0.8（月份屬延伸層，研究島開放後才有）
+      const kinds = [['fruit', 3], ['clothes', 2], ['way', 1.2], ['job', 1], ['school', 1]].concat(this.researchOpen() ? [['month', 0.8]] : []);
+      let r = Math.random() * kinds.reduce((a, k) => a + k[1], 0), kind = 'fruit';
+      for (const [k, w] of kinds) { if (r < w) { kind = k; break; } r -= w; }
+      if (PICK_ORDERS[kind]) {
+        // 指路、找人、找學校用品、找月份：4 張圖卡選 1 張
+        const P = PICK_ORDERS[kind];
+        const spots = L.shuffle(P.list).slice(0, 4);
         const answer = spots[Math.floor(Math.random() * 4)];
-        o = { type: 'way', who, spots, answer, words: [answer], text: 'Where is the ' + answer + '?', zh: zhOf(answer) + '在哪裡？', wrong: {} };
-      } else if (r < 0.6) {
+        o = { type: kind, pick: true, who, spots, answer, words: [answer], text: P.say(answer), zh: P.zh(answer), wrong: {} };
+      } else if (kind === 'fruit') {
         const bin = Math.floor(Math.random() * BINS.length), n = 1 + Math.floor(Math.random() * NUMS.length);
         const [item, color] = BINS[bin];
         const num = NUMS[n - 1];
@@ -2812,14 +2864,16 @@
       const st = Math.min.apply(null, o.words.map((w) => L.stage(this.s.words, w)));
       this.mkSay.setText(o.text);
       this.mkZh.setText(this.subs() && (st === 0 || o.reveal) ? o.zh : '');
-      const fruit = o.type === 'fruit', way = o.type === 'way';
+      const fruit = o.type === 'fruit', way = !!o.pick;
       this.mkBins.forEach((b) => b.setVisible(fruit));
       [this.mkBasket, this.mkClear, this.mkGive].forEach((x) => x.setVisible(fruit));
-      this.mkRoad.setVisible(way);
+      this.mkRoad.setVisible(o.type === 'way');
       this.mkWay.forEach((c, i) => {
         c.card.setVisible(way);
         if (!way) return;
-        drawPlace(c.pic, o.spots[i]);
+        const P = PICK_ORDERS[o.type];
+        P.draw(c.pic, o.spots[i]);
+        c.en.setText(P.label ? P.label(o.spots[i]) : '');
         c.zh.setText(this.subs() && st === 0 ? zhOf(o.spots[i]) : '');
         c.card.setAlpha(o.wrong[o.spots[i]] ? 0.35 : 1);
       });
@@ -2890,14 +2944,15 @@
 
     pickWay(i) {
       const s = this.s, o = this.mo;
-      if (this.modal !== 'market' || !o || o.done || o.type !== 'way') return;
+      if (this.modal !== 'market' || !o || o.done || !o.pick) return;
       const k = o.spots[i], c = this.mkWay[i];
       if (o.wrong[k]) return;
       const right = k === o.answer;
-      if (o.tries === 0) { this.stats.way.q += 1; if (right) this.stats.way.first += 1; }
+      const st = this.stats[o.type] || (this.stats[o.type] = { q: 0, first: 0 });
+      if (o.tries === 0) { st.q += 1; if (right) st.first += 1; }
       if (!o.recorded) { L.answer(s.words, o.answer, { day: s.day, options: 4, firstTry: right, peeked: false }); o.recorded = true; }
       speak(k);
-      if (right) { this.touch('way'); speak('This is the ' + k + '. Thank you!'); this.orderDone(); return; }
+      if (right) { speak(PICK_ORDERS[o.type].thanks(k)); this.orderDone(); return; }
       o.tries += 1; o.reveal = true; o.wrong[k] = true;
       this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
       speak('No. ' + o.text);
@@ -2923,7 +2978,7 @@
     orderDone() {
       const o = this.mo;
       o.done = true;
-      this.touch(o.type === 'fruit' ? 'market' : 'clothes');
+      this.touch(o.type === 'fruit' ? 'market' : o.type);
       // 市集每天只有前 MARKET_PAID 單給星砂（原本沒有上限，可以一直刷）
       const s = this.s;
       if (!s.mkPaid || s.mkPaid.day !== s.day) s.mkPaid = { day: s.day, n: 0 };
@@ -4889,7 +4944,7 @@
     lab_storm() {
       ['typhoon', 'safe', 'house', 'wind'].forEach((w) => L.seen(this.s.words, w, this.s.day));
       const fix = L.shuffle([
-        { k: 'crack', label: '有裂縫的橋', draw: (g) => { g.fillStyle(0x8d6e63, 1); g.fillRect(-50, -6, 100, 14); g.fillRect(-46, 8, 8, 26); g.fillRect(38, 8, 8, 26); g.lineStyle(3, 0x3e2723, 1); g.lineBetween(-4, -6, 4, 2); g.lineBetween(4, 2, -2, 8); } },
+        { k: 'crack', label: '有裂縫的橋', draw: (g) => { g.fillStyle(0x8d6e63, 1); g.fillRect(-50, -6, 100, 14); g.fillRect(-46, 8, 8, 26); g.fillRect(38, 8, 8, 26); g.fillStyle(0xffffff, 1); g.fillTriangle(-8, -6, 6, -6, -2, 8); g.lineStyle(3, 0x3e2723, 1); g.lineBetween(-8, -6, -2, 8); g.lineBetween(6, -6, -2, 8); } },
         { k: 'well', label: '好好的水井', draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-26, -4, 52, 36); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -36, 6, 34); g.fillRect(24, -36, 6, 34); g.fillRect(-32, -40, 64, 8); } },
         { k: 'kite', label: '天上的風箏', draw: (g) => { prepIcon(g, 'kite'); } },
       ]);
@@ -6246,7 +6301,7 @@
         if (!o || o.done) { if (Math.random() < 0.05) this.closeModal(); return; }
         if (Math.random() < 0.03) { this.closeModal(); return; }
         if (o.type === 'fruit') { if (Math.random() < 0.7) this.addFruit(Math.floor(Math.random() * BINS.length)); else this.giveFruit(); }
-        else if (o.type === 'way') this.pickWay(Math.floor(Math.random() * 4));
+        else if (o.pick) this.pickWay(Math.floor(Math.random() * 4));
         else this.pickCloth(Math.floor(Math.random() * 4));
         return;
       }
