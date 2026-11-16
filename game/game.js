@@ -264,6 +264,18 @@
   const FESTIVALS = { 10: { k: 'Halloween', zh: '萬聖節', pic: 'pumpkin' }, 20: { k: 'birthday', zh: '生日', pic: 'cake' }, 0: { k: 'Christmas', zh: '聖誕節', pic: 'xtree' } };
   const festivalOf = (d) => FESTIVALS[d % 30] || null;
 
+  // 各機制的延伸題（§4.7、4.9、4.12、4.13、4.14、4.15、4.22、4.23）：掛在原本的站，每 3 回合有 1 回合
+  const EXTRAS = {
+    tea:     { lab: 'ice',     title: 'Ice 冰塊' },
+    magnet:  { lab: 'poles',   title: 'Magnet Boat 磁鐵推船' },
+    dig:     { lab: 'wall',    title: 'Rain Wall 擋牆' },
+    light:   { lab: 'shadow',  title: 'Shadow 影子' },
+    push:    { lab: 'mill',    title: 'Wind and Water 風車與水車' },
+    circuit: { lab: 'series',  title: 'Two Lamps 兩盞燈' },
+    pitch:   { lab: 'noise',   title: 'Noise 隔音牆' },
+    fossil:  { lab: 'mineral', title: 'Minerals 礦物' },
+  };
+
   // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
   const MAP = [
     { z: 'lighthouse', x: 170,  y: 430, en: 'Lighthouse', zh: '燈塔',     color: 0x9ccb86, icon: 'bulb' },
@@ -3070,6 +3082,7 @@
     openStation(k) {
       if (this.paused()) return;
       this.held = null; this.tool = null; this.redrawTools();
+      if (this.extraTurn(k)) return;
       if (k === 'tea') this.openTea();
       else if (k === 'acid') this.openAcid();
       else if (k === 'magnet') this.openMagnet();
@@ -3559,6 +3572,7 @@
     openCave(k) {
       if (this.paused()) return;
       this.held = null; this.tool = null; this.redrawTools();
+      if (this.extraTurn(k)) return;
       if (k === 'light') this.openLight(); else if (k === 'moon') this.openMoon(); else this.openPush();
     }
 
@@ -3911,6 +3925,7 @@
     openLighthouse(k) {
       if (this.paused()) return;
       this.held = null; this.tool = null; this.redrawTools();
+      if (this.extraTurn(k)) return;
       if (k === 'circuit') this.openCircuit(); else if (k === 'music') this.openMusic(); else this.openFog();
     }
 
@@ -4557,6 +4572,241 @@
       this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'recycle' && this.rq === cur) this.openRecycle(); });
     }
 
+    // ---------- 各機制的延伸題：掛在原本的實驗站，每 3 回合有 1 回合換成延伸題，共用實驗室視窗 ----------
+    // 回傳 true 表示這次開的是延伸題
+    extraTurn(k) {
+      const ex = EXTRAS[k];
+      if (!ex) return false;
+      const s = this.s;
+      s.alt = s.alt || {};
+      s.alt[k] = (s.alt[k] || 0) + 1;
+      if (s.alt[k] % 3 !== 0) return false;
+      this.openExtra(ex.lab, k, ex.title);
+      return true;
+    }
+
+    openExtra(lab, station, title) {
+      this.held = null; this.tool = null; this.redrawTools();
+      this.modal = 'lab';
+      this.labKind = lab;
+      this.labStation = station;
+      this.rxContent.removeAll(true);
+      this.rxMsg.setText('');
+      this.rxTitle.setText(title);
+      this.rxBox.setVisible(true);
+      this['lab_' + lab]();
+    }
+
+    // 共用的選擇題流程：qs = [{ say, zh, opts: [{ draw(g), label }], answer, why, after, scene(g), word }]
+    // 一題一題來，選錯卡片變淡並說明原因，選對進下一題；全部答完算完成一回合
+    runQuiz(statKey, qs, doneMsg) {
+      const q = this.xq = { qs, i: 0, done: false };
+      const stat = this.stats[statKey] || (this.stats[statKey] = { q: 0, first: 0 });
+      const show = () => {
+        this.rxContent.removeAll(true);
+        const cur = qs[q.i];
+        cur.tries = 0; cur.wrong = {}; cur.ok = false;
+        this.rxSet(cur.say, cur.zh, cur.hint || '');
+        if (cur.scene) { const g = this.add.graphics(); cur.scene(g); this.rx(g); }
+        const n = cur.opts.length, w = n > 3 ? 180 : 200;
+        cur.cards = cur.opts.map((o, j) => this.rxCard(640 + (j - (n - 1) / 2) * (w + 20), cur.y || 470, w, 160, (card) => {
+          const g = this.add.graphics({ y: -16 }); o.draw(g); card.add(g);
+          card.add(txt(this, 0, 58, o.label, 18, '#37474f', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5));
+        }, () => pick(j)));
+        this.time.delayedCall(200, () => { if (this.xq === q && !cur.ok) speak(cur.say); });
+      };
+      const pick = (j) => {
+        const cur = qs[q.i];
+        if (this.modal !== 'lab' || this.xq !== q || q.done || cur.ok || cur.wrong[j]) return;
+        const right = j === cur.answer;
+        if (cur.tries === 0) {
+          stat.q += 1; if (right) stat.first += 1;
+          if (cur.word) L.answer(this.s.words, cur.word, { day: this.s.day, options: cur.opts.length, firstTry: right, peeked: false });
+        }
+        if (!right) {
+          cur.tries += 1; cur.wrong[j] = true;
+          const c = cur.cards[j]; c.setAlpha(0.35); this.rxShake(c);
+          this.rxMsg.setText(cur.why || 'Try again. 再想想看');
+          speak('Try again.');
+          return;
+        }
+        cur.ok = true;
+        speak(cur.yes || 'Yes!');
+        this.rxMsg.setText(cur.after || 'Yes! 對了');
+        if (cur.result) { const g = this.add.graphics(); cur.result(g); this.rx(g); }
+        q.i += 1;
+        if (q.i < qs.length) this.time.delayedCall(BOT ? 20 : 1600, () => { if (this.xq === q && this.modal === 'lab') show(); });
+        else { q.done = true; this.labDone(this.labStation || statKey, doneMsg); }
+      };
+      q.pickAt = pick;                     // 機器人與回歸測試用
+      q.cur = () => qs[q.i];
+      show();
+    }
+
+    // --- §4.7 冰塊：放哪裡最晚融化、最早融化 ---
+    lab_ice() {
+      ['ice', 'hot', 'cold'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const cube = (g, x, y) => { g.fillStyle(0xe1f5fe, 1); g.fillRect(x - 12, y - 12, 24, 24); g.lineStyle(2, 0x81d4fa, 1); g.strokeRect(x - 12, y - 12, 24, 24); };
+      const opts = [
+        { draw: (g) => { g.fillStyle(0xffd54a, 1); g.fillCircle(-26, -26, 14); g.lineStyle(3, 0xffb300, 1); for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; g.lineBetween(-26 + Math.cos(a) * 18, -26 + Math.sin(a) * 18, -26 + Math.cos(a) * 24, -26 + Math.sin(a) * 24); } cube(g, 10, 14); }, label: '晒太陽 in the sun' },
+        { draw: (g) => { g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -20, 8, 40); g.fillStyle(0x2e8b3a, 1); g.fillCircle(-26, -30, 22); g.fillStyle(0x1b5e20, 0.25); g.fillEllipse(6, 22, 70, 18); cube(g, 10, 12); }, label: '樹蔭下 in the shade' },
+        { draw: (g) => { g.fillStyle(0x1e88e5, 1); g.fillRoundedRect(-34, -16, 68, 44, 6); g.fillStyle(0xffffff, 1); g.fillRect(-34, -22, 68, 10); cube(g, 0, 6); }, label: '保冷箱 in a cooler' },
+      ];
+      this.runQuiz('ice', [
+        { say: 'Where will the ice melt last?', zh: '冰塊放在哪裡，會最晚融化？', opts, answer: 2, why: '想想哪裡最不會被熱到。保冷箱可以擋住外面的熱', after: 'The cooler keeps the heat out. 保冷箱擋住外面的熱，冰最慢融化' },
+        { say: 'Where will the ice melt first?', zh: '冰塊放在哪裡，會最早融化？', opts, answer: 0, why: '想想哪裡最熱', after: 'The sun is hot! 太陽的熱讓冰融化得最快' },
+      ], 'Cool!');
+    }
+
+    // --- §4.12 磁鐵推船：一樣的極互相推開，不一樣的極互相吸引 ---
+    lab_poles() {
+      ['magnet', 'push', 'pull'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const boat = Math.random() < 0.5 ? 'N' : 'S';
+      const other = boat === 'N' ? 'S' : 'N';
+      const color = (p) => (p === 'N' ? 0xe53935 : 0x1e88e5);
+      const scene = (g) => {
+        g.fillStyle(0x4fc3f7, 0.6); g.fillRect(420, 280, 440, 70);
+        g.fillStyle(0x8d6e63, 1); g.fillTriangle(560, 300, 720, 300, 700, 330); g.fillTriangle(560, 300, 580, 330, 700, 330);
+        // 船上的磁鐵：面向左邊（玩家這邊）的是 boat 極
+        g.fillStyle(color(boat), 1); g.fillRect(560, 282, 40, 18); g.fillStyle(color(other), 1); g.fillRect(600, 282, 40, 18);
+        g.fillStyle(0xffffff, 1); g.fillCircle(580, 291, 7); g.fillStyle(0x27384a, 1);
+        const lbl = (p, x) => { g.lineStyle(2, 0x27384a, 1); if (p === 'N') { g.lineBetween(x - 4, 296, x - 4, 286); g.lineBetween(x - 4, 286, x + 4, 296); g.lineBetween(x + 4, 296, x + 4, 286); } else { g.beginPath(); g.arc(x, 288, 3, 0, Math.PI * 1.5, false); g.strokePath(); g.beginPath(); g.arc(x, 294, 3, Math.PI, Math.PI * 2.5, false); g.strokePath(); } };
+        lbl(boat, 580);
+      };
+      const card = (p) => ({ draw: (g) => { g.fillStyle(color(p === 'N' ? 'S' : 'N'), 1); g.fillRect(-40, -12, 40, 24); g.fillStyle(color(p), 1); g.fillRect(0, -12, 40, 24); g.fillStyle(0xffffff, 1); g.fillCircle(24, 0, 9); }, label: (p === 'N' ? '紅色 N 極' : '藍色 S 極') + '朝向船' });
+      const opts = [card('N'), card('S')];
+      this.runQuiz('poles', [
+        { say: 'Push the boat away!', zh: '把船推開！要用哪一極朝向船上的磁鐵？', scene, opts, answer: boat === 'N' ? 0 : 1, why: '一樣的極會互相推開', after: 'Same poles push. 一樣的極互相推開，船開走了！' },
+        { say: 'Pull the boat to you!', zh: '把船拉過來！要用哪一極朝向船上的磁鐵？', scene, opts, answer: boat === 'N' ? 1 : 0, why: '不一樣的極會互相吸引', after: 'Different poles pull. 不一樣的極互相吸引，船過來了！' },
+      ], 'Great!');
+    }
+
+    // --- §4.15 擋牆：大雨後水流會沖走沙地，牆要擋在水流過來的路上 ---
+    lab_wall() {
+      ['rain', 'sand', 'rock'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const left = Math.random() < 0.5;            // 水流往左下或右下
+      const sandX = left ? 430 : 850;
+      const spots = L.shuffle([
+        { x: left ? 520 : 760, y: 395, good: true },  // 在水流的路上、沙地上方
+        { x: left ? 820 : 460, y: 395, good: false }, // 另一邊，沒有水流過
+        { x: 640, y: 255, good: false },              // 山頂，雨還沒聚成水流
+      ]);
+      const names = ['A', 'B', 'C'];
+      const scene = (g) => {
+        g.fillStyle(0x8d6e63, 1); g.fillTriangle(400, 470, 880, 470, 640, 240);
+        g.fillStyle(0x78909c, 1); g.fillCircle(600, 215, 22); g.fillCircle(640, 205, 26); g.fillCircle(680, 215, 22);
+        g.lineStyle(2, 0x1e88e5, 1); [600, 630, 660, 690].forEach((x) => g.lineBetween(x, 238, x - 4, 252));
+        g.fillStyle(0xe8cf8f, 1); g.fillEllipse(sandX, 480, 150, 40);
+        // 水流路徑（箭頭）
+        g.lineStyle(6, 0x4fc3f7, 0.9);
+        const pts = left ? [[640, 270], [590, 330], [530, 400], [460, 460]] : [[640, 270], [690, 330], [750, 400], [820, 460]];
+        for (let i = 0; i < pts.length - 1; i++) g.lineBetween(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
+        spots.forEach((p, i) => { g.lineStyle(3, 0xffffff, 1); g.strokeRect(p.x - 26, p.y - 14, 52, 28); });
+        this.rx(txt(this, sandX, 480, '沙地', 16, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
+        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#27384a', strokeThickness: 4 }).setOrigin(0.5)));
+      };
+      const opts = spots.map((p, i) => ({ draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-30, -6, 60, 16); g.lineStyle(2, 0x616161, 1); for (let x = -30; x < 30; x += 12) g.strokeRect(x, -6, 12, 8); }, label: '蓋在 ' + names[i] }));
+      this.runQuiz('wall', [
+        { say: 'Heavy rain is coming! Where should we build the wall?', zh: '大雨要來了！擋牆要蓋在哪裡，才能保護沙地？', scene, opts, answer: spots.findIndex((p) => p.good), y: 560,
+          why: '看看藍色的水會流到哪裡；牆要擋在水流過來的路上', after: 'The water goes around. 水被擋住，沙地沒有被沖走！' },
+      ], 'Safe sand!');
+    }
+
+    // --- §4.9 影子：影子在物體背對光的那一邊 ---
+    lab_shadow() {
+      ['shadow', 'light', 'left', 'right'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const mk = (lampLeft) => {
+        const scene = (g) => {
+          g.fillStyle(0x37474f, 1); g.fillRect(380, 360, 520, 8);
+          g.fillStyle(0x8d6e63, 1); g.fillRect(610, 270, 60, 90);
+          const lx = lampLeft ? 440 : 840;
+          g.fillStyle(0xfff59d, 0.5); g.fillCircle(lx, 270, 30); g.fillStyle(0xffd54a, 1); g.fillCircle(lx, 270, 16);
+          g.fillStyle(0x455a64, 1); g.fillRect(lx - 3, 286, 6, 74);
+        };
+        const pic = (side) => (g) => { g.fillStyle(0x37474f, 1); g.fillRect(-50, 22, 100, 4); g.fillStyle(0x8d6e63, 1); g.fillRect(-12, -20, 24, 42);
+          g.fillStyle(0x000000, 0.55); if (side === 'top') g.fillRect(-12, -30, 24, 10); else g.fillRect(side === 'left' ? -46 : 12, 14, 34, 8); };
+        return { say: 'Where is the shadow?', zh: '燈在' + (lampLeft ? '左' : '右') + '邊，影子在哪裡？', scene,
+          opts: [{ draw: pic('left'), label: '左邊 left' }, { draw: pic('right'), label: '右邊 right' }, { draw: pic('top'), label: '上面 on top' }],
+          answer: lampLeft ? 1 : 0, why: '光被物體擋住的地方才會有影子：在物體背對燈的那一邊', after: 'The shadow is on the other side. 影子在背對燈的那一邊', y: 500 };
+      };
+      const first = Math.random() < 0.5;
+      this.runQuiz('shadow', [mk(first), mk(!first)], 'Bright!');
+    }
+
+    // --- §4.14 風車與水車：風車要放在風大的地方，水車要放在有流水的地方 ---
+    lab_mill() {
+      ['wind', 'windy', 'water'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const hill = (g) => { g.fillStyle(0x7cb342, 1); g.fillTriangle(-50, 30, 50, 30, 0, -24); g.lineStyle(3, 0xffffff, 0.9); g.lineBetween(-40, -30, -10, -30); g.lineBetween(-30, -20, 4, -20); };
+      const house = (g) => { g.fillStyle(0xffcc80, 1); g.fillRect(-30, -6, 60, 36); g.fillStyle(0xe65100, 1); g.fillTriangle(-38, -6, 38, -6, 0, -32); };
+      const tree = (g) => { g.fillStyle(0x6d4c41, 1); g.fillRect(-5, -6, 10, 36); g.fillStyle(0x2e8b3a, 1); g.fillCircle(0, -18, 24); };
+      const river = (g) => { g.fillStyle(0x4fc3f7, 1); g.fillRect(-50, 0, 100, 24); g.lineStyle(3, 0xffffff, 0.9); g.lineBetween(-36, 10, -16, 10); g.lineBetween(4, 16, 24, 16); };
+      const garden = (g) => { g.fillStyle(0x8d6e4a, 1); g.fillEllipse(0, 18, 90, 20); [-24, 0, 24].forEach((x) => { g.fillStyle(0x43a047, 1); g.fillRect(x - 1, -4, 3, 20); g.fillStyle(0xe53956, 1); g.fillCircle(x, -6, 6); }); };
+      this.runQuiz('mill', [
+        { say: 'Where should the windmill go?', zh: '風車要放在哪裡才會轉？', opts: L.shuffle([{ draw: hill, label: '風大的山頂', k: 1 }, { draw: house, label: '屋子裡', k: 0 }, { draw: tree, label: '大樹下', k: 0 }]),
+          why: '風車要有風吹才會轉', after: 'The wind turns the windmill. 風推動風車轉動' },
+        { say: 'Where should the waterwheel go?', zh: '水車要放在哪裡才會轉？', opts: L.shuffle([{ draw: river, label: '流動的河邊', k: 1 }, { draw: hill, label: '山頂', k: 0 }, { draw: garden, label: '花園', k: 0 }]),
+          why: '水車要有流動的水推才會轉', after: 'The water turns the wheel. 流水推動水車轉動' },
+      ].map((q) => Object.assign(q, { answer: q.opts.findIndex((o) => o.k) })), 'Strong!');
+    }
+
+    // --- §4.13 串聯與並聯：並聯時兩盞燈比較亮，壞一盞另一盞還會亮 ---
+    lab_series() {
+      ['lamp', 'light'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const bulb = (g, x, y, on) => { g.fillStyle(on === 2 ? 0xffeb3b : (on === 1 ? 0xfff59d : 0xeceff1), 1); g.fillCircle(x, y, 9); g.lineStyle(2, 0x90a4ae, 1); g.strokeCircle(x, y, 9); };
+      const series = (bright) => (g) => { g.lineStyle(3, 0x78909c, 1); g.strokeRect(-56, -26, 112, 52); g.fillStyle(0x455a64, 1); g.fillRect(-62, -10, 12, 20); bulb(g, -10, -26, bright); bulb(g, 24, -26, bright); };
+      const parallel = (bright) => (g) => { g.lineStyle(3, 0x78909c, 1); g.strokeRect(-56, -30, 112, 60); g.lineBetween(-56, 0, 56, 0); g.fillStyle(0x455a64, 1); g.fillRect(-62, -10, 12, 20); bulb(g, 10, -30, bright); bulb(g, 10, 0, bright); };
+      this.runQuiz('series', [
+        { say: 'Which way makes both lamps brighter?', zh: '哪一種接法，兩盞燈比較亮？', opts: [{ draw: series(1), label: '一條路（串聯）' }, { draw: parallel(2), label: '兩條路（並聯）' }], answer: 1,
+          why: '串聯時兩盞燈要分同一條路的電，比較暗', after: 'Each lamp gets its own path. 並聯時每盞燈各有一條路，比較亮' },
+        { say: 'One lamp breaks. Which way keeps the other lamp on?', zh: '有一盞燈壞了，哪一種接法另一盞還會亮？', opts: [{ draw: series(0), label: '一條路（串聯）' }, { draw: parallel(2), label: '兩條路（並聯）' }], answer: 1,
+          why: '串聯只有一條路，一盞壞了整條就斷了', after: 'The other path still works. 並聯還有另一條路，燈還會亮' },
+      ], 'Bright!');
+    }
+
+    // --- §4.22 隔音牆：牆要擋在聲音傳過去的路上；厚牆擋得比較多 ---
+    lab_noise() {
+      ['noise', 'noisy', 'quiet'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const spots = [{ x: 390, label: 'A' }, { x: 640, label: 'B' }, { x: 890, label: 'C' }];
+      const scene = (g) => {
+        g.fillStyle(0x8fbf7a, 1); g.fillRect(320, 360, 640, 10);
+        // 左：吵的機器；右：房子
+        g.fillStyle(0x78909c, 1); g.fillRect(450, 300, 70, 60); g.fillStyle(0x455a64, 1); g.fillCircle(470, 330, 10); g.fillCircle(500, 330, 10);
+        g.lineStyle(3, 0xe53935, 0.8); [24, 38].forEach((r) => { g.beginPath(); g.arc(520, 320, r, -0.7, 0.7, false); g.strokePath(); });
+        g.fillStyle(0xffcc80, 1); g.fillRect(760, 300, 80, 60); g.fillStyle(0xe65100, 1); g.fillTriangle(750, 300, 850, 300, 800, 266);
+        spots.forEach((p) => { g.lineStyle(3, 0x27384a, 0.6); g.strokeRect(p.x - 10, 280, 20, 80); });
+        spots.forEach((p) => this.rx(txt(this, p.x, 262, p.label, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)));
+        this.rx(txt(this, 485, 380, '吵的機器', 16, '#455a64').setOrigin(0.5)); this.rx(txt(this, 800, 380, '房子', 16, '#455a64').setOrigin(0.5));
+      };
+      const wallCard = (lbl) => ({ draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-8, -26, 16, 52); }, label: '蓋在 ' + lbl });
+      this.runQuiz('noise', [
+        { say: 'It is too noisy! Where should the wall go?', zh: '太吵了！隔音牆要蓋在哪裡，房子才會安靜？', scene, opts: spots.map((p) => wallCard(p.label)), answer: 1, y: 500,
+          why: '牆要擋在聲音從機器傳到房子的路上', after: 'The wall blocks the noise. 牆擋住了聲音，房子安靜了' },
+        { say: 'Which wall blocks more noise?', zh: '哪一種牆擋住的聲音比較多？', opts: [{ draw: (g) => { g.fillStyle(0xd7ccc8, 1); g.fillRect(-4, -30, 8, 60); }, label: '薄木板' }, { draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-22, -30, 44, 60); g.lineStyle(2, 0x616161, 1); for (let y = -30; y < 30; y += 12) g.lineBetween(-22, y, 22, y); }, label: '厚厚的磚牆' }], answer: 1,
+          why: '想想哪一種比較不容易讓聲音穿過去', after: 'A thick wall is quieter. 厚牆擋住比較多聲音' },
+      ], 'Quiet!');
+    }
+
+    // --- §4.23 礦物與用途 ---
+    lab_mineral() {
+      const ms = [
+        { k: 'sand',     label: '沙（石英）',   draw: (g) => drawSoil(g, 'sand', 1) },
+        { k: 'iron',     label: '鐵礦',         draw: (g) => { g.fillStyle(0x6d4c41, 1); g.fillCircle(-6, 4, 14); g.fillCircle(8, 0, 12); g.fillStyle(0xb0bec5, 1); g.fillCircle(2, -2, 4); g.fillCircle(-8, 8, 3); } },
+        { k: 'salt',     label: '鹽（岩鹽）',   draw: (g) => { g.fillStyle(0xffffff, 1); [[-10, 6], [6, 8], [0, -6], [12, -4]].forEach(([x, y]) => g.fillRect(x - 6, y - 6, 12, 12)); g.lineStyle(1, 0xbdbdbd, 1); g.strokeRect(-16, 0, 12, 12); } },
+        { k: 'graphite', label: '石墨',         draw: (g) => { g.fillStyle(0x424242, 1); g.fillRoundedRect(-18, -10, 36, 22, 6); g.fillStyle(0x757575, 1); g.fillRect(-12, -6, 20, 4); } },
+      ];
+      const uses = L.shuffle([
+        { say: 'Which one do we use to make glass?', zh: '做玻璃要用哪一種？', ans: 'sand', after: 'Glass is made from sand. 玻璃是用沙（石英）燒成的' },
+        { say: 'Which one is in a pencil?', zh: '鉛筆芯是用哪一種做的？', ans: 'graphite', after: 'Pencil lead is graphite. 鉛筆芯其實是石墨，不是鉛' },
+        { say: 'Which one do we use to make nails?', zh: '鐵釘是用哪一種做的？', ans: 'iron', after: 'Nails are made of iron. 鐵礦煉成鐵，才能做鐵釘' },
+        { say: 'Which one do we put in food?', zh: '煮菜時會加哪一種？', ans: 'salt', after: 'We put salt in food. 鹽也是一種礦物' },
+      ]).slice(0, 2);
+      L.seen(this.s.words, 'mineral', this.s.day);
+      this.runQuiz('mineral', uses.map((u) => {
+        const opts = L.shuffle(ms);
+        return { say: u.say, zh: u.zh, opts, answer: opts.findIndex((m) => m.k === u.ans), word: u.ans === 'graphite' ? null : u.ans, why: '想想看它的特性：透明的、黑黑滑滑的、硬硬的、鹹鹹的', after: u.after };
+      }), 'Great!');
+    }
+
     // ---------- 研究島（M6 延伸層，5～6 年級）：氣象站、生態研究所、地質洞窟 ----------
     groupOpen(gk) {
       const s = this.s;
@@ -4647,8 +4897,10 @@
       const st = RLABS.find((x) => x.k === k);
       if (!this.groupOpen(st.g)) { this.floatText(ROFF + st.x - this.cameras.main.scrollX, 360, this.groupNeed(st.g), '#37474f', true); return; }
       this.held = null; this.tool = null; this.redrawTools();
+      if (this.extraTurn(k)) return;
       this.modal = 'lab';
       this.labKind = k;
+      this.labStation = null;
       this.rxContent.removeAll(true);
       this.rxMsg.setText('');
       this.rxTitle.setText(st.en + ' ' + st.zh);
@@ -4658,8 +4910,11 @@
 
     labDone(key, msg) {
       this.stationDone(key, 3, msg);
-      const k = this.labKind;
-      this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'lab' && this.labKind === k) this.openLab(k); });
+      const k = this.labKind, extra = !!this.labStation;
+      this.time.delayedCall(BOT ? 30 : 1800, () => {
+        if (this.modal !== 'lab' || this.labKind !== k) return;
+        if (extra) this.closeModal(); else this.openLab(k);
+      });
     }
 
     // --- 水循環（§4.19）：加熱面放太陽下、冷凝板放高處陰涼、集水槽放冷凝板下面 ---
@@ -5805,6 +6060,7 @@
         if (Math.random() < 0.03) { this.closeModal(); return; }
         const q = this.xq, R = (n) => Math.floor(Math.random() * n);
         if (!q || q.done) return;
+        if (q.pickAt) { q.pickAt(R(q.cur().opts.length)); return; }
         const k = this.labKind;
         if (k === 'water') { if (Math.random() < 0.5) this.waterPart(WC_PARTS[R(3)].k); else this.waterSpot(WC_SPOTS[R(3)].k); }
         else if (k === 'typhoon') { if (q.step === 1) this.pickSymbol(R(3)); else if (Math.random() < 0.7) this.pickPrep(R(4)); else this.prepDone(); }
