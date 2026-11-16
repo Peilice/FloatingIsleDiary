@@ -246,6 +246,7 @@
     { name: '英語：生活對話（市集、日曆）', codes: '英語 B-Ⅱ-1、C-Ⅱ-2、D-Ⅱ-1', keys: ['market', 'calendar'] },
     { name: '英語：家人、地點、節慶、職業、學校用品、月份', codes: '英語 B-Ⅱ-1、C-Ⅱ-2', keys: ['family', 'way', 'festival', 'job', 'school', 'month'] },
     { name: '英語：顏色、食物、季節、數字、動物、身體', codes: '英語 B-Ⅱ-1', keys: ['color', 'meal', 'season', 'count', 'zoo', 'body'] },
+    { name: '英語：動作、感覺、時段、地點、物品', codes: '英語 B-Ⅱ-1', keys: ['act', 'feel', 'time', 'spot', 'thing'] },
     { name: '英語：句子回顧（日記）', codes: '英語 Ae-Ⅲ-12、B-Ⅲ-1、Ad-Ⅲ-11', keys: ['diary'] },
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
@@ -283,6 +284,11 @@
   const COUNT = ['six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
   const ZOO = ['dog', 'pig', 'chicken', 'elephant', 'lion', 'tiger', 'bear', 'panda', 'snake', 'deer', 'dolphin', 'whale'];
   const BODY = ['head', 'eye', 'ear', 'nose', 'mouth', 'arm', 'hand', 'leg', 'foot'];
+  const ACTS = { run: 'running', walk: 'walking', jump: 'jumping', sit: 'sitting', stand: 'standing', sleep: 'sleeping', read: 'reading', write: 'writing', sing: 'singing', dance: 'dancing', wash: 'washing', drink: 'drinking', kick: 'kicking', throw: 'throwing' };
+  const FEELS = ['happy', 'sad', 'tired', 'thirsty', 'hungry'];
+  const DAYTIME = ['morning', 'afternoon', 'evening', 'night'];
+  const SPOTS = ['lake', 'sea', 'mountain', 'road', 'kitchen', 'bedroom', 'classroom', 'farm'];
+  const THINGS = ['robot', 'clock', 'fan', 'computer', 'bike', 'ball', 'rope', 'flute', 'mirror', 'shirt', 'pants', 'dress'];
   const PICK_ORDERS = {
     way:    { list: PLACES, draw: (g, k) => drawPlace(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'This is the ' + k + '. Thank you!' },
     job:    { list: JOBS, draw: (g, k) => drawJob(g, k), say: (k) => 'Who is the ' + (k === 'police' ? 'police officer' : k) + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Thank you for your help!' },
@@ -293,6 +299,11 @@
     count:  { list: COUNT, draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
     zoo:    { list: ZOO, draw: (g, k) => drawZoo(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'I see the ' + k + '! Thank you!' },
     body:   { list: BODY, draw: (g, k) => drawBody(g, k), say: (k) => 'Point to the ' + k + '.', zh: (k) => '指出' + zhOf(k) + '。', thanks: () => 'Good job!' },
+    act:    { list: Object.keys(ACTS), draw: (g, k) => drawAct(g, k), say: (k) => 'Who is ' + ACTS[k] + '?', zh: (k) => '誰在' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    feel:   { list: FEELS, draw: (g, k) => drawFeel(g, k), say: (k) => 'Who is ' + k + '?', zh: (k) => '誰覺得' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    time:   { list: DAYTIME, draw: (g, k) => drawDaytime(g, k), say: (k) => 'Which one is ' + (k === 'night' ? 'night' : 'the ' + k) + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    spot:   { list: SPOTS, draw: (g, k) => drawSpot(g, k), say: (k) => 'Which one is the ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    thing:  { list: THINGS, draw: (g, k) => drawThing(g, k), say: (k) => (k === 'pants' ? 'Where are the pants?' : 'Where is the ' + k + '?'), zh: (k) => zhOf(k) + '在哪裡？', thanks: () => 'There it is! Thank you!' },
     month:  { list: MONTHS, draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
   };
   // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
@@ -1031,6 +1042,89 @@
     g.lineStyle(1.5, 0xc62828, 1); g.beginPath(); g.arc(0, -21, 4, 0.3, Math.PI - 0.3, false); g.strokePath(); // mouth
     const spot = { head: [0, -26, 17], eye: [5, -28, 5], ear: [15, -26, 7], nose: [0, -24, 4], mouth: [0, -19, 5], arm: [-17, -2, 8], hand: [-23, 6, 6], leg: [6, 16, 8], foot: [8, 26, 7] }[k];
     g.lineStyle(2.5, 0xe53935, 1); g.strokeCircle(spot[0], spot[1], spot[2]);
+  }
+  // 動作：火柴人，pts 是 [頭, 肩, 臀, 左手, 右手, 左腳, 右腳]，手腳可以有關節（陣列）
+  function stick(g, o) {
+    const c = o.c || 0x37474f;
+    g.lineStyle(4, c, 1);
+    const seg = (a, list) => { let p = a; list.forEach((q) => { g.lineBetween(p[0], p[1], q[0], q[1]); p = q; }); };
+    seg(o.sh, [o.hip]);
+    o.arms.forEach((a) => seg(o.sh, a));
+    o.legs.forEach((l) => seg(o.hip, l));
+    g.fillStyle(0xffcc99, 1); g.fillCircle(o.head[0], o.head[1], 8);
+    g.lineStyle(2, c, 1); g.strokeCircle(o.head[0], o.head[1], 8);
+  }
+  function note(g, x, y) { g.fillStyle(0x7e57c2, 1); g.fillCircle(x, y, 3); g.lineStyle(2, 0x7e57c2, 1); g.lineBetween(x + 3, y, x + 3, y - 10); g.lineBetween(x + 3, y - 10, x + 7, y - 7); }
+  function drawAct(g, k) {
+    g.clear();
+    const std = { head: [0, -26], sh: [0, -16], hip: [0, 4], arms: [[[-10, -2]], [[10, -2]]], legs: [[[-6, 22]], [[6, 22]]] };
+    const P = (o) => stick(g, Object.assign({}, std, o));
+    if (k === 'stand') P({});
+    else if (k === 'walk') { P({ arms: [[[-8, -2]], [[8, -4]]], legs: [[[-4, 13], [-9, 22]], [[5, 13], [9, 22]]] }); g.fillStyle(0x90a4ae, 1); g.fillEllipse(-26, 23, 7, 4); g.fillEllipse(-38, 21, 7, 4); }
+    else if (k === 'run') { P({ head: [6, -24], sh: [4, -14], hip: [-2, 4], arms: [[[-10, -18], [-16, -10]], [[14, -6], [20, -14]]], legs: [[[-14, 10], [-22, 6]], [[8, 12], [6, 24]]] }); g.lineStyle(2, 0x90a4ae, 1); [-14, -6, 2].forEach((y) => g.lineBetween(-36, y, -24, y)); }
+    else if (k === 'jump') { P({ head: [0, -32], sh: [0, -22], hip: [0, -4], arms: [[[-12, -36]], [[12, -36]]], legs: [[[-8, 4], [-6, 12]], [[8, 4], [6, 12]]] }); g.fillStyle(0x000000, 0.15); g.fillEllipse(0, 26, 30, 6); }
+    else if (k === 'sit') { g.fillStyle(0x8d6e63, 1); g.fillRect(-14, 6, 26, 5); g.fillRect(-14, -12, 5, 36); g.fillRect(8, 6, 4, 18); P({ head: [-2, -24], sh: [-2, -14], hip: [-2, 4], arms: [[[8, 0]], [[10, -2]]], legs: [[[14, 4], [16, 22]], [[16, 6], [18, 22]]] }); }
+    else if (k === 'sleep') { g.fillStyle(0x90caf9, 1); g.fillRect(-36, 4, 72, 14); g.fillStyle(0x8d6e63, 1); g.fillRect(-38, -6, 5, 28); g.fillRect(34, 4, 4, 18); g.fillStyle(0xffffff, 1); g.fillEllipse(-24, 0, 20, 10); g.fillStyle(0xffcc99, 1); g.fillCircle(-22, -4, 8); g.fillStyle(0x7986cb, 1); g.fillRect(-14, -4, 46, 10); g.lineStyle(2, 0x5c6bc0, 1); [[-6, -24], [4, -32]].forEach(([x, y]) => { g.lineBetween(x, y, x + 7, y); g.lineBetween(x + 7, y, x, y + 7); g.lineBetween(x, y + 7, x + 7, y + 7); }); }
+    else if (k === 'read') { P({ arms: [[[-6, -4], [4, -10]], [[8, -4], [12, -10]]] }); g.fillStyle(0x1e88e5, 1); g.fillRect(2, -20, 16, 14); g.fillStyle(0xffffff, 1); g.fillRect(9, -20, 2, 14); }
+    else if (k === 'write') { g.fillStyle(0xa1887f, 1); g.fillRect(4, 0, 34, 5); g.fillRect(32, 5, 4, 18); g.fillStyle(0xffffff, 1); g.fillRect(10, -4, 18, 4); P({ head: [-10, -24], sh: [-10, -14], hip: [-10, 4], arms: [[[0, -6], [14, -6]]], legs: [[[-14, 22]], [[-6, 22]]] }); g.lineStyle(3, 0xfdd835, 1); g.lineBetween(14, -6, 20, -16); }
+    else if (k === 'sing') { P({ arms: [[[-12, -10]], [[12, -10]]] }); note(g, 18, -30); note(g, 28, -20); }
+    else if (k === 'dance') { P({ arms: [[[-14, -30]], [[14, -6], [20, 0]]], legs: [[[-6, 22]], [[12, 12], [20, 16]]] }); note(g, -26, -24); note(g, 28, -28); }
+    else if (k === 'wash') { g.fillStyle(0x90a4ae, 1); g.fillRect(4, -36, 22, 5); g.fillRect(21, -36, 5, 10); P({ head: [-14, -24], sh: [-14, -14], hip: [-14, 4], arms: [[[0, -8], [18, -10]], [[0, -4], [20, -6]]], legs: [[[-18, 22]], [[-10, 22]]] }); g.fillStyle(0x4fc3f7, 1); [[23, -22], [21, -18]].forEach(([x, y]) => g.fillCircle(x, y, 2)); g.lineStyle(1.5, 0x81d4fa, 1); [[14, -16], [28, -12], [26, -2]].forEach(([x, y]) => g.strokeCircle(x, y, 3)); }
+    else if (k === 'drink') { P({ arms: [[[-10, -2]], [[10, -12], [6, -24]]] }); g.fillStyle(0xe1f5fe, 1); g.fillRect(4, -32, 9, 12); g.lineStyle(1.5, 0x4fc3f7, 1); g.strokeRect(4, -32, 9, 12); }
+    else if (k === 'kick') { P({ head: [-8, -26], sh: [-8, -16], hip: [-8, 4], arms: [[[-20, -8]], [[4, -8]]], legs: [[[-10, 22]], [[6, 10], [14, 10]]] }); g.fillStyle(0xffffff, 1); g.fillCircle(24, 10, 7); g.lineStyle(1.5, 0x37474f, 1); g.strokeCircle(24, 10, 7); }
+    else if (k === 'throw') { P({ head: [-6, -24], sh: [-6, -14], hip: [-6, 4], arms: [[[-16, -4]], [[2, -26], [8, -32]]] }); g.fillStyle(0xe53935, 1); g.fillCircle(26, -30, 6); g.lineStyle(1.5, 0xb0bec5, 1); g.lineBetween(12, -32, 18, -31); }
+  }
+  // 感覺：臉的表情加一個小提示
+  function drawFeel(g, k) {
+    g.clear();
+    g.fillStyle(0xffe0b2, 1); g.fillCircle(-6, 0, 22); g.lineStyle(2, 0xffb74d, 1); g.strokeCircle(-6, 0, 22);
+    g.fillStyle(0x37474f, 1); g.lineStyle(2.5, 0x37474f, 1);
+    const smile = (up) => { g.beginPath(); if (up) g.arc(-6, 4, 9, 0.2, Math.PI - 0.2, false); else g.arc(-6, 16, 9, Math.PI + 0.3, -0.3, false); g.strokePath(); };
+    if (k === 'tired') { g.lineBetween(-16, -4, -10, -4); g.lineBetween(-2, -4, 4, -4); g.fillStyle(0x37474f, 1); g.fillEllipse(-6, 10, 8, 10); g.lineStyle(2, 0x5c6bc0, 1); [[18, -24], [26, -32]].forEach(([x, y]) => { g.lineBetween(x, y, x + 6, y); g.lineBetween(x + 6, y, x, y + 6); g.lineBetween(x, y + 6, x + 6, y + 6); }); }
+    else { g.fillCircle(-13, -5, 2.5); g.fillCircle(1, -5, 2.5); }
+    if (k === 'happy') { smile(true); g.fillStyle(0xf48fb1, 0.6); g.fillCircle(-20, 4, 4); g.fillCircle(8, 4, 4); }
+    if (k === 'sad') { smile(false); g.fillStyle(0x4fc3f7, 1); g.fillEllipse(-14, 4, 4, 7); }
+    if (k === 'thirsty') { g.lineBetween(-12, 10, 0, 10); g.fillStyle(0xe57373, 1); g.fillEllipse(-6, 14, 6, 6); g.fillStyle(0xe1f5fe, 1); g.fillRect(20, -18, 14, 20); g.lineStyle(2, 0x4fc3f7, 1); g.strokeRect(20, -18, 14, 20); g.fillStyle(0x4fc3f7, 1); g.fillRect(21, -8, 12, 9); }
+    if (k === 'hungry') { g.strokeCircle(-6, 10, 4); g.fillStyle(0xffffff, 1); g.fillCircle(28, -14, 13); g.lineStyle(1, 0xbdbdbd, 1); g.strokeCircle(28, -14, 13); g.fillStyle(0xbf6c3a, 1); g.fillEllipse(28, -14, 16, 10); g.fillStyle(0xffffff, 1); g.fillCircle(17, 4, 3); g.fillCircle(13, 10, 2); }
+  }
+  // 時段：太陽的位置和天空的顏色
+  function drawDaytime(g, k) {
+    g.clear();
+    const sky = { morning: 0xb3e5fc, afternoon: 0x4fc3f7, evening: 0xffab91, night: 0x1a237e }[k];
+    g.fillStyle(sky, 1); g.fillRect(-40, -34, 80, 50);
+    g.fillStyle(0x7cb342, 1); g.fillRect(-40, 10, 80, 12);
+    if (k === 'morning') { g.fillStyle(0xffd54a, 1); g.fillCircle(-24, 6, 10); g.fillStyle(0x7cb342, 1); g.fillRect(-40, 10, 80, 12); g.lineStyle(2, 0xffb300, 1); [[-24, -10], [-36, -4], [-12, -4]].forEach(([x, y]) => g.lineBetween(-24 + (x + 24) * 0.6, 6 + (y - 6) * 0.6, x, y)); }
+    else if (k === 'afternoon') { g.fillStyle(0xffd54a, 1); g.fillCircle(8, -22, 10); }
+    else if (k === 'evening') { g.fillStyle(0xff7043, 1); g.fillCircle(24, 8, 11); g.fillStyle(0x7cb342, 1); g.fillRect(-40, 10, 80, 12); }
+    else { g.fillStyle(0xfff9c4, 1); g.fillCircle(18, -20, 9); g.fillStyle(0x1a237e, 1); g.fillCircle(23, -23, 8); g.fillStyle(0xffffff, 1); [[-28, -26], [-14, -16], [-30, -6], [0, -28]].forEach(([x, y]) => g.fillCircle(x, y, 1.6)); g.fillStyle(0x33691e, 1); g.fillRect(-40, 10, 80, 12); }
+  }
+  // 地點
+  function drawSpot(g, k) {
+    g.clear();
+    if (k === 'lake') { g.fillStyle(0x7cb342, 1); g.fillRect(-40, -20, 80, 44); g.fillStyle(0x4fc3f7, 1); g.fillEllipse(0, 6, 54, 24); g.fillStyle(0x2e7d32, 1); [[-30, -10], [30, -12], [-34, 14], [32, 14]].forEach(([x, y]) => g.fillTriangle(x - 7, y + 8, x + 7, y + 8, x, y - 10)); }
+    else if (k === 'sea') { g.fillStyle(0xb3e5fc, 1); g.fillRect(-40, -30, 80, 24); g.fillStyle(0x1e88e5, 1); g.fillRect(-40, -6, 80, 30); g.lineStyle(2, 0xffffff, 1); [[-30, 4], [-6, 12], [18, 2]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 6, Math.PI, 0, false); g.strokePath(); }); g.fillStyle(0x8d6e63, 1); g.fillTriangle(10, -10, 30, -10, 26, -4); g.fillStyle(0xffffff, 1); g.fillTriangle(20, -11, 20, -26, 30, -11); }
+    else if (k === 'mountain') { g.fillStyle(0x78909c, 1); g.fillTriangle(-40, 22, 6, 22, -16, -24); g.fillStyle(0x607d8b, 1); g.fillTriangle(-10, 22, 40, 22, 16, -32); g.fillStyle(0xffffff, 1); g.fillTriangle(10, -20, 22, -20, 16, -32); g.fillTriangle(-21, -14, -11, -14, -16, -24); }
+    else if (k === 'road') { g.fillStyle(0x7cb342, 1); g.fillRect(-40, -30, 80, 54); g.fillStyle(0x757575, 1); g.fillTriangle(-34, 24, 34, 24, 4, -30); g.fillTriangle(-34, 24, 4, -30, -4, -30); g.fillStyle(0xffffff, 1); [[0, 14], [1, -2], [2, -16]].forEach(([x, y], i) => g.fillRect(x - 2, y, 4, 8 - i * 2)); }
+    else if (k === 'kitchen') { g.fillStyle(0xeceff1, 1); g.fillRect(-36, -6, 72, 30); g.fillStyle(0x37474f, 1); g.fillCircle(-18, -6, 8); g.fillCircle(14, -6, 8); g.fillStyle(0x9e9e9e, 1); g.fillRect(-28, -22, 22, 14); g.fillRect(-32, -22, 30, 4); g.fillStyle(0xbdbdbd, 1); g.fillRect(-24, 4, 48, 14); g.lineStyle(2, 0xb0bec5, 1); [-12, -18, -24].forEach((y, i) => g.lineBetween(-18 + i * 2, y - 6, -16 + i * 2, y - 12)); }
+    else if (k === 'bedroom') { g.fillStyle(0xfff3e0, 1); g.fillRect(-40, -30, 80, 54); g.fillStyle(0x8d6e63, 1); g.fillRect(-34, -4, 6, 26); g.fillRect(28, 6, 4, 16); g.fillStyle(0xf48fb1, 1); g.fillRect(-28, 4, 60, 12); g.fillStyle(0xffffff, 1); g.fillEllipse(-18, 0, 18, 8); g.fillStyle(0x90caf9, 1); g.fillRect(14, -24, 18, 14); g.lineStyle(2, 0xffffff, 1); g.lineBetween(23, -24, 23, -10); }
+    else if (k === 'classroom') { g.fillStyle(0x2e7d32, 1); g.fillRect(-30, -32, 60, 26); g.lineStyle(2, 0x6d4c41, 1); g.strokeRect(-30, -32, 60, 26); g.lineStyle(1.5, 0xffffff, 1); g.lineBetween(-22, -24, -2, -24); g.lineBetween(-22, -16, 8, -16); g.fillStyle(0xa1887f, 1); [[-24, 10], [0, 10], [24, 10]].forEach(([x, y]) => { g.fillRect(x - 9, y, 18, 4); g.fillRect(x - 7, y + 4, 3, 10); g.fillRect(x + 4, y + 4, 3, 10); }); }
+    else if (k === 'farm') { g.fillStyle(0x7cb342, 1); g.fillRect(-40, 6, 80, 18); g.fillStyle(0xc62828, 1); g.fillRect(-30, -14, 30, 26); g.fillTriangle(-34, -14, 4, -14, -15, -32); g.fillStyle(0xffffff, 1); g.fillRect(-20, -2, 10, 14); g.lineStyle(2, 0x8d6e63, 1); g.lineBetween(8, 6, 38, 6); g.lineBetween(8, 14, 38, 14); [10, 20, 30].forEach((x) => g.lineBetween(x, 2, x, 20)); }
+  }
+  // 物品
+  function drawThing(g, k) {
+    g.clear();
+    if (k === 'robot') { g.fillStyle(0x90a4ae, 1); g.fillRect(-14, -30, 28, 20); g.fillRect(-18, -8, 36, 26); g.fillRect(-28, -6, 8, 18); g.fillRect(20, -6, 8, 18); g.fillRect(-12, 18, 8, 8); g.fillRect(4, 18, 8, 8); g.fillStyle(0x4fc3f7, 1); g.fillCircle(-6, -20, 4); g.fillCircle(6, -20, 4); g.lineStyle(2, 0x607d8b, 1); g.lineBetween(0, -30, 0, -38); g.fillStyle(0xe53935, 1); g.fillCircle(0, -38, 3); }
+    else if (k === 'clock') { g.fillStyle(0xffffff, 1); g.fillCircle(0, -4, 24); g.lineStyle(3, 0x8d6e63, 1); g.strokeCircle(0, -4, 24); g.lineStyle(3, 0x37474f, 1); g.lineBetween(0, -4, 0, -20); g.lineBetween(0, -4, 12, -4); g.fillStyle(0x37474f, 1); [0, 1, 2, 3].forEach((i) => { const a = i * Math.PI / 2; g.fillCircle(Math.cos(a) * 19, -4 + Math.sin(a) * 19, 2); }); }
+    else if (k === 'fan') { g.lineStyle(3, 0x78909c, 1); g.lineBetween(0, -4, 0, 20); g.fillStyle(0x78909c, 1); g.fillEllipse(0, 22, 30, 8); g.lineStyle(2, 0xb0bec5, 1); g.strokeCircle(0, -14, 20); g.fillStyle(0x4fc3f7, 1); [0, 1, 2].forEach((i) => { const a = i * 2.094; g.fillEllipse(Math.cos(a) * 9, -14 + Math.sin(a) * 9, 14, 8); }); g.fillStyle(0x607d8b, 1); g.fillCircle(0, -14, 4); }
+    else if (k === 'computer') { g.fillStyle(0x37474f, 1); g.fillRoundedRect(-28, -30, 56, 38, 4); g.fillStyle(0x81d4fa, 1); g.fillRect(-23, -25, 46, 28); g.fillStyle(0x546e7a, 1); g.fillRect(-4, 8, 8, 8); g.fillRect(-16, 15, 32, 4); g.fillStyle(0x9e9e9e, 1); g.fillRect(-26, 21, 52, 6); }
+    else if (k === 'bike') { g.lineStyle(3, 0x37474f, 1); g.strokeCircle(-20, 10, 12); g.strokeCircle(20, 10, 12); g.lineStyle(3, 0xe53935, 1); g.lineBetween(-20, 10, -4, -8); g.lineBetween(-4, -8, 14, -8); g.lineBetween(14, -8, 20, 10); g.lineBetween(-4, -8, 2, 10); g.lineBetween(2, 10, -20, 10); g.lineBetween(14, -8, 12, -18); g.lineStyle(3, 0x37474f, 1); g.lineBetween(-10, -14, 0, -14); g.lineBetween(8, -18, 18, -18); }
+    else if (k === 'ball') { g.fillStyle(0xffffff, 1); g.fillCircle(0, -2, 22); g.lineStyle(2, 0x37474f, 1); g.strokeCircle(0, -2, 22); g.fillStyle(0x37474f, 1); g.fillCircle(0, -2, 7); [0, 1, 2, 3, 4].forEach((i) => { const a = -Math.PI / 2 + i * 1.2566; g.fillCircle(Math.cos(a) * 17, -2 + Math.sin(a) * 17, 4); }); }
+    else if (k === 'rope') { g.lineStyle(4, 0xa1887f, 1); g.strokeCircle(-6, 0, 18); g.strokeCircle(-6, 0, 11); g.lineBetween(12, 0, 34, 16); g.lineStyle(1.5, 0x6d4c41, 1); for (let a = 0; a < 6.28; a += 0.6) g.lineBetween(-6 + Math.cos(a) * 16, Math.sin(a) * 16, -6 + Math.cos(a + 0.3) * 20, Math.sin(a + 0.3) * 20); }
+    else if (k === 'flute') { g.fillStyle(0xbdbdbd, 1); g.fillRect(-36, -4, 72, 9); g.lineStyle(1, 0x757575, 1); g.strokeRect(-36, -4, 72, 9); g.fillStyle(0x424242, 1); [-24, -10, 2, 12, 22].forEach((x) => g.fillCircle(x, 0.5, 2.5)); }
+    else if (k === 'mirror') { g.fillStyle(0x8d6e63, 1); g.fillEllipse(0, -6, 40, 52); g.fillRect(-3, 18, 6, 10); g.fillStyle(0xe1f5fe, 1); g.fillEllipse(0, -6, 30, 42); g.lineStyle(3, 0xffffff, 0.9); g.lineBetween(-8, -18, 2, -26); g.lineBetween(-8, -10, 6, -20); }
+    else if (k === 'shirt') { g.fillStyle(0x42a5f5, 1); g.fillRect(-16, -18, 32, 40); g.fillTriangle(-16, -18, -32, -4, -24, 4); g.fillTriangle(16, -18, 32, -4, 24, 4); g.fillRect(-28, -8, 12, 10); g.fillRect(16, -8, 12, 10); g.fillStyle(0xffffff, 1); g.fillTriangle(-6, -18, 6, -18, 0, -10); g.fillCircle(0, -2, 1.5); g.fillCircle(0, 6, 1.5); g.fillCircle(0, 14, 1.5); }
+    else if (k === 'pants') { g.fillStyle(0x3949ab, 1); g.fillRect(-18, -24, 36, 10); g.fillTriangle(-18, -14, 0, -14, -14, 26); g.fillTriangle(-18, -14, -14, 26, -24, 26); g.fillTriangle(18, -14, 0, -14, 14, 26); g.fillTriangle(18, -14, 14, 26, 24, 26); g.fillRect(-20, -14, 40, 6); }
+    else if (k === 'dress') { g.fillStyle(0xec407a, 1); g.fillRect(-10, -26, 20, 16); g.fillTriangle(-10, -10, 10, -10, 0, -10); g.fillTriangle(-28, 24, 28, 24, 0, -12); g.fillRect(-10, -12, 20, 4); g.lineStyle(3, 0xec407a, 1); g.lineBetween(-8, -26, -10, -34); g.lineBetween(8, -26, 10, -34); g.fillStyle(0xffffff, 1); g.fillRect(-12, -10, 24, 3); }
   }
   // 月曆頁（上面的月份名稱是另外放的文字）
   function drawMonth(g) {
@@ -2915,7 +3009,8 @@
       // 權重：水果 3、衣物 2、指路 1.2、職業 1、學校用品 1、月份 0.8（月份屬延伸層，研究島開放後才有）
       // 單字補充（顏色、食物、季節、數字、動物園、身體）各 0.6
       const kinds = [['fruit', 3], ['clothes', 2], ['way', 1.2], ['job', 1], ['school', 1],
-        ['color', 0.6], ['meal', 0.6], ['season', 0.6], ['count', 0.6], ['zoo', 0.6], ['body', 0.6]].concat(this.researchOpen() ? [['month', 0.8]] : []);
+        ['color', 0.6], ['meal', 0.6], ['season', 0.6], ['count', 0.6], ['zoo', 0.6], ['body', 0.6],
+        ['act', 0.6], ['feel', 0.5], ['time', 0.5], ['spot', 0.5], ['thing', 0.6]].concat(this.researchOpen() ? [['month', 0.8]] : []);
       let r = Math.random() * kinds.reduce((a, k) => a + k[1], 0), kind = 'fruit';
       for (const [k, w] of kinds) { if (r < w) { kind = k; break; } r -= w; }
       if (PICK_ORDERS[kind]) {
