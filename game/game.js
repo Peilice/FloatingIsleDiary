@@ -245,6 +245,16 @@
   };
   const FAC_KEYS = Object.keys(FAC);
 
+  // 裝飾（遊戲企劃「圖鑑完成度換取外觀和家具」）：圖鑑達到 lib 項才能買，擺在草地固定位置，只是好看
+  const DECOR = [
+    { k: 'flowerbed', zh: '花圃',   en: 'flowers',  lib: 8,  price: 20, x: 320,  y: 612 },
+    { k: 'fence',     zh: '籬笆',   en: 'fence',    lib: 10, price: 25, x: 600,  y: 392 },
+    { k: 'bench',     zh: '長椅',   en: 'bench',    lib: 14, price: 35, x: 880,  y: 600 },
+    { k: 'lamppost',  zh: '路燈',   en: 'lamp',     lib: 17, price: 45, x: 330,  y: 470 },
+    { k: 'flag',      zh: '旗子',   en: 'flag',     lib: 20, price: 55, x: 870,  y: 430 },
+    { k: 'fountain',  zh: '噴水池', en: 'fountain', lib: 23, price: 80, x: 175,  y: 605 },
+  ];
+
   // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
   const MAP = [
     { z: 'lighthouse', x: 170,  y: 430, en: 'Lighthouse', zh: '燈塔',     color: 0x9ccb86, icon: 'bulb' },
@@ -331,7 +341,7 @@
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
       harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
-      bagReady: false, drillDay: 0, lightDone: 0, fixed: {}, crack: null,
+      bagReady: false, drillDay: 0, lightDone: 0, fixed: {}, crack: null, decor: {},
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -847,6 +857,17 @@
     else { g.lineStyle(6, 0x558b2f, 1); g.lineBetween(0, 24, 0, -22); g.fillStyle(0x7cb342, 1); g.fillEllipse(-9, -4, 14, 6); g.fillEllipse(9, -14, 14, 6); }
   }
 
+  // 裝飾
+  function drawDecor(g, k) {
+    g.clear();
+    if (k === 'flowerbed') { g.fillStyle(0x8d6e4a, 1); g.fillEllipse(0, 6, 90, 22); [[-30, 0xe53956], [-12, 0xffd54a], [6, 0xba68c8], [24, 0xff8a65]].forEach(([x, c]) => { g.fillStyle(0x43a047, 1); g.fillRect(x - 1, -10, 3, 12); g.fillStyle(c, 1); g.fillCircle(x, -12, 6); }); }
+    else if (k === 'fence') { g.fillStyle(0xd7ccc8, 1); for (let i = -4; i <= 4; i++) { g.fillRect(i * 24 - 4, -24, 8, 30); g.fillTriangle(i * 24 - 4, -24, i * 24 + 4, -24, i * 24, -30); } g.fillRect(-100, -18, 200, 5); g.fillRect(-100, -6, 200, 5); }
+    else if (k === 'bench') { g.fillStyle(0x8d6e63, 1); g.fillRect(-36, -14, 72, 8); g.fillRect(-36, -2, 72, 6); g.fillStyle(0x5d4037, 1); g.fillRect(-32, 4, 5, 14); g.fillRect(27, 4, 5, 14); }
+    else if (k === 'lamppost') { g.fillStyle(0x455a64, 1); g.fillRect(-3, -60, 6, 66); g.fillRect(-12, 4, 24, 6); g.fillStyle(0xfff59d, 1); g.fillCircle(0, -66, 10); g.fillStyle(0xfff59d, 0.25); g.fillCircle(0, -66, 22); }
+    else if (k === 'flag') { g.fillStyle(0x6d4c41, 1); g.fillRect(-2, -70, 4, 76); g.fillStyle(0xff7043, 1); g.fillTriangle(2, -70, 2, -46, 40, -58); g.fillStyle(0xffd54a, 1); g.fillCircle(18, -58, 5); }
+    else { g.fillStyle(0x90a4ae, 1); g.fillEllipse(0, 6, 80, 24); g.fillStyle(0x4fc3f7, 1); g.fillEllipse(0, 2, 66, 16); g.fillStyle(0x90a4ae, 1); g.fillRect(-5, -26, 10, 28); g.fillStyle(0x81d4fa, 0.8); g.fillCircle(-10, -30, 6); g.fillCircle(10, -30, 6); g.fillCircle(0, -36, 7); }
+  }
+
   // 設施：fixed 修好、crack 有裂痕；壞掉的是灰色、缺了幾塊
   function drawFacility(g, k, fixed, crack) {
     g.clear();
@@ -1064,7 +1085,7 @@
       const before = new Set(this.children.list);
       const zoneObjs = {};
       const grab = (z, fn) => { const b = new Set(this.children.list); fn(); zoneObjs[z] = this.children.list.filter((o) => !b.has(o)); };
-      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); this.buildCritter(); });
+      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); this.buildCritter(); this.buildDecorObjs(); });
       grab('forest', () => { this.buildForest(); this.buildFacility('bridge'); });
       grab('beach', () => { this.buildBeach(); this.buildFacility('dock'); });
       grab('cave', () => { this.buildCave(); this.buildFacility('stairs'); });
@@ -1100,6 +1121,7 @@
       this.buildMap();
       this.buildSeeds();
       this.buildFix();
+      this.buildDecorShop();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1351,18 +1373,20 @@
       this.dustStar.fillPoints(pts, true);
       this.dustText = txt(this, 1150, 48, '0', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5).setDepth(41);
 
-      const hudBtn = (x, label, onTap) => {
+      const hudBtn = (x, label, onTap, w) => {
+        w = w || 120;
         const b = this.add.container(x, 48).setDepth(40);
         const g = this.add.graphics();
-        g.fillStyle(0xffffff, 0.9); g.fillRoundedRect(-60, -30, 120, 60, 30);
-        b.add([g, txt(this, 0, 0, label, 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)]);
-        b.setSize(120, 60).setInteractive({ useHandCursor: true });
+        g.fillStyle(0xffffff, 0.9); g.fillRoundedRect(-w / 2, -30, w, 60, 30);
+        b.add([g, txt(this, 0, 0, label, w < 120 ? 24 : 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)]);
+        b.setSize(w, 60).setInteractive({ useHandCursor: true });
         b.on('pointerdown', onTap);
         return b;
       };
       hudBtn(84, '圖鑑', () => this.openLibrary());
       hudBtn(214, '日記', () => this.openBook());
-      hudBtn(985, '地圖', () => this.openMap());
+      hudBtn(918, '地圖', () => this.openMap(), 96);
+      hudBtn(1024, '裝飾', () => this.openDecor(), 96);
 
       // 靜音
       const mb = this.add.container(320, 48).setDepth(40);
@@ -1401,7 +1425,7 @@
       this.dayText = txt(this, 640, 20, '', 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5, 0).setDepth(41);
       this.dayIcon = makeIcon(this, 'sun', 640, 70, 0.8).setDepth(42);
       // 天氣圖示放在日期列右邊；演練日的日期文字比較長（Day 28  Sunday  Drill Day），要留空間
-      this.dayWeatherIcon = makeIcon(this, 'sunny', 835, 36, 0.7).setDepth(42);
+      this.dayWeatherIcon = makeIcon(this, 'sunny', 828, 36, 0.7).setDepth(42);
     }
 
     setMuted(on) {
@@ -1637,7 +1661,7 @@
     closeModal() {
       if (this.modal === 'map') return;
       if (this.sdBox) this.sdBox.setVisible(false);
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox, this.fxBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox, this.fxBox, this.dcBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -4973,6 +4997,81 @@
       return b;
     }
 
+    // ---------- 裝飾：圖鑑達到項數後用星砂買，擺在草地上 ----------
+    buildDecorObjs() {
+      this.decorObjs = {};
+      DECOR.forEach((d) => { this.decorObjs[d.k] = this.add.graphics({ x: d.x, y: d.y }).setDepth(d.k === 'fence' ? 5 : 8).setVisible(false); drawDecor(this.decorObjs[d.k], d.k); });
+    }
+
+    renderDecor() { if (this.decorObjs) DECOR.forEach((d) => this.decorObjs[d.k].setVisible(!!this.s.decor[d.k])); }
+
+    buildDecorShop() {
+      const c = this.modalBase(80, 200, 90, 880, 540, 0xfffaf0);
+      c.add(txt(this, 640, 128, 'Decor 裝飾', 30, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.dcSub = txt(this, 640, 170, '', 19, '#6b7c8c').setOrigin(0.5);
+      this.dcMsg = txt(this, 640, 600, '', 20, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.dcSub, this.dcMsg]);
+      this.dcCards = DECOR.map((d, i) => {
+        const card = this.add.container(370 + (i % 3) * 270, 280 + Math.floor(i / 3) * 190);
+        const bg = this.add.graphics();
+        const pic = this.add.graphics({ y: -6 }).setScale(0.9); drawDecor(pic, d.k);
+        const name = txt(this, 0, 42, d.zh + ' ' + d.en, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const info = txt(this, 0, 68, '', 17, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+        card.add([bg, pic, name, info]);
+        card.setSize(240, 170).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.buyDecor(d.k));
+        c.add(card);
+        return { card, bg, info, d };
+      });
+      this.closeButton(c, 1050, 120, () => this.closeModal());
+      this.dcBox = c;
+    }
+
+    openDecor() {
+      if (this.paused()) return;
+      this.modal = 'decor';
+      this.dcArm = null;
+      this.dcMsg.setText('');
+      this.renderDecorShop();
+      this.dcBox.setVisible(true);
+    }
+
+    renderDecorShop() {
+      const s = this.s, n = this.libCount();
+      this.dcSub.setText('圖鑑越完整，能買的裝飾越多（目前圖鑑 ' + n + ' / ' + LIB.length + ' 項，★ ' + s.stardust + '）');
+      this.dcCards.forEach((c) => {
+        const own = !!s.decor[c.d.k], open = n >= c.d.lib;
+        c.bg.clear();
+        c.bg.fillStyle(own ? 0xe8f5e9 : (open ? 0xffffff : 0xeeeeee), 1); c.bg.fillRoundedRect(-120, -85, 240, 170, 18);
+        c.bg.lineStyle(3, own ? 0x66bb6a : 0xd7ccc8, 1); c.bg.strokeRoundedRect(-120, -85, 240, 170, 18);
+        c.card.setAlpha(open || own ? 1 : 0.5);
+        c.info.setText(own ? '已經擺在草地上' : (open ? '★' + c.d.price : '圖鑑 ' + c.d.lib + ' 項才能買'));
+        c.info.setColor(own ? '#2e7d32' : (open ? '#e65100' : '#757575'));
+      });
+    }
+
+    buyDecor(k) {
+      const s = this.s, d = DECOR.find((x) => x.k === k);
+      if (this.modal !== 'decor' || s.decor[k]) return;
+      if (this.libCount() < d.lib) { this.dcMsg.setText('圖鑑要 ' + d.lib + ' 項才能買' + d.zh); return; }
+      // 點一下顯示價格，3 秒內再點一次才買
+      if (this.dcArm !== k) {
+        this.dcArm = k;
+        this.time.delayedCall(3000, () => { if (this.dcArm === k) { this.dcArm = null; if (this.dcMsg.active) this.dcMsg.setText(''); } });
+        this.dcMsg.setText(s.stardust >= d.price ? '再點一次買下' + d.zh + ' ★' + d.price : '星砂不夠，需要 ★' + d.price);
+        return;
+      }
+      this.dcArm = null;
+      if (s.stardust < d.price) { this.dcMsg.setText('星砂不夠，需要 ★' + d.price); return; }
+      s.stardust -= d.price;
+      s.decor[k] = true;
+      this.touch('decor');
+      speak('It looks nice!');
+      this.dcMsg.setText(d.zh + '擺好了！回草地看看');
+      this.renderDecorShop();
+      this.refreshAll();
+    }
+
     // ---------- 設施修理（§3.4、§5）：花星砂修好壞掉的設施，修理時要選對材料 ----------
     fixedCount() { return FAC_KEYS.filter((k) => this.s.fixed[k]).length; }
 
@@ -5462,6 +5561,7 @@
       this.renderNav();
       this.renderResearch();
       this.renderFacilities();
+      this.renderDecor();
       this.refreshTut();
       this.redrawTools();
     }
@@ -5483,6 +5583,7 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'decor') { if (Math.random() < 0.2) this.closeModal(); else this.buyDecor(DECOR[Math.floor(Math.random() * DECOR.length)].k); return; }
       if (this.modal === 'fix') { if (Math.random() < 0.1) this.closeModal(); else this.pickMaterial(Math.floor(Math.random() * MATERIALS.length)); return; }
       if (this.modal === 'seeds') {
         const r = Math.random();

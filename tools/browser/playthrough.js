@@ -114,6 +114,15 @@
   const PART_OF = { carrot: 'root', bean: 'seed', rose: 'flower', corn: 'seed', potato: 'stem', grape: 'fruit' };
   const cropFor = (want, s) => (PART_OF[want] ? want : Object.keys(PART_OF).find((k) => PART_OF[k] === want && (s.inv[k] || 0) > 0) || Object.keys(PART_OF).find((k) => PART_OF[k] === want && s.seeds.includes(k)));
 
+  // 裝飾：圖鑑夠、星砂多（留 30 顆）就買下一樣
+  const DECOR = [['flowerbed', 8, 20], ['fence', 10, 25], ['bench', 14, 35], ['lamppost', 17, 45], ['flag', 20, 55], ['fountain', 23, 80]];
+  function decor(sc, s) {
+    const d = DECOR.find(([k, lib, price]) => !s.decor[k] && sc.libCount() >= lib && s.stardust >= price + 30);
+    if (!d) return;
+    sc.openDecor(); sc.buyDecor(d[0]); sc.buyDecor(d[0]); sc.closeModal();
+    A.log.push('day ' + s.day + ' 買裝飾 ' + d[0]);
+  }
+
   function wishes(sc, s) {
     ['rabbit', s.fwho].filter(Boolean).forEach((who) => {
       const want = s.wishes[who];
@@ -185,6 +194,7 @@
       wishes(sc, s);
       buySeeds(sc, s);
       repair(sc, s);
+      decor(sc, s);
       forest(sc, s);
       if (A.todo.length && s.t > 5) A.todo.shift()();
     } catch (e) { A.errors.push('day ' + s.day + ' ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
@@ -203,7 +213,7 @@
     } catch (e) { A.errors.push('step ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
     g.renderer.render = rr;
     const s = __ci.state;
-    return { day: s.day, stardust: s.stardust, seeds: s.seeds.join(','), dustByDay: (A.dust || []).join(' '), buys: A.log.filter((l) => /買|修/.test(l)), crack: s.crack, lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
+    return { day: s.day, stardust: s.stardust, seeds: s.seeds.join(','), dustByDay: (A.dust || []).join(' '), buys: A.log.filter((l) => /買|修/.test(l)), decor: Object.keys(s.decor || {}).join(','), crack: s.crack, lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
   };
 })();
 'agent ready';
