@@ -245,6 +245,7 @@
     { name: '化石與地層', codes: 'INc-Ⅲ-11、INd-Ⅲ-8～10', keys: ['fossil'] },
     { name: '英語：生活對話（市集、日曆）', codes: '英語 B-Ⅱ-1、C-Ⅱ-2、D-Ⅱ-1', keys: ['market', 'calendar'] },
     { name: '英語：家人、地點、節慶、職業、學校用品、月份', codes: '英語 B-Ⅱ-1、C-Ⅱ-2', keys: ['family', 'way', 'festival', 'job', 'school', 'month'] },
+    { name: '英語：顏色、食物、季節、數字、動物、身體', codes: '英語 B-Ⅱ-1', keys: ['color', 'meal', 'season', 'count', 'zoo', 'body'] },
     { name: '英語：句子回顧（日記）', codes: '英語 Ae-Ⅲ-12、B-Ⅲ-1、Ad-Ⅲ-11', keys: ['diary'] },
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
@@ -276,10 +277,22 @@
   const SCHOOL = ['book', 'pen', 'pencil', 'ruler', 'eraser', 'bag', 'desk', 'chair'];
   const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
   const cap = (w) => w.charAt(0).toUpperCase() + w.slice(1);
+  const BALLOON = { red: 0xe53935, blue: 0x1e88e5, green: 0x43a047, yellow: 0xfdd835, orange: 0xfb8c00, purple: 0x8e24aa, pink: 0xf48fb1, black: 0x212121, white: 0xffffff, brown: 0x6d4c41, gray: 0x9e9e9e };
+  const FOODS = ['lemon', 'rice', 'bread', 'egg', 'milk', 'soup'];
+  const SEASONS = ['spring', 'summer', 'autumn', 'winter'];
+  const COUNT = ['six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  const ZOO = ['dog', 'pig', 'chicken', 'elephant', 'lion', 'tiger', 'bear', 'panda', 'snake', 'deer', 'dolphin', 'whale'];
+  const BODY = ['head', 'eye', 'ear', 'nose', 'mouth', 'arm', 'hand', 'leg', 'foot'];
   const PICK_ORDERS = {
     way:    { list: PLACES, draw: (g, k) => drawPlace(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'This is the ' + k + '. Thank you!' },
     job:    { list: JOBS, draw: (g, k) => drawJob(g, k), say: (k) => 'Who is the ' + (k === 'police' ? 'police officer' : k) + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Thank you for your help!' },
     school: { list: SCHOOL, draw: (g, k) => drawSchool(g, k), say: (k) => 'I need ' + (k === 'eraser' ? 'an ' : 'a ') + k + ' for school.', zh: (k) => '上學要用' + zhOf(k) + '，是哪一個？', thanks: () => 'Thank you! I am ready for school.' },
+    color:  { list: Object.keys(BALLOON), draw: (g, k) => drawBalloon(g, k), say: (k) => 'Which balloon is ' + k + '?', zh: (k) => '哪一顆氣球是' + zhOf(k) + '？', thanks: (k) => 'Yes, it is ' + k + '. Thank you!' },
+    meal:   { list: FOODS, draw: (g, k) => drawFood(g, k), say: (k) => 'Can I have the ' + k + ', please?', zh: (k) => '可以給我' + zhOf(k) + '嗎？', thanks: () => 'Yummy! Thank you!' },
+    season: { list: SEASONS, draw: (g, k) => drawSeason(g, k), say: (k) => 'Which one is ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: (k) => 'I like ' + k + '! Thank you!' },
+    count:  { list: COUNT, draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
+    zoo:    { list: ZOO, draw: (g, k) => drawZoo(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'I see the ' + k + '! Thank you!' },
+    body:   { list: BODY, draw: (g, k) => drawBody(g, k), say: (k) => 'Point to the ' + k + '.', zh: (k) => '指出' + zhOf(k) + '。', thanks: () => 'Good job!' },
     month:  { list: MONTHS, draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
   };
   // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
@@ -944,6 +957,80 @@
     else if (k === 'bag') { g.fillStyle(0xe53935, 1); g.fillRoundedRect(-20, -14, 40, 38, 8); g.lineStyle(4, 0xb71c1c, 1); g.beginPath(); g.arc(0, -14, 10, Math.PI, 0, false); g.strokePath(); g.fillStyle(0xffcdd2, 1); g.fillRect(-12, 2, 24, 10); }
     else if (k === 'desk') { g.fillStyle(0xa1887f, 1); g.fillRect(-34, -12, 68, 8); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -4, 6, 30); g.fillRect(24, -4, 6, 30); g.fillStyle(0x8d6e63, 1); g.fillRect(-24, -4, 22, 12); }
     else if (k === 'chair') { g.fillStyle(0x6d4c41, 1); g.fillRect(-14, -26, 6, 50); g.fillRect(-14, -26, 26, 6); g.fillRect(-14, 0, 30, 6); g.fillRect(10, 0, 6, 24); g.fillRect(-14, -14, 26, 4); }
+  }
+  // 氣球（顏色訂單）
+  function drawBalloon(g, k) {
+    g.clear();
+    g.lineStyle(2, 0x78909c, 1); g.lineBetween(0, 10, 2, 26);
+    g.fillStyle(BALLOON[k], 1); g.fillEllipse(0, -10, 34, 40);
+    g.lineStyle(2, 0x90a4ae, 1); g.strokeEllipse(0, -10, 34, 40);
+    g.fillStyle(BALLOON[k], 1); g.fillTriangle(-4, 12, 4, 12, 0, 7);
+    g.fillStyle(0xffffff, k === 'white' ? 0 : 0.45); g.fillEllipse(-7, -18, 8, 12);
+  }
+  // 食物
+  function drawFood(g, k) {
+    g.clear();
+    const bowl = (c) => { g.fillStyle(c, 1); g.fillEllipse(0, 0, 56, 14); g.fillStyle(0xeceff1, 1); g.beginPath(); g.arc(0, 0, 28, 0, Math.PI, false); g.fillPath(); g.lineStyle(2, 0x90a4ae, 1); g.beginPath(); g.arc(0, 0, 28, 0, Math.PI, false); g.strokePath(); };
+    if (k === 'lemon') { g.fillStyle(0xfdd835, 1); g.fillEllipse(0, 0, 50, 34); g.fillTriangle(22, -6, 22, 6, 32, 0); g.fillTriangle(-22, -6, -22, 6, -32, 0); g.fillStyle(0x7cb342, 1); g.fillEllipse(8, -18, 14, 7); }
+    else if (k === 'rice') { bowl(0xffffff); g.fillStyle(0xffffff, 1); g.fillEllipse(0, -6, 50, 22); g.fillStyle(0xe0e0e0, 1); [[-12, -8], [0, -12], [12, -6], [-4, -2], [8, -14]].forEach(([x, y]) => g.fillEllipse(x, y, 5, 3)); }
+    else if (k === 'bread') { g.fillStyle(0xd7a35b, 1); g.fillRoundedRect(-30, -14, 60, 32, 12); g.fillStyle(0xf3d6a1, 1); g.fillRoundedRect(-24, -8, 48, 20, 8); g.lineStyle(2, 0xb07a35, 1); [-12, 0, 12].forEach((x) => g.lineBetween(x - 4, -14, x + 4, -6)); }
+    else if (k === 'egg') { g.fillStyle(0xfff8e1, 1); g.fillEllipse(0, 2, 32, 42); g.lineStyle(2, 0xd7ccc8, 1); g.strokeEllipse(0, 2, 32, 42); }
+    else if (k === 'milk') { g.fillStyle(0xffffff, 1); g.fillRect(-16, -18, 32, 42); g.fillTriangle(-16, -18, 16, -18, 0, -32); g.lineStyle(2, 0x90a4ae, 1); g.strokeRect(-16, -18, 32, 42); g.fillStyle(0x1e88e5, 1); g.fillRect(-16, 0, 32, 10); }
+    else if (k === 'soup') { bowl(0xff8a65); g.lineStyle(2, 0xb0bec5, 1); [-10, 0, 10].forEach((x) => { g.beginPath(); g.moveTo(x, -6); g.lineTo(x - 4, -16); g.lineTo(x + 2, -26); g.strokePath(); }); }
+  }
+  // 季節：春天開花、夏天大太陽和海、秋天落葉、冬天雪人
+  function drawSeason(g, k) {
+    g.clear();
+    if (k === 'spring') { g.fillStyle(0x7cb342, 1); g.fillRect(-36, 10, 72, 14); [[-20, 0, 0xf48fb1], [0, -6, 0xfdd835], [20, 0, 0xce93d8]].forEach(([x, y, c]) => { g.lineStyle(2, 0x388e3c, 1); g.lineBetween(x, y, x, 12); g.fillStyle(c, 1); [0, 1, 2, 3, 4].forEach((i) => { const a = i * 1.2566; g.fillCircle(x + Math.cos(a) * 6, y + Math.sin(a) * 6, 5); }); g.fillStyle(0xffffff, 1); g.fillCircle(x, y, 3); }); }
+    else if (k === 'summer') { g.fillStyle(0x4fc3f7, 1); g.fillRect(-36, 6, 72, 18); g.fillStyle(0xffd54a, 1); g.fillCircle(0, -14, 14); g.lineStyle(3, 0xffb300, 1); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.lineBetween(Math.cos(a) * 18, -14 + Math.sin(a) * 18, Math.cos(a) * 24, -14 + Math.sin(a) * 24); } }
+    else if (k === 'autumn') { g.fillStyle(0x6d4c41, 1); g.fillRect(-4, -6, 8, 30); g.fillStyle(0xef6c00, 1); g.fillCircle(0, -16, 18); [[-24, 4], [20, 10], [-14, 18], [28, -4]].forEach(([x, y], i) => { g.fillStyle(i % 2 ? 0xfdd835 : 0xd84315, 1); g.fillEllipse(x, y, 10, 6); }); }
+    else { g.fillStyle(0xffffff, 1); g.fillCircle(0, 10, 16); g.fillCircle(0, -14, 11); g.lineStyle(2, 0xb0bec5, 1); g.strokeCircle(0, 10, 16); g.strokeCircle(0, -14, 11); g.fillStyle(0xfb8c00, 1); g.fillTriangle(0, -14, 0, -10, 9, -12); g.fillStyle(0x37474f, 1); g.fillCircle(-4, -17, 1.6); g.fillCircle(4, -17, 1.6); g.fillStyle(0x90caf9, 1); [[-30, -20], [26, -24], [-24, 6], [30, 8]].forEach(([x, y]) => g.fillCircle(x, y, 2.5)); }
+  }
+  // 數星星：每排 4 顆
+  function drawStars(g, n) {
+    g.clear();
+    g.fillStyle(0xffc107, 1);
+    const rows = Math.ceil(n / 4);
+    for (let i = 0; i < n; i++) {
+      const r = Math.floor(i / 4), c = i % 4, x = -24 + c * 16, y = -24 + r * 16 + (3 - rows) * 8;
+      const pts = [];
+      for (let j = 0; j < 10; j++) { const a = -Math.PI / 2 + j * Math.PI / 5, rad = j % 2 ? 3 : 7; pts.push({ x: x + Math.cos(a) * rad, y: y + Math.sin(a) * rad }); }
+      g.fillPoints(pts, true);
+    }
+  }
+  // 動物園的動物（頭像或全身的簡單圖）
+  function drawZoo(g, k) {
+    g.clear();
+    const eyes = (y, dx, c) => { g.fillStyle(c || 0x212121, 1); g.fillCircle(-dx, y, 2.2); g.fillCircle(dx, y, 2.2); };
+    if (k === 'dog') { g.fillStyle(0xbcaaa4, 1); g.fillCircle(0, 0, 18); g.fillStyle(0x6d4c41, 1); g.fillEllipse(-18, 2, 10, 24); g.fillEllipse(18, 2, 10, 24); eyes(-4, 7); g.fillStyle(0x212121, 1); g.fillEllipse(0, 7, 9, 6); }
+    else if (k === 'pig') { g.fillStyle(0xf8bbd0, 1); g.fillCircle(0, 0, 19); g.fillTriangle(-16, -12, -6, -16, -14, -26); g.fillTriangle(16, -12, 6, -16, 14, -26); g.fillStyle(0xf48fb1, 1); g.fillEllipse(0, 6, 16, 11); g.fillStyle(0xad1457, 1); g.fillCircle(-3, 6, 1.8); g.fillCircle(3, 6, 1.8); eyes(-6, 7); }
+    else if (k === 'chicken') { g.fillStyle(0xffffff, 1); g.fillEllipse(0, 8, 36, 30); g.fillCircle(10, -12, 11); g.lineStyle(1, 0xbdbdbd, 1); g.strokeEllipse(0, 8, 36, 30); g.fillStyle(0xe53935, 1); g.fillCircle(8, -24, 4); g.fillCircle(13, -23, 4); g.fillStyle(0xffb300, 1); g.fillTriangle(20, -12, 20, -8, 27, -10); g.fillStyle(0x212121, 1); g.fillCircle(13, -14, 2); }
+    else if (k === 'elephant') { g.fillStyle(0x90a4ae, 1); g.fillEllipse(-18, -2, 22, 30); g.fillEllipse(18, -2, 22, 30); g.fillStyle(0xb0bec5, 1); g.fillCircle(0, -2, 15); g.fillRect(-4, 6, 8, 20); eyes(-6, 6); }
+    else if (k === 'lion') { g.fillStyle(0xef6c00, 1); g.fillCircle(0, 0, 22); g.fillStyle(0xffca28, 1); g.fillCircle(0, 0, 14); eyes(-3, 5); g.fillStyle(0x6d4c41, 1); g.fillTriangle(-3, 4, 3, 4, 0, 7); }
+    else if (k === 'tiger') { g.fillStyle(0xfb8c00, 1); g.fillCircle(0, 0, 18); g.fillCircle(-14, -14, 6); g.fillCircle(14, -14, 6); g.lineStyle(3, 0x212121, 1); g.lineBetween(-4, -17, -2, -10); g.lineBetween(4, -17, 2, -10); g.lineBetween(-18, -2, -10, 0); g.lineBetween(18, -2, 10, 0); g.fillStyle(0xffffff, 1); g.fillEllipse(0, 8, 16, 10); eyes(-4, 6); }
+    else if (k === 'bear') { g.fillStyle(0x6d4c41, 1); g.fillCircle(-14, -14, 7); g.fillCircle(14, -14, 7); g.fillCircle(0, 0, 18); g.fillStyle(0xbcaaa4, 1); g.fillEllipse(0, 6, 14, 10); eyes(-4, 7); g.fillStyle(0x212121, 1); g.fillCircle(0, 4, 2.5); }
+    else if (k === 'panda') { g.fillStyle(0x212121, 1); g.fillCircle(-14, -14, 7); g.fillCircle(14, -14, 7); g.fillStyle(0xffffff, 1); g.fillCircle(0, 0, 18); g.lineStyle(1, 0xbdbdbd, 1); g.strokeCircle(0, 0, 18); g.fillStyle(0x212121, 1); g.fillEllipse(-7, -3, 8, 10); g.fillEllipse(7, -3, 8, 10); g.fillCircle(0, 7, 2.5); eyes(-3, 7, 0xffffff); }
+    else if (k === 'snake') { g.lineStyle(8, 0x43a047, 1); g.beginPath(); g.moveTo(-30, 14); g.lineTo(-18, 2); g.lineTo(-6, 14); g.lineTo(6, 2); g.lineTo(18, 14); g.strokePath(); g.fillStyle(0x43a047, 1); g.fillCircle(24, 6, 8); g.fillStyle(0x212121, 1); g.fillCircle(26, 4, 1.6); g.lineStyle(1.5, 0xe53935, 1); g.lineBetween(31, 7, 37, 8); }
+    else if (k === 'deer') { g.lineStyle(3, 0x5d4037, 1); g.lineBetween(-8, -14, -14, -30); g.lineBetween(-12, -24, -20, -26); g.lineBetween(8, -14, 14, -30); g.lineBetween(12, -24, 20, -26); g.fillStyle(0xa1887f, 1); g.fillEllipse(0, 0, 28, 34); g.fillStyle(0xffffff, 1); [[-6, 6], [6, 8], [0, -6]].forEach(([x, y]) => g.fillCircle(x, y, 2)); eyes(-4, 6); }
+    else if (k === 'dolphin') { g.fillStyle(0x4fc3f7, 0.5); g.fillRect(-36, 14, 72, 10); g.fillStyle(0x78909c, 1); g.fillEllipse(0, 0, 54, 20); g.fillTriangle(-2, -8, 8, -8, 0, -20); g.fillTriangle(-26, 0, -36, -10, -36, 10); g.fillTriangle(24, -2, 36, 2, 24, 4); g.fillStyle(0x212121, 1); g.fillCircle(14, -3, 1.8); }
+    else if (k === 'whale') { g.fillStyle(0x1565c0, 1); g.fillEllipse(-2, 4, 62, 34); g.fillTriangle(-28, 2, -38, -10, -38, 14); g.fillStyle(0x90caf9, 1); g.fillEllipse(2, 14, 44, 10); g.lineStyle(2, 0x4fc3f7, 1); g.lineBetween(4, -14, 0, -28); g.lineBetween(4, -14, 10, -26); g.fillStyle(0xffffff, 1); g.fillCircle(18, -2, 2.5); }
+  }
+  // 身體部位：同一個小朋友，紅圈圈出一個部位
+  function drawBody(g, k) {
+    g.clear();
+    g.fillStyle(0xffcc99, 1);
+    g.fillEllipse(-15, -26, 6, 9); g.fillEllipse(15, -26, 6, 9);   // ear
+    g.fillCircle(0, -26, 13);                                       // head
+    g.fillStyle(0x4fc3f7, 1); g.fillRoundedRect(-11, -12, 22, 20, 4);
+    g.lineStyle(5, 0xffcc99, 1); g.lineBetween(-11, -8, -22, 4); g.lineBetween(11, -8, 22, 4);   // arm
+    g.fillStyle(0xffcc99, 1); g.fillCircle(-23, 6, 4); g.fillCircle(23, 6, 4);                 // hand
+    g.lineStyle(5, 0x5d4037, 1); g.lineBetween(-5, 8, -6, 24); g.lineBetween(5, 8, 6, 24);     // leg
+    g.fillStyle(0x37474f, 1); g.fillEllipse(-8, 26, 10, 5); g.fillEllipse(8, 26, 10, 5);       // foot
+    g.fillStyle(0x212121, 1); g.fillCircle(-5, -28, 1.8); g.fillCircle(5, -28, 1.8);           // eye
+    g.fillStyle(0xe57373, 1); g.fillCircle(0, -24, 1.8);                                       // nose
+    g.lineStyle(1.5, 0xc62828, 1); g.beginPath(); g.arc(0, -21, 4, 0.3, Math.PI - 0.3, false); g.strokePath(); // mouth
+    const spot = { head: [0, -26, 17], eye: [5, -28, 5], ear: [15, -26, 7], nose: [0, -24, 4], mouth: [0, -19, 5], arm: [-17, -2, 8], hand: [-23, 6, 6], leg: [6, 16, 8], foot: [8, 26, 7] }[k];
+    g.lineStyle(2.5, 0xe53935, 1); g.strokeCircle(spot[0], spot[1], spot[2]);
   }
   // 月曆頁（上面的月份名稱是另外放的文字）
   function drawMonth(g) {
@@ -2826,7 +2913,9 @@
       const who = L.shuffle(['rabbit'].concat(this.residents()))[0];
       let o;
       // 權重：水果 3、衣物 2、指路 1.2、職業 1、學校用品 1、月份 0.8（月份屬延伸層，研究島開放後才有）
-      const kinds = [['fruit', 3], ['clothes', 2], ['way', 1.2], ['job', 1], ['school', 1]].concat(this.researchOpen() ? [['month', 0.8]] : []);
+      // 單字補充（顏色、食物、季節、數字、動物園、身體）各 0.6
+      const kinds = [['fruit', 3], ['clothes', 2], ['way', 1.2], ['job', 1], ['school', 1],
+        ['color', 0.6], ['meal', 0.6], ['season', 0.6], ['count', 0.6], ['zoo', 0.6], ['body', 0.6]].concat(this.researchOpen() ? [['month', 0.8]] : []);
       let r = Math.random() * kinds.reduce((a, k) => a + k[1], 0), kind = 'fruit';
       for (const [k, w] of kinds) { if (r < w) { kind = k; break; } r -= w; }
       if (PICK_ORDERS[kind]) {
@@ -2872,9 +2961,11 @@
         c.card.setVisible(way);
         if (!way) return;
         const P = PICK_ORDERS[o.type];
+        // 身體部位的小人比較細，放大一點才看得清楚五官
+        if (o.type === 'body') c.pic.setScale(1.3).setY(0); else c.pic.setScale(1.1).setY(-6);
         P.draw(c.pic, o.spots[i]);
         c.en.setText(P.label ? P.label(o.spots[i]) : '');
-        c.zh.setText(this.subs() && st === 0 ? zhOf(o.spots[i]) : '');
+        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? zhOf(o.spots[i]) : '');
         c.card.setAlpha(o.wrong[o.spots[i]] ? 0.35 : 1);
       });
       this.mkClothes.forEach((c, i) => {
