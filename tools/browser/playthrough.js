@@ -79,7 +79,7 @@
   }
 
   function farm(sc, s) {
-    const wanted = Object.values(s.wishes).filter(Boolean);
+    const wanted = Object.values(s.wishes).filter(Boolean).map((w) => cropFor(w, s)).filter(Boolean);
     s.plots.forEach((p, i) => {
       if (p.plant && p.progress >= 1) { sc.tool = null; sc.onPlot(i); }
       if (!p.plant) {
@@ -110,10 +110,15 @@
     if (k) { sc.openFix(k); A.log.push('day ' + s.day + ' 修 ' + k); }
   }
 
+  // 部位願望：哪種作物是哪個部位
+  const PART_OF = { carrot: 'root', bean: 'seed', rose: 'flower', corn: 'seed', potato: 'stem', grape: 'fruit' };
+  const cropFor = (want, s) => (PART_OF[want] ? want : Object.keys(PART_OF).find((k) => PART_OF[k] === want && (s.inv[k] || 0) > 0) || Object.keys(PART_OF).find((k) => PART_OF[k] === want && s.seeds.includes(k)));
+
   function wishes(sc, s) {
     ['rabbit', s.fwho].filter(Boolean).forEach((who) => {
       const want = s.wishes[who];
-      if (want && (s.inv[want] || 0) > 0) { sc.held = want; sc.giveTo(who); sc.held = null; }
+      const item = want && cropFor(want, s);
+      if (item && (s.inv[item] || 0) > 0) { sc.held = item; sc.giveTo(who); sc.held = null; }
     });
   }
 

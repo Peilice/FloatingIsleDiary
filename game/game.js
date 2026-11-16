@@ -298,7 +298,17 @@
   const RABBIT = { x: 1020, y: 500 };
   const PIP = { x: 130, y: 500 };
   const TUT = ['seed', 'plant', 'water', 'grow', 'pick', 'give'];
-  const wishSentence = (k) => 'I want ' + PLANTS[k].art + '.';
+  // §4.2 植物各部位：願望也可能是「要某個部位」，玩家要知道哪種作物是那個部位
+  const PARTS = {
+    root:   { zh: '根',   say: 'a root' },
+    seed:   { zh: '種子', say: 'some seeds' },
+    flower: { zh: '花',   say: 'a flower' },
+    fruit:  { zh: '果實', say: 'a fruit' },
+    stem:   { zh: '莖',   say: 'a stem' },
+  };
+  const wishSentence = (k) => 'I want ' + (PARTS[k] ? PARTS[k].say : PLANTS[k].art) + '.';
+  // 這個物品能不能滿足這個願望：同一種作物，或是願望要的部位
+  const wishMatches = (want, item) => want === item || (!!PARTS[want] && PLANTS[item] && PLANTS[item].part === want);
 
   // ---------- 存檔 ----------
   function emptyEvents() { return { planted: [], picked: [], gave: [], came: [], party: [] }; }
@@ -799,6 +809,16 @@
     else if (w === 'water') drawBagItem(g, 'water');
     else if (w === 'rain') drawIcon(g, 'rainy');
     else drawIcon(g, w);
+  }
+
+  // 植物部位的示意圖（不畫出是哪一種作物）
+  function drawPartIcon(g, part) {
+    g.clear();
+    if (part === 'root') { g.lineStyle(4, 0x8d6e4a, 1); g.lineBetween(0, -20, 0, 6); g.lineBetween(0, 0, -12, 18); g.lineBetween(0, 2, 12, 20); g.lineBetween(-6, 10, -16, 10); g.lineBetween(6, 12, 16, 14); g.fillStyle(0x7cb342, 1); g.fillEllipse(0, -22, 18, 6); }
+    else if (part === 'seed') { g.fillStyle(0x8d6e4a, 1); [[-10, -4], [4, -8], [10, 6], [-4, 8]].forEach(([x, y]) => g.fillEllipse(x, y, 10, 7)); }
+    else if (part === 'flower') { g.fillStyle(0xf48fb1, 1); for (let k = 0; k < 5; k++) { const a = k * Math.PI * 2 / 5; g.fillCircle(Math.cos(a) * 10, -6 + Math.sin(a) * 10, 7); } g.fillStyle(0xffd54a, 1); g.fillCircle(0, -6, 6); g.lineStyle(3, 0x43a047, 1); g.lineBetween(0, 4, 0, 24); }
+    else if (part === 'fruit') { g.fillStyle(0xff7043, 1); g.fillCircle(0, 4, 15); g.fillStyle(0x43a047, 1); g.fillEllipse(6, -12, 12, 6); g.fillStyle(0xffffff, 0.35); g.fillCircle(-5, -1, 4); }
+    else { g.lineStyle(6, 0x558b2f, 1); g.lineBetween(0, 24, 0, -22); g.fillStyle(0x7cb342, 1); g.fillEllipse(-9, -4, 14, 6); g.fillEllipse(9, -14, 14, 6); }
   }
 
   // 設施：fixed 修好、crack 有裂痕；壞掉的是灰色、缺了幾塊
@@ -1818,8 +1838,11 @@
 
     newWish(who) {
       const s = this.s;
-      // 候選只放「做得到的」：種過的作物，而且是這位居民會想要的
-      const cands = this.likes(who).filter((k) => s.lib[k]);
+      // 候選只放「做得到的」：種過的作物，而且是這位居民會想要的；
+      // 教學結束後再加上這些作物的部位（§4.2：I want a root.），部位字和作物名一起交給排程器
+      const crops = this.likes(who).filter((k) => s.lib[k]);
+      const parts = s.tut >= 7 ? Array.from(new Set(crops.map((k) => PLANTS[k].part))) : [];
+      const cands = crops.concat(parts);
       if (!cands.length) return false;
       const w = L.pick(s.words, cands, s.day, s.lastWish, Math.random, s.sched);
       s.wishes[who] = w; s.lastWish = w;
@@ -1869,9 +1892,9 @@
       const q = this.wishQ(who);
       if (q.tries === 0) {
         const st = this.stats.wish[kinds] || (this.stats.wish[kinds] = { q: 0, first: 0 });
-        st.q += 1; if (item === want) st.first += 1;
+        st.q += 1; if (wishMatches(want, item)) st.first += 1;
       }
-      if (item === want) {
+      if (wishMatches(want, item)) {
         s.inv[item] -= 1;
         s.stardust += 5;
         if (!q.recorded) L.answer(s.words, want, { day: s.day, options: kinds, firstTry: q.tries === 0, peeked: q.peeked });
@@ -5309,9 +5332,10 @@
       const showZh = this.subs() && (st === 0 || q.reveal);
       b.g.clear(); drawBubble(b.g, 0, 0, 340, 126, 120);
       b.icon.setVisible(showPic);
-      if (showPic) drawIcon(b.icon, item);
+      // 部位願望只畫部位本身（不畫作物，避免直接給答案）
+      if (showPic) { if (PARTS[item]) drawPartIcon(b.icon, item); else drawIcon(b.icon, item); }
       b.en.setX(showPic ? 118 : 24).setText(wishSentence(item));
-      b.zh.setX(showPic ? 118 : 24).setText(showZh ? '我想要' + zhOf(item) : '');
+      b.zh.setX(showPic ? 118 : 24).setText(showZh ? '我想要' + (PARTS[item] ? PARTS[item].zh : zhOf(item)) : '');
     }
 
     refreshLibrary() {
