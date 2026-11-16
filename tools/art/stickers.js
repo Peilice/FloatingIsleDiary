@@ -71,6 +71,30 @@ function grape(c) {
   });
   return out;
 }
+// 建築：牆、屋頂、門窗（地點貼紙共用）
+const R = (x, y, w, h, fill, o = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" ${o}/>`;
+const RR = (x, y, w, h, r, fill, o = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" ${o}/>`;
+function windowPane(x, y, w = 26, h = 26) {
+  return RR(x, y, w, h, 4, '#bfe6f6', ink(3)) + P(`M${x + w / 2} ${y} L${x + w / 2} ${y + h} M${x} ${y + h / 2} L${x + w} ${y + h / 2}`, 'none', ink(2.5))
+    + P(`M${x + 4} ${y + 9} L${x + 9} ${y + 4}`, 'none', 'stroke="#ffffff" stroke-width="3" stroke-linecap="round"');
+}
+const ground = () => E(120, 204, 96, 14, '#8bc66a', ink(3.5));
+
+// 人物（職業）：同一個小朋友的頭身，靠衣服、帽子、道具分辨
+function person(o) {
+  const skin = '#f6c9a0', hair = o.hair || '#5b3a26';
+  return [
+    // 身體（制服）
+    P('M60 214 Q60 150 120 146 Q180 150 180 214Z', G(o.coat), ink()),
+    o.inner ? P('M104 148 L120 182 L136 148Z', o.inner, ink(3)) : '',
+    // 頭
+    E(120, 100, 46, 48, G(skin), ink()),
+    P('M74 96 Q72 52 120 50 Q168 52 166 96 Q150 74 120 74 Q90 74 74 96Z', G(hair), ink(3.5)),
+    eye(102, 104, 6.5), eye(138, 104, 6.5), cheek(92, 122, 7), cheek(148, 122, 7), smile(120, 126, 7),
+    o.extra || '',
+  ].join('');
+}
+
 // 一隻球鞋
 function shoe(x, y) {
   const t = (d) => d.replace(/(-?\d+(\.\d+)?) (-?\d+(\.\d+)?)/g, (m, a, _, b) => (Number(a) + x) + ' ' + (Number(b) + y));
@@ -313,6 +337,138 @@ const ART = {
   shoes: () => [
     shoe(36, 104), shoe(108, 132),
   ],
+  // ---- 地點（市集指路訂單）----
+  zoo: () => [
+    ground(),
+    R(46, 92, 16, 112, G('#8d6e4a'), ink()), R(178, 92, 16, 112, G('#8d6e4a'), ink()),
+    P('M62 112 L178 112 M62 150 L178 150', 'none', ink(4)),
+    ...[78, 98, 118, 138, 158].map((x) => R(x, 112, 6, 92, '#a9805a', ink(2.5))),
+    RR(52, 56, 136, 44, 12, G('#5aa83f'), ink()),
+    C(96, 78, 13, G('#ffd36b'), ink(3)), C(92, 75, 2.5, INK), C(100, 75, 2.5, INK),
+    E(146, 80, 16, 12, G('#a9bdcc'), ink(3)), C(142, 77, 2.5, INK),
+  ],
+  park: () => [
+    ground(),
+    R(70, 120, 14, 80, G('#8a5a36'), ink()), C(77, 96, 40, G('#5aa83f'), ink()), C(62, 82, 14, '#ffffff', 'opacity=".25"'),
+    RR(112, 150, 92, 12, 4, G('#d98c4a'), ink(3.5)), RR(112, 168, 92, 10, 4, G('#d98c4a'), ink(3.5)),
+    R(118, 176, 8, 24, '#6d4c34', ink(2.5)), R(190, 176, 8, 24, '#6d4c34', ink(2.5)),
+    ...[[134, 196, '#f48fb1'], [156, 198, '#fdd835'], [178, 196, '#ce93d8']].map(([x, y, c]) => C(x, y, 7, c, ink(2.5)) + C(x, y, 2.5, '#fff6d0')),
+  ],
+  library: () => [
+    ground(),
+    P('M36 92 L120 46 L204 92Z', G('#c4473d'), ink()),
+    R(50, 92, 140, 108, G('#f6e3c4'), ink()),
+    ...[66, 98, 130, 162].map((x) => R(x, 104, 12, 84, '#ffffff', ink(2.5))),
+    RR(98, 138, 44, 62, 6, '#8a5a36', ink(3)),
+    RR(86, 60, 68, 26, 6, '#ffffff', ink(3)),
+    P('M98 66 L118 70 L118 82 L98 78Z', '#3d7fd6', ink(2)), P('M142 66 L122 70 L122 82 L142 78Z', '#43a047', ink(2)),
+  ],
+  hospital: () => [
+    ground(),
+    R(50, 66, 140, 134, G('#f7fbff'), ink()),
+    R(42, 58, 156, 16, G('#7fc4dc'), ink(3.5)),
+    RR(98, 84, 44, 44, 8, '#ffffff', ink(3)), R(114, 90, 12, 32, '#e5484d'), R(104, 100, 32, 12, '#e5484d'),
+    windowPane(62, 92), windowPane(152, 92),
+    RR(100, 150, 40, 50, 6, G('#7fc4dc'), ink(3)), P('M120 150 L120 200', 'none', ink(2.5)),
+    windowPane(62, 146), windowPane(152, 146),
+  ],
+  school: () => [
+    ground(),
+    P('M120 30 L120 64', 'none', ink(4)), P('M122 32 L150 40 L122 48Z', '#e5484d', ink(3)),
+    P('M56 98 L120 58 L184 98Z', G('#e8852c'), ink()),
+    R(60, 98, 120, 102, G('#ffe6a8'), ink()),
+    C(120, 84, 13, '#ffffff', ink(3)), P('M120 84 L120 76 M120 84 L126 88', 'none', ink(2.5)),
+    windowPane(72, 112), windowPane(142, 112),
+    RR(102, 146, 36, 54, 6, '#8a5a36', ink(3)), C(130, 174, 3, '#f6d36b'),
+    R(24, 142, 36, 58, G('#ffe6a8'), ink(3.5)), R(180, 142, 36, 58, G('#ffe6a8'), ink(3.5)),
+  ],
+  store: () => [
+    ground(),
+    R(50, 96, 140, 104, G('#fff3df'), ink()),
+    P('M40 70 L200 70 L196 104 L44 104Z', '#ffffff', ink()),
+    ...[0, 1, 2, 3].map((i) => P(`M${44 + i * 40} 70 L${64 + i * 40} 70 L${62 + i * 40} 104 L${46 + i * 40} 104Z`, '#e5484d')),
+    P('M40 70 L200 70 L196 104 L44 104Z', 'none', ink()),
+    ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => C(48 + i * 20.5, 106, 10, i % 2 ? '#ffffff' : '#e5484d', ink(2.5))),
+    RR(62, 130, 56, 46, 6, '#bfe6f6', ink(3)), C(78, 154, 7, '#e8443a', ink(2)), C(98, 158, 7, '#f6c43a', ink(2)),
+    RR(132, 130, 44, 70, 6, '#3d7fd6', ink(3)), C(166, 168, 3, '#f6d36b'),
+  ],
+  // ---- 職業（市集「Who is the doctor?」）----
+  doctor: () => [person({ coat: '#f7fbff', inner: '#7fc4dc', extra:
+    P('M96 160 Q96 196 120 196 Q144 196 144 160', 'none', ink(4)) + C(120, 198, 7, '#b0bec5', ink(3)) + R(146, 168, 18, 6, '#7fc4dc', ink(2)) }) ],
+  nurse: () => [person({ coat: '#f8bccb', inner: '#ffffff', hair: '#7a4a2a', extra:
+    RR(94, 44, 52, 20, 6, '#ffffff', ink(3)) + R(116, 47, 8, 14, '#e5484d') + R(113, 50, 14, 8, '#e5484d') }) ],
+  police: () => [person({ coat: '#2f4a8a', inner: '#bfe6f6', extra:
+    P('M70 76 Q72 42 120 40 Q168 42 170 76Z', G('#2f4a8a'), ink()) + RR(66, 72, 108, 12, 6, '#1d2f5c', ink(3))
+    + P('M120 46 L128 58 L120 68 L112 58Z', '#f6d36b', ink(2.5)) + P('M84 176 L92 168 L100 176 L92 186Z', '#f6d36b', ink(2.5)) }) ],
+  driver: () => [person({ coat: '#5d7f99', inner: '#ffffff', extra:
+    RR(78, 50, 84, 18, 8, G('#5d7f99'), ink(3)) + RR(74, 64, 60, 8, 4, '#3b5468', ink(2.5))
+    + C(178, 184, 26, 'none', `stroke="${INK}" stroke-width="10"`) + C(178, 184, 26, 'none', 'stroke="#455a64" stroke-width="5"') + C(178, 184, 6, '#455a64', ink(2.5)) }) ],
+  teacher: () => [person({ coat: '#8e4fb5', inner: '#ffffff', hair: '#3a2a20', extra:
+    RR(10, 40, 56, 44, 4, G('#2e7d4f'), ink(3.5)) + P('M20 54 L54 54 M20 66 L46 66', 'none', 'stroke="#ffffff" stroke-width="3" stroke-linecap="round"')
+    + P('M70 170 L42 92', 'none', `stroke="${INK}" stroke-width="7" stroke-linecap="round"`) + P('M70 170 L42 92', 'none', 'stroke="#d9a066" stroke-width="3" stroke-linecap="round"')
+    + C(102, 104, 11, 'none', ink(2.5)) + C(138, 104, 11, 'none', ink(2.5)) + P('M113 104 L127 104', 'none', ink(2.5)) }) ],
+  farmer: () => [person({ coat: '#6fa33c', inner: '#3d7fd6', extra:
+    E(120, 62, 70, 14, G('#f0cf7c'), ink(3.5)) + P('M88 60 Q90 34 120 32 Q150 34 152 60Z', G('#f0cf7c'), ink(3.5)) + R(88, 52, 64, 8, '#c4473d')
+    + P('M196 98 L196 214', 'none', `stroke="${INK}" stroke-width="9" stroke-linecap="round"`) + P('M196 98 L196 214', 'none', 'stroke="#a9805a" stroke-width="4" stroke-linecap="round"')
+    + P('M182 84 L182 100 L210 100 L210 84 M196 84 L196 100', 'none', ink(4)) }) ],
+  cook: () => [person({ coat: '#ffffff', inner: '#e5484d', extra:
+    C(104, 38, 18, '#ffffff', ink(3)) + C(136, 38, 18, '#ffffff', ink(3)) + C(120, 28, 20, '#ffffff', ink(3)) + R(92, 46, 56, 20, '#ffffff', ink(3))
+    + E(186, 186, 24, 10, '#90a4ae', ink(3)) + P('M210 186 L232 180', 'none', ink(5)) }) ],
+  student: () => [person({ coat: '#f6c43a', inner: '#ffffff', extra:
+    RR(150, 152, 40, 56, 8, G('#e5484d'), ink(3)) + P('M150 162 Q136 156 136 176', 'none', ink(4)) + R(160, 176, 20, 10, '#ffcdd2', ink(2)) }) ],
+  // ---- 學校用品（市集「I need a ruler for school.」）----
+  book: () => [
+    P('M30 70 Q76 56 120 76 L120 196 Q76 176 30 190Z', G('#3d7fd6'), ink()),
+    P('M210 70 Q164 56 120 76 L120 196 Q164 176 210 190Z', G('#43a047'), ink()),
+    P('M40 78 Q78 66 114 84 L114 188 Q78 172 40 182Z', '#ffffff', ink(2.5)),
+    P('M200 78 Q162 66 126 84 L126 188 Q162 172 200 182Z', '#ffffff', ink(2.5)),
+    P('M52 100 L102 108 M52 120 L102 128 M52 140 L92 146 M138 108 L188 100 M138 128 L188 120 M148 146 L188 140', 'none', 'stroke="#b0bec5" stroke-width="3" stroke-linecap="round"'),
+  ],
+  pen: () => [
+    `<g transform="rotate(-35 120 120)">`,
+    RR(54, 104, 132, 32, 12, G('#3d7fd6'), ink()), RR(40, 100, 40, 40, 10, G('#2a5ca8'), ink()),
+    R(70, 92, 44, 8, '#b0bec5', ink(2.5)), P('M186 104 L214 120 L186 136Z', G('#cfd8dc'), ink()), C(214, 120, 3, INK),
+    `</g>`,
+  ],
+  pencil: () => [
+    `<g transform="rotate(-35 120 120)">`,
+    R(56, 100, 124, 40, G('#f6c43a'), ink()), P('M56 113 L180 113 M56 127 L180 127', 'none', `stroke="${dark('#f6c43a', 0.2)}" stroke-width="2.5"`),
+    RR(28, 100, 30, 40, 8, G('#f48fb1'), ink()), R(52, 98, 12, 44, '#b0bec5', ink(3)),
+    P('M180 100 L214 120 L180 140Z', G('#f3d2a2'), ink()), P('M204 114 L214 120 L204 126Z', INK),
+    `</g>`,
+  ],
+  ruler: () => [
+    `<g transform="rotate(-18 120 120)">`,
+    RR(20, 92, 200, 56, 8, G('#ffe08a'), ink()),
+    ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => P(`M${34 + i * 14.5} 92 L${34 + i * 14.5} ${i % 2 ? 106 : 116}`, 'none', ink(2.5))),
+    `</g>`,
+  ],
+  eraser: () => [
+    `<g transform="rotate(-12 120 120)">`,
+    P('M50 96 L150 96 L150 168 L50 168Z', G('#f8a5bd'), ink()),
+    P('M150 96 L196 96 L196 168 L150 168Z', G('#5ab4e6'), ink()),
+    P('M60 108 L100 108', 'none', 'stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".6"'),
+    `</g>`,
+  ],
+  bag: () => [
+    P('M84 72 Q84 38 120 38 Q156 38 156 72', 'none', `stroke="${INK}" stroke-width="14" stroke-linecap="round"`),
+    P('M84 72 Q84 38 120 38 Q156 38 156 72', 'none', 'stroke="#b33b33" stroke-width="7" stroke-linecap="round"'),
+    RR(52, 64, 136, 150, 30, G('#e5484d'), ink()),
+    RR(70, 132, 100, 62, 16, G('#ef6a5e'), ink(3.5)), R(104, 150, 32, 10, '#ffcdd2', ink(2.5)),
+    P('M58 100 Q120 116 182 100', 'none', ink(3.5)), shine(84, 88, 12, 6),
+  ],
+  desk: () => [
+    RR(28, 84, 184, 26, 6, G('#c8935f'), ink()),
+    R(42, 110, 16, 96, G('#8a5a36'), ink()), R(182, 110, 16, 96, G('#8a5a36'), ink()),
+    RR(66, 110, 90, 40, 4, G('#b07a4a'), ink(3.5)), RR(98, 124, 26, 8, 4, '#f6d36b', ink(2)),
+    R(150, 64, 40, 22, '#3d7fd6', ink(3)), R(156, 56, 30, 10, '#ffffff', ink(2.5)),
+  ],
+  chair: () => [
+    RR(70, 36, 100, 70, 12, G('#e8852c'), ink()),
+    R(78, 104, 12, 48, G('#8a5a36'), ink(3.5)), R(150, 104, 12, 48, G('#8a5a36'), ink(3.5)),
+    RR(60, 146, 120, 22, 8, G('#e8852c'), ink()),
+    R(68, 168, 12, 44, G('#8a5a36'), ink(3.5)), R(160, 168, 12, 44, G('#8a5a36'), ink(3.5)),
+  ],
   // 印章：選對時蓋在卡片上
   stamp: () => [
     `<g transform="rotate(-14 120 120)">`,
@@ -363,4 +519,6 @@ Object.keys(ART).forEach((k) => {
   const png = new Resvg(svg, { fitTo: { mode: 'width', value: 320 } }).render().asPng();
   fs.writeFileSync(path.join(out, k + '.png'), png);
 });
+// 遊戲讀這份清單載入貼紙（index.html 在 game.js 之前載入）
+fs.writeFileSync(path.join(out, 'index.js'), '// 由 tools/art/stickers.js 產生，請勿手動修改\nwindow.ART_KEYS = ' + JSON.stringify(Object.keys(ART)) + ';\n');
 console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)');

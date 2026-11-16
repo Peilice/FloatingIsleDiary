@@ -11,10 +11,7 @@
   const INK = 0x2b3a55;             // 墨線
   const PAPER = 0xfbf6ea;           // 手帳內頁
   // 貼紙素材（tools/art/stickers.js 產生，放在 game/art/）
-  const ART_KEYS = ['panda', 'lion', 'tiger', 'bear', 'dog', 'pig', 'chicken', 'elephant', 'snake', 'deer', 'dolphin', 'whale',
-    'rabbit', 'frog', 'duck', 'fish', 'bird', 'monkey', 'cow', 'horse', 'fox', 'stamp',
-    'apple-red', 'apple-green', 'apple-yellow', 'grape-purple', 'grape-green', 'banana',
-    'hat', 'coat', 'umbrella', 'raincoat', 'shoes'];
+  const ART_KEYS = window.ART_KEYS || [];   // game/art/index.js（tools/art/stickers.js 產生）
   const fruitArt = (item, color) => 'st-' + (item === 'banana' ? 'banana' : item + '-' + color);
   const params = new URLSearchParams(location.search);
   const FAST = Number(params.get('fast')) || 0;
@@ -3169,7 +3166,7 @@
         // 指路：縮小排在十字路口的四個方向；其他：4 張貼紙排一排
         const pos = road ? [[640, 330], [452, 450], [828, 450], [640, 572]][i] : [640 + (i - 1.5) * 222, 470];
         c.x = pos[0]; c.card.setPosition(pos[0], pos[1]).setScale(road ? 0.56 : 1).setAngle(road ? 0 : c.tilt);
-        const tex = 'st-' + k, useImg = o.type === 'zoo' && this.textures.exists(tex);
+        const tex = 'st-' + k, useImg = this.textures.exists(tex);   // 有貼紙就用貼紙，還沒畫的用程式繪圖
         c.img.setVisible(useImg); c.pic.setVisible(!useImg);
         if (useImg) c.img.setTexture(tex).setDisplaySize(158, 158);
         // 身體部位的小人比較細，放大一點才看得清楚五官

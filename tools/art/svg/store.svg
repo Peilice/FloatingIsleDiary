@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fff8ec"/><stop offset="0.55" stop-color="#fff3df"/><stop offset="1" stop-color="#d6cdc1"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <ellipse cx="120" cy="204" rx="96" ry="14" fill="#8bc66a" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="50" y="96" width="140" height="104" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M40 70 L200 70 L196 104 L44 104Z" fill="#ffffff" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M44 70 L64 70 L62 104 L46 104Z" fill="#e5484d" />
+    <path d="M84 70 L104 70 L102 104 L86 104Z" fill="#e5484d" />
+    <path d="M124 70 L144 70 L142 104 L126 104Z" fill="#e5484d" />
+    <path d="M164 70 L184 70 L182 104 L166 104Z" fill="#e5484d" />
+    <path d="M40 70 L200 70 L196 104 L44 104Z" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="48" cy="106" r="10" fill="#e5484d" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="68.5" cy="106" r="10" fill="#ffffff" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="89" cy="106" r="10" fill="#e5484d" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="109.5" cy="106" r="10" fill="#ffffff" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="130" cy="106" r="10" fill="#e5484d" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="150.5" cy="106" r="10" fill="#ffffff" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="171" cy="106" r="10" fill="#e5484d" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="191.5" cy="106" r="10" fill="#ffffff" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="62" y="130" width="56" height="46" rx="6" fill="#bfe6f6" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="78" cy="154" r="7" fill="#e8443a" stroke="#2b3a55" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="98" cy="158" r="7" fill="#f6c43a" stroke="#2b3a55" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="132" y="130" width="44" height="70" rx="6" fill="#3d7fd6" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="166" cy="168" r="3" fill="#f6d36b" />
+  </g>
+</svg>

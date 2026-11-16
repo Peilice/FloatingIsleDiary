@@ -1,0 +1,2 @@
+// 由 tools/art/stickers.js 產生，請勿手動修改
+window.ART_KEYS = ["panda","lion","tiger","bear","dog","pig","chicken","elephant","snake","deer","dolphin","whale","rabbit","frog","duck","fish","bird","monkey","cow","horse","fox","apple-red","apple-green","apple-yellow","grape-purple","grape-green","banana","hat","coat","umbrella","raincoat","shoes","zoo","park","library","hospital","school","store","doctor","nurse","police","driver","teacher","farmer","cook","student","book","pen","pencil","ruler","eraser","bag","desk","chair","stamp"];

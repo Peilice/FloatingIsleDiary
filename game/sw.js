@@ -1,6 +1,6 @@
 // 網路優先、失敗時改用快取，開發時改檔不會被舊快取卡住，離線也能玩
 const CACHE = 'cloudisland-v1';
-const FILES = ['./', './index.html', './game.js', './words.js', './logic.js', './lib/phaser.min.js', './manifest.webmanifest', './icon.svg',
+const FILES = ['./', './index.html', './game.js', './words.js', './logic.js', './art/index.js', './lib/phaser.min.js', './manifest.webmanifest', './icon.svg',
   './fonts/Huninn-subset.woff2', './fonts/Andika-Regular.woff2', './fonts/Andika-Bold.woff2'];
 
 self.addEventListener('install', (e) => {
