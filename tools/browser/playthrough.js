@@ -13,6 +13,7 @@
 
   function solveModal(sc, s) {
     const m = sc.modal;
+    if (m === 'map') { sc.pickIsle('meadow'); return; }   // 開始時的地圖：先去草地
     if (m === 'weather') { if (!sc.wq.done) sc.pickWeather(sc.wq.order.indexOf(sc.wq.answer)); return; }
     if (m === 'diary') { if (s.diaryQ && !s.diaryQ.done) sc.pickDiary(s.diaryQ.options.indexOf(s.diaryQ.answer)); else sc.goodNight(); return; }
     if (m === 'drill') {

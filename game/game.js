@@ -231,6 +231,16 @@
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
 
+  // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
+  const MAP = [
+    { z: 'lighthouse', x: 170,  y: 430, en: 'Lighthouse', zh: '燈塔',     color: 0x9ccb86, icon: 'bulb' },
+    { z: 'cave',       x: 370,  y: 320, en: 'Cave',       zh: '洞穴',     color: 0x9e98a8, icon: 'moon' },
+    { z: 'beach',      x: 545,  y: 470, en: 'Beach',      zh: '海灘',     color: 0xf1dca6, icon: 'tea' },
+    { z: 'meadow',     x: 735,  y: 320, en: 'Meadow',     zh: '草地',     color: 0x7ccb69, icon: 'carrot' },
+    { z: 'forest',     x: 925,  y: 470, en: 'Pond Forest', zh: '池塘森林', color: 0x5aa64a, icon: 'frog' },
+    { z: 'research',   x: 1110, y: 320, en: 'Research',   zh: '研究島',   color: 0x8fd3cc, icon: 'flask' },
+  ];
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -955,6 +965,7 @@
       this.buildRecycle();
       this.buildLab();
       this.buildParent();
+      this.buildMap();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -970,9 +981,9 @@
       this.applyWeatherLook();
       this.refreshAll();
       // 讀檔後接上當天的流程：一天走完在寫日記、早上還沒回答天氣、或剛開始
-      if (this.s.t >= DAY_LEN) this.openDiary();
-      else if (this.needWeatherQ()) this.openWeatherQ();
-      else if (this.s.t < 3) this.showBanner();
+      // 按「開始」後先出現地圖（主畫面），選好島才開始當天的流程（日記、天氣題、播報）
+      if (BOT) this.startDayFlow();
+      else { this.pendingDay = true; this.openMap(); }
       this.ensureWish('rabbit', 800);
       this.ensureForestWish(1500);
       this.checkTown();
@@ -1217,6 +1228,7 @@
       };
       hudBtn(84, '圖鑑', () => this.openLibrary());
       hudBtn(214, '日記', () => this.openBook());
+      hudBtn(985, '地圖', () => this.openMap());
 
       // 靜音
       const mb = this.add.container(320, 48).setDepth(40);
@@ -1489,6 +1501,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
+      if (this.modal === 'map') return;
       [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
@@ -1810,29 +1823,8 @@
 
     goZone(z) {
       if (this.paused() || this.zone === z) return;
-      if (z === 'forest' && !this.s.forestOpen) {
-        this.floatText(1130, 330, '再完成 ' + (FOREST_NEED - (this.s.gaveTotal || 0)) + ' 個願望', '#2f5d34', true);
-        return;
-      }
-      if (z === 'beach' && !this.s.beachOpen) {
-        const need = [];
-        if ((this.s.harvested || 0) < BEACH_HARVEST) need.push('收成 ' + (BEACH_HARVEST - (this.s.harvested || 0)) + ' 次');
-        if (this.libCount() < BEACH_LIB) need.push('圖鑑 ' + (BEACH_LIB - this.libCount()) + ' 項');
-        this.floatText(260, 330, '再' + need.join('、'), '#e65100', true);
-        return;
-      }
-      if (z === 'research' && !this.researchOpen()) {
-        this.floatText(1060, 200, '延伸區：' + this.groupNeed('weather'), '#00695c', true);
-        return;
-      }
-      if (z === 'lighthouse' && !this.s.lightOpen) {
-        this.floatText(260, 330, '洞穴實驗再完成 ' + (LIGHT_NEED - (this.s.caveDone || 0)) + ' 回合', '#e53935', true);
-        return;
-      }
-      if (z === 'cave' && !this.s.caveOpen) {
-        this.floatText(260, 330, '圖鑑再 ' + (CAVE_LIB - this.libCount()) + ' 項', '#5e35b1', true);
-        return;
-      }
+      const why = this.lockReason(z);
+      if (why) { this.floatText(z === 'forest' || z === 'research' ? 1060 : 260, z === 'research' ? 200 : 330, why, '#37474f', true); return; }
       const from = this.zone;
       this.zone = z;
       // 平移時兩個區域都要畫，結束後只留目前的區域
@@ -1844,6 +1836,110 @@
     }
 
     showZones(zs) { Object.keys(this.zoneLayers).forEach((k) => this.zoneLayers[k].setVisible(zs.includes(k))); }
+
+    // 還不能去這座島的原因（可以去就回傳 null）；地圖和左右箭頭共用
+    lockReason(z) {
+      const s = this.s;
+      if (z === 'meadow') return null;
+      if (z === 'forest') return s.forestOpen ? null : '再完成 ' + Math.max(0, FOREST_NEED - (s.gaveTotal || 0)) + ' 個願望';
+      if (z === 'beach') {
+        if (s.beachOpen) return null;
+        const need = [];
+        if ((s.harvested || 0) < BEACH_HARVEST) need.push('收成 ' + (BEACH_HARVEST - (s.harvested || 0)) + ' 次');
+        if (this.libCount() < BEACH_LIB) need.push('圖鑑 ' + (BEACH_LIB - this.libCount()) + ' 項');
+        return '再' + need.join('、');
+      }
+      if (z === 'cave') return s.caveOpen ? null : (!s.beachOpen ? '先開放海灘' : '圖鑑再 ' + Math.max(0, CAVE_LIB - this.libCount()) + ' 項');
+      if (z === 'lighthouse') return s.lightOpen ? null : (!s.caveOpen ? '先開放洞穴' : '洞穴實驗再完成 ' + Math.max(0, LIGHT_NEED - (s.caveDone || 0)) + ' 回合');
+      return this.researchOpen() ? null : '要先開放其他 5 座島';
+    }
+
+    // 直接跳到某座島（從地圖選島時，不做平移動畫）
+    jumpZone(z) {
+      this.zone = z;
+      this.cameras.main.scrollX = { forest: OFF, beach: BOFF, cave: COFF, lighthouse: LOFF, research: ROFF }[z] || 0;
+      this.showZones([z]);
+      this.renderNav();
+      this.refreshAll();
+      if (z === 'forest' && this.s.visitor) this.time.delayedCall(500, () => this.sayVisitor());
+    }
+
+    // 當天的流程：一天走完在寫日記、早上還沒回答天氣、或剛開始
+    startDayFlow() {
+      if (this.s.t >= DAY_LEN) this.openDiary();
+      else if (this.needWeatherQ()) this.openWeatherQ();
+      else if (this.s.t < 3) this.showBanner();
+    }
+
+    // ---------- 地圖（主畫面）：6 座島，點了就過去；還沒開放的變淡並寫出還差什麼 ----------
+    buildMap() {
+      const c = this.add.container(0, 0).setDepth(140).setVisible(false);
+      const bg = this.add.graphics();
+      bg.fillGradientStyle(0x6dc0f2, 0x6dc0f2, 0xd9f1ff, 0xd9f1ff, 1); bg.fillRect(0, 0, W, H);
+      bg.fillStyle(0xffffff, 0.8);
+      [[120, 120, 0.8], [980, 110, 1], [600, 640, 0.7], [1150, 620, 0.6]].forEach(([x, y, k]) => { bg.fillCircle(x, y, 30 * k); bg.fillCircle(x + 34 * k, y - 12 * k, 38 * k); bg.fillCircle(x + 70 * k, y, 28 * k); });
+      c.add(bg);
+      c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0).setInteractive()); // 擋住下面的點擊
+      c.add(txt(this, W / 2, 62, 'Where do you want to go?', 38, '#27527a', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.mapZh = txt(this, W / 2, 108, '要去哪一座島？', 24, '#27527a').setOrigin(0.5);
+      this.mapDay = txt(this, 60, 30, '', 22, '#27527a', { fontStyle: 'bold' });
+      this.mapDust = txt(this, W - 60, 30, '', 22, '#27527a', { fontStyle: 'bold' }).setOrigin(1, 0);
+      c.add([this.mapZh, this.mapDay, this.mapDust]);
+      this.mapIsles = MAP.map((m) => {
+        const isle = this.add.container(m.x, m.y);
+        const g = this.add.graphics();
+        g.fillStyle(0x000000, 0.08); g.fillEllipse(0, 70, 170, 26);
+        g.fillStyle(0x7a5a3a, 1); g.fillEllipse(0, 34, 170, 56); g.fillTriangle(-60, 40, 60, 40, 0, 88);
+        g.fillStyle(m.color, 1); g.fillEllipse(0, 18, 190, 64);
+        const icon = this.add.graphics({ y: -10 }).setScale(1.6);
+        if (m.icon === 'moon') drawMoon(icon, 2); else drawIcon(icon, m.icon);
+        const name = txt(this, 0, 104, m.en + ' ' + m.zh, 22, '#27384a', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
+        const need = txt(this, 0, 134, '', 17, '#455a64', { stroke: '#ffffff', strokeThickness: 4, align: 'center', wordWrap: { width: 200 } }).setOrigin(0.5, 0);
+        const here = txt(this, 0, -66, '', 18, '#e65100', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 4 }).setOrigin(0.5);
+        isle.add([g, icon, name, need, here]);
+        isle.setSize(210, 200).setInteractive({ useHandCursor: true });
+        isle.on('pointerdown', () => this.pickIsle(m.z));
+        c.add(isle);
+        this.tweens.add({ targets: isle, y: m.y - 8, yoyo: true, repeat: -1, duration: 1400 + Math.random() * 600, ease: 'Sine.easeInOut' });
+        return { isle, icon, need, here, m };
+      });
+      this.mapBox = c;
+    }
+
+    openMap() {
+      if (this.modal && this.modal !== 'map') return;
+      this.modal = 'map';
+      this.held = null; this.tool = null; this.redrawTools();
+      const s = this.s;
+      this.mapZh.setVisible(this.subs());
+      this.mapDay.setText('Day ' + s.day + '  ' + weekday(s.day));
+      this.mapDust.setText('★ ' + s.stardust);
+      this.mapIsles.forEach((it) => {
+        const why = this.lockReason(it.m.z);
+        it.isle.setAlpha(why ? 0.5 : 1);
+        it.need.setText(why || '');
+        it.here.setText(it.m.z === this.zone && !this.pendingDay ? 'You are here.' : '');
+      });
+      this.mapBox.setVisible(true);
+      if (this.pendingDay) speak('Where do you want to go?');
+    }
+
+    pickIsle(z) {
+      if (this.modal !== 'map') return;
+      const it = this.mapIsles.find((x) => x.m.z === z);
+      const why = this.lockReason(z);
+      if (why) {
+        // 還沒開放：島晃一下，再說一次還差什麼
+        this.tweens.add({ targets: it.isle, angle: 4, yoyo: true, repeat: 2, duration: 70, onComplete: () => it.isle.setAngle(0) });
+        this.floatText(it.m.x, it.m.y - 90, why, '#c62828', true);
+        return;
+      }
+      speak(it.m.en);
+      this.mapBox.setVisible(false);
+      this.modal = null;
+      this.jumpZone(z);
+      if (this.pendingDay) { this.pendingDay = false; this.startDayFlow(); }
+    }
 
     checkUnlock() {
       const s = this.s;
