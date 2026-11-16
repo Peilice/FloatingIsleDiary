@@ -204,6 +204,19 @@
     const rt = Math.max(1, Math.floor(e.G / 10)); e.R += Math.sign(rt - e.R);
     const ft = Math.max(1, Math.floor(e.R / 4)); e.F += Math.sign(ft - e.F);
   }
+  // 長期經營的生態園：現在的數量對應哪一種情況（FOOD_CASES 的索引），-1 表示平衡
+  function ecoProblem(e) {
+    const rt = Math.max(1, Math.floor(e.G / 10));
+    if (e.R >= rt + 3) return 0;
+    const ft = Math.max(1, Math.floor(e.R / 4));
+    if (e.F >= ft + 2) return 1;
+    return -1;
+  }
+  const ECO_MAX_A = 6;   // 草地最多擴到 6 塊
+  const ECO_EVENTS = [
+    { k: 'rabbits', zh: '外地的兔子跑來了', apply: (e) => { e.R += 6; } },
+    { k: 'foxes',   zh: '山上的狐狸搬來了', apply: (e) => { e.F += 3; } },
+  ];
   // 拼字（§4.24）：180 個拼寫字裡、遊戲中有圖可畫的字
   const SPELL = ['bean', 'sunny', 'cloudy', 'rainy', 'windy', 'fish', 'bird', 'apple', 'grape', 'banana', 'hat', 'coat', 'rock', 'mud', 'moon', 'star', 'bell', 'drum', 'paper', 'bottle', 'water', 'tree', 'grass', 'lamp', 'box', 'rain'];
 
@@ -5133,15 +5146,40 @@
       this.labDone('typhoon', 'Ready!');
     }
 
+    // 生態園每天的變化（§4.20 長期經營）：第一次打開食物鏈站之後才開始
+    ecoDay() {
+      const e = this.s.eco;
+      if (!e) return;
+      foodStep(e);
+      e.ev = null;
+      if (ecoProblem(e) < 0) {
+        e.calm = (e.calm || 0) + 1;
+        if (e.calm >= 3 && Math.random() < 0.35) {
+          const ev = ECO_EVENTS[Math.floor(Math.random() * ECO_EVENTS.length)];
+          ev.apply(e); e.ev = ev.k; e.calm = 0;
+        }
+      } else e.calm = 0;
+      if (ecoProblem(e) < 0) { e.okDays = (e.okDays || 0) + 1; e.fixed = false; }
+    }
+
     // --- 食物鏈（§4.20）：承載量模型，每天向平衡值靠近，不會滅絕 ---
+    // 生態園有狀況時處理自己的生態園（選對的處置會留下來）；平衡時拿練習題來做
     lab_food() {
-      const sc = FOOD_CASES[Math.floor(Math.random() * FOOD_CASES.length)];
-      const q = this.xq = { sc, eco: Object.assign({}, sc.start), tries: 0, done: false, order: L.shuffle(FOOD_ACTS.map((a, i) => i)), busy: false };
-      this.rxSet(sc.say, sc.zh, '');
+      const s = this.s;
+      if (!s.eco) s.eco = { A: 3, G: 30, R: 3, F: 1, okDays: 0, calm: 0, ev: null };
+      const prob = ecoProblem(s.eco);
+      const live = prob >= 0 && !s.eco.fixed;
+      const sc = live ? Object.assign({}, FOOD_CASES[prob], { start: Object.assign({}, s.eco) }) : FOOD_CASES[Math.floor(Math.random() * FOOD_CASES.length)];
+      const q = this.xq = { sc, live, eco: Object.assign({}, sc.start), tries: 0, done: false, order: L.shuffle(FOOD_ACTS.map((a, i) => i)), busy: false };
+      const ev = live && ECO_EVENTS.find((x) => x.k === s.eco.ev);
+      this.rxSet(sc.say, (ev ? ev.zh + '！' : '') + sc.zh,
+        live ? '這是你的生態園，選的辦法會留下來'
+          : prob >= 0 ? '你的生態園正在慢慢恢復，先來做練習題'
+          : '你的生態園今天很平衡（平衡 ' + (s.eco.okDays || 0) + ' 天），來做練習題');
       q.board = this.rx(this.add.graphics());
       q.nums = ['grass', 'rabbit', 'fox'].map((k, i) => this.rx(txt(this, 520, 250 + i * 70, '', 26, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5)));
       q.icons = ['grass', 'rabbit', 'fox'].map((k, i) => { const g = this.add.graphics({ x: 330, y: 250 + i * 70 }); if (k === 'fox') foxIcon(g); else drawIcon(g, k); return this.rx(g); });
-      q.dayT = this.rx(txt(this, 820, 220, '', 20, '#6b7c8c').setOrigin(0.5));
+      q.dayT = this.rx(txt(this, 820, 220, q.live ? 'My island 我的生態園' : 'Practice 練習', 18, '#6b7c8c').setOrigin(0.5));
       q.cards = q.order.map((ai, j) => this.rxCard(340 + j * 200, 500, 180, 110, (card) => {
         card.add(txt(this, 0, 0, FOOD_ACTS[ai].zh, 20, '#37474f', { fontStyle: 'bold', align: 'center', wordWrap: { width: 160 } }).setOrigin(0.5));
       }, () => this.pickFood(j)));
@@ -5180,7 +5218,11 @@
           q.busy = false;
           if (right) {
             q.done = true;
-            this.rxSet('The island is in balance!', '草、兔子、狐狸都穩定下來了！', '');
+            if (q.live) {
+              const e = this.s.eco;
+              act.apply(e); e.A = Math.min(ECO_MAX_A, e.A); e.ev = null; e.fixed = true;
+            }
+            this.rxSet('The island is in balance!', '草、兔子、狐狸都穩定下來了！', q.live ? '你的生態園之後每天會照這樣慢慢變好' : '');
             speak('The island is in balance!');
             this.labDone('food', 'Balance!');
           } else {
@@ -6004,6 +6046,7 @@
       }
       s.prevWeather = s.weather;
       s.weather = pick;
+      this.ecoDay();
       this.applyWeatherLook();
       if (this.needWeatherQ()) this.openWeatherQ(); else this.showBanner();
       saveState(s);
