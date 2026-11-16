@@ -19,7 +19,13 @@
     if (m === 'map') { sc.pickIsle('meadow'); return; }   // 開始時的地圖：先去草地
     if (m === 'fix') { const q = sc.fq2; if (q.done) return; sc.pickMaterial(['wood', 'stone', 'metal', 'glass'].indexOf(FIXMAT[q.k])); return; }
     if (m === 'weather') { if (!sc.wq.done) sc.pickWeather(sc.wq.order.indexOf(sc.wq.answer)); return; }
-    if (m === 'diary') { if (s.diaryQ && !s.diaryQ.done) sc.pickDiary(s.diaryQ.options.indexOf(s.diaryQ.answer)); else sc.goodNight(); return; }
+    if (m === 'diary') {
+      const q = s.diaryQ;
+      if (q && !q.done && q.spell) { const sp = q.spell, need = q.answer[sp.got.length]; sc.pickTile(sp.tiles.findIndex((ch, j) => ch === need && !sp.used[j])); }
+      else if (q && !q.done) sc.pickDiary(q.options.indexOf(q.answer));
+      else sc.goodNight();
+      return;
+    }
     if (m === 'drill') {
       const q = sc.dr;
       if (q.done) { sc.closeModal(); return; }

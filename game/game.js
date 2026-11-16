@@ -6130,6 +6130,24 @@
       if (!s.diaryQ || s.diaryQ.day !== s.day) {
         const q = L.diary(Object.assign({ weather: s.weather }, s.ev), { weather: WEATHER_KEYS, plant: s.seeds, animal: ANIMAL_KEYS, weekday: WEEK });
         s.diaryQ = Object.assign(q, { day: s.day, tries: 0, recorded: false, done: false, wrong: {} });
+        // 延伸層（§3.5）：研究島開放後，日記的空格改成拼字：答案的字母打散，再加 2 個不在字裡的字母
+        if (this.researchOpen() && /^[a-z]{3,8}$/.test(q.answer)) {
+          const extra = L.shuffle('abcdefghijklmnopqrstuvwxyz'.split('').filter((ch) => !q.answer.includes(ch))).slice(0, 2);
+          q.spell = { got: '', tiles: L.shuffle(q.answer.split('').concat(extra)), used: {} };
+        }
+      }
+      if (!this.dyTiles) {
+        this.dyTiles = [];
+        for (let j = 0; j < 10; j++) {
+          const b = this.add.container(0, 480);
+          const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-36, -38, 72, 76, 14); bg.lineStyle(4, 0xffc46b, 1); bg.strokeRoundedRect(-36, -38, 72, 76, 14);
+          const t = txt(this, 0, 0, '', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+          b.add([bg, t]);
+          b.setSize(72, 76).setInteractive({ useHandCursor: true });
+          b.on('pointerdown', () => this.pickTile(j));
+          this.dyBox.add(b);
+          this.dyTiles.push({ b, t });
+        }
       }
       this.dyBox.setVisible(true);
       this.renderDiary();
@@ -6143,7 +6161,8 @@
       // 句子三段排版：前半、空格、後半，整句置中
       this.dyBefore.setText(q.before);
       this.dyAfter.setText(q.after);
-      this.dyBlank.setText(q.done ? q.answer : '');
+      const sp = q.spell && !q.done ? q.spell : null;
+      this.dyBlank.setText(q.done ? q.answer : sp ? sp.got + '_'.repeat(q.answer.length - sp.got.length) : '');
       const blankW = 210;
       const total = this.dyBefore.width + blankW + this.dyAfter.width;
       const x0 = 640 - total / 2;
@@ -6155,9 +6174,17 @@
       // 選錯才露出當天的小圖提示
       this.dyHint.setVisible(q.tries > 0 && !q.done);
       if (q.tries > 0) { drawIcon(this.dyHint, q.answer); this.dyHint.setX(x0 + this.dyBefore.width + blankW / 2); }
+      this.dyTiles.forEach((tl, j) => {
+        const on = !!sp && j < sp.tiles.length;
+        tl.b.setVisible(on);
+        if (!on) return;
+        tl.b.setX(640 + (j - (sp.tiles.length - 1) / 2) * 86);
+        tl.t.setText(sp.tiles[j]);
+        tl.b.setAlpha(sp.used[j] ? 0.25 : 1);
+      });
       this.dyOpts.forEach((o, i) => {
         const w = q.options[i];
-        o.b.setVisible(!q.done);
+        o.b.setVisible(!q.done && !q.spell);
         o.bg.clear();
         o.bg.fillStyle(0xffffff, 1); o.bg.fillRoundedRect(-110, -48, 220, 96, 24);
         o.bg.lineStyle(4, 0xffc46b, 1); o.bg.strokeRoundedRect(-110, -48, 220, 96, 24);
@@ -6176,11 +6203,7 @@
       if (q.wrong[w]) return;
       if (q.tries === 0) { this.stats.diary.q += 1; if (w === q.answer) this.stats.diary.first += 1; }
       if (w === q.answer) {
-        q.done = true;
-        if (!q.recorded) L.answer(s.words, w, { day: s.day, options: q.options.length, firstTry: q.tries === 0, peeked: false });
-        s.diary.push({ day: q.day, text: q.text, weather: s.weather });
-        this.touch('diary');
-        speak(q.text);
+        this.diaryDone(q.options.length);
       } else {
         q.tries += 1;
         q.wrong[w] = true;
@@ -6188,6 +6211,39 @@
         const o = this.dyOpts[i];
         this.tweens.add({ targets: o.b, x: o.x + 10, yoyo: true, repeat: 2, duration: 60, onComplete: () => o.b.setX(o.x) });
         speak(w);
+      }
+      this.renderDiary();
+    }
+
+    diaryDone(nOpts) {
+      const s = this.s, q = s.diaryQ;
+      q.done = true;
+      if (!q.recorded) L.answer(s.words, q.answer, { day: s.day, options: nOpts, firstTry: q.tries === 0, peeked: false });
+      s.diary.push({ day: q.day, text: q.text, weather: s.weather });
+      this.touch('diary');
+      speak(q.text);
+    }
+
+    // 拼字日記：照順序點字母；點錯的字母不會放進去，第一次點錯就算這題沒有一次對
+    pickTile(j) {
+      const s = this.s, q = s.diaryQ;
+      if (this.modal !== 'diary' || !q || q.done || !q.spell) return;
+      const sp = q.spell;
+      if (sp.used[j]) return;
+      const ch = sp.tiles[j], need = q.answer[sp.got.length];
+      if (ch === need) {
+        sp.used[j] = true; sp.got += ch;
+        if (sp.got === q.answer) {
+          if (q.tries === 0) { this.stats.diary.q += 1; this.stats.diary.first += 1; }
+          this.diaryDone(sp.tiles.length);
+        }
+      } else {
+        if (q.tries === 0) this.stats.diary.q += 1;
+        q.tries += 1;
+        if (!q.recorded) { L.answer(s.words, q.answer, { day: s.day, options: sp.tiles.length, firstTry: false, peeked: false }); q.recorded = true; }
+        const tl = this.dyTiles[j];
+        this.tweens.add({ targets: tl.b, angle: 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => tl.b.setAngle(0) });
+        speak('Try again.');
       }
       this.renderDiary();
     }
@@ -6444,7 +6500,8 @@
       const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
       if (this.modal === 'weather') { if (!this.wq.done) this.pickWeather(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'diary') {
-        if (this.s.diaryQ && this.s.diaryQ.done) this.goodNight(); else this.pickDiary(Math.floor(Math.random() * 3));
+        const dq = this.s.diaryQ;
+        if (dq && dq.done) this.goodNight(); else if (dq && dq.spell) this.pickTile(Math.floor(Math.random() * dq.spell.tiles.length)); else this.pickDiary(Math.floor(Math.random() * 3));
         return;
       }
       if (this.modal === 'build') {
