@@ -1,0 +1,267 @@
+<title>浮島日記風格示意</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Huninn&family=Iansui&display=swap">
+<style>
+/* 版面：兩張 16:9 的遊戲畫面上下排，各自附上說明；頁面本身安靜，讓示意圖說話 */
+:root {
+  --bg: #f3f6f8;
+  --surface: #ffffff;
+  --ink: #23324a;
+  --muted: #5d6b7e;
+  --line: #d7dee6;
+  --accent: #2f7d6d;
+  --font-ui: "Huninn", "jf-openhuninn", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-en: "Andika", "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141b24; --surface: #1d2733; --ink: #e6edf5; --muted: #a3b0bf; --line: #2e3b4b; --accent: #6cc3ad;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141b24; --surface: #1d2733; --ink: #e6edf5; --muted: #a3b0bf; --line: #2e3b4b; --accent: #6cc3ad;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-ui); font-size: 16px; line-height: 1.7;
+  padding-block: 32px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 48px; }
+header { display: grid; gap: 6px; }
+h1 { font-size: 1.9rem; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+header p { margin: 0; color: var(--muted); max-width: 62ch; }
+section { display: grid; gap: 14px; }
+.tag { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tag b { font-size: 1.35rem; }
+.tag span { color: var(--muted); }
+.rec { font-size: .8rem; color: #fff; background: var(--accent); border-radius: 999px; padding: 2px 10px; letter-spacing: .06em; }
+figure { margin: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+figure svg { display: block; width: 100%; height: auto; }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px 28px; }
+.notes div { display: grid; gap: 4px; }
+.notes h3 { margin: 0; font-size: .95rem; color: var(--accent); letter-spacing: .04em; }
+.notes ul { margin: 0; padding-left: 1.2em; color: var(--ink); }
+.notes li { margin: 2px 0; }
+footer { color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>浮島日記：兩種風格的同一個畫面</h1>
+    <p>兩張都是市集的「找動物」訂單：兔子問 Where is the panda?，孩子從 4 張卡片選出貓熊。選對的那張已經蓋上回饋。英文都用 Andika（識字教學字型）。</p>
+  </header>
+
+  <section>
+    <div class="tag"><b>A　手帳貼紙風</b><span>整個遊戲像孩子自己做的島嶼手帳</span><span class="rec">推薦</span></div>
+    <figure><svg id="mockA" viewBox="0 0 1280 720" role="img" aria-label="手帳貼紙風示意：點格紙的手帳內頁、紙膠帶、四張有白邊的動物貼紙"></svg></figure>
+    <div class="notes">
+      <div><h3>畫面的語言</h3><ul><li>視窗是點格紙的手帳內頁，用紙膠帶貼住</li><li>所有圖都是有白邊、有陰影的貼紙，深藍墨線統一外框</li><li>選對時蓋一個綠色印章，日記本可以收集這些貼紙</li></ul></div>
+      <div><h3>製作方式</h3><ul><li>現有的程式繪圖加上統一外框和白邊就能做到</li><li>以後換成畫的圖，只要符合「貼紙」規格就不會跑風格</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="tag"><b>B　繪本水彩風</b><span>柔和的水彩天空與浮島，像一本攤開的繪本</span></div>
+    <figure><svg id="mockB" viewBox="0 0 1280 720" role="img" aria-label="繪本水彩風示意：水彩天空和浮島，四張柔邊的動物插畫"></svg></figure>
+    <div class="notes">
+      <div><h3>畫面的語言</h3><ul><li>天空、浮島、卡片都用水彩暈染，沒有硬邊</li><li>角色不描黑線，靠顏色深淺分出形狀</li><li>回饋是一圈淡淡的光暈，比較安靜</li></ul></div>
+      <div><h3>製作方式</h3><ul><li>正式版需要插畫素材，150 多種圖要畫得一致成本很高</li><li>縮小到卡片大小時，柔邊的小圖比較不好辨認</li></ul></div>
+    </div>
+  </section>
+
+  <footer>示意圖用程式即時畫出，只表達方向；正式美術會再細修。</footer>
+</div>
+
+<script>
+(function () {
+  const INK = '#2b3a55';
+
+  // 動物：同一組形狀，A 有墨線、B 沒有線改用柔和色
+  function animal(kind, s) {
+    const line = s.ink ? ` stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"` : '';
+    const soft = !s.ink;
+    const c = (a, b) => (soft ? b : a);
+    if (kind === 'panda') return `
+      <circle cx="-30" cy="-30" r="14" fill="${c('#2b2f36', '#3d4450')}"${line}/>
+      <circle cx="30" cy="-30" r="14" fill="${c('#2b2f36', '#3d4450')}"${line}/>
+      <circle cx="0" cy="0" r="40" fill="#fffdf8"${line}/>
+      <ellipse cx="-15" cy="-4" rx="10" ry="13" transform="rotate(25 -15 -4)" fill="${c('#2b2f36', '#4a5260')}"/>
+      <ellipse cx="15" cy="-4" rx="10" ry="13" transform="rotate(-25 15 -4)" fill="${c('#2b2f36', '#4a5260')}"/>
+      <circle cx="-13" cy="-5" r="3.2" fill="#fff"/><circle cx="13" cy="-5" r="3.2" fill="#fff"/>
+      <ellipse cx="0" cy="13" rx="6" ry="4.5" fill="#2b2f36"/>
+      <path d="M-7 21 Q0 26 7 21" fill="none" stroke="#2b2f36" stroke-width="2.4" stroke-linecap="round"/>`;
+    if (kind === 'lion') return `
+      ${[...Array(12)].map((_, i) => { const a = i * Math.PI / 6; return `<circle cx="${(Math.cos(a) * 36).toFixed(1)}" cy="${(Math.sin(a) * 36).toFixed(1)}" r="15" fill="${c('#e8822e', '#f0a560')}"${line}/>`; }).join('')}
+      <circle cx="0" cy="0" r="38" fill="${c('#e8822e', '#f0a560')}"/>
+      <circle cx="0" cy="2" r="28" fill="${c('#ffd35c', '#ffe08f')}"${line}/>
+      <circle cx="-10" cy="-4" r="3.6" fill="#2b2f36"/><circle cx="10" cy="-4" r="3.6" fill="#2b2f36"/>
+      <path d="M-6 9 L6 9 L0 15 Z" fill="#7a4a2a"/>
+      <path d="M-8 19 Q0 24 8 19" fill="none" stroke="#7a4a2a" stroke-width="2.4" stroke-linecap="round"/>`;
+    if (kind === 'elephant') return `
+      <ellipse cx="-34" cy="-2" rx="24" ry="30" fill="${c('#8fa3b3', '#a9bccb')}"${line}/>
+      <ellipse cx="34" cy="-2" rx="24" ry="30" fill="${c('#8fa3b3', '#a9bccb')}"${line}/>
+      <circle cx="0" cy="-6" r="28" fill="${c('#a9bccb', '#c3d3df')}"${line}/>
+      <path d="M-8 10 Q-10 36 4 44 Q12 46 12 38 Q2 34 8 10 Z" fill="${c('#a9bccb', '#c3d3df')}"${line}/>
+      <circle cx="-11" cy="-10" r="3.6" fill="#2b2f36"/><circle cx="11" cy="-10" r="3.6" fill="#2b2f36"/>`;
+    if (kind === 'dog') return `
+      <ellipse cx="-34" cy="4" rx="13" ry="28" transform="rotate(14 -34 4)" fill="${c('#7a5236', '#a07656')}"${line}/>
+      <ellipse cx="34" cy="4" rx="13" ry="28" transform="rotate(-14 34 4)" fill="${c('#7a5236', '#a07656')}"${line}/>
+      <circle cx="0" cy="0" r="34" fill="${c('#d8b48c', '#e8cba8')}"${line}/>
+      <ellipse cx="0" cy="14" rx="17" ry="13" fill="${c('#f3e1c8', '#f7ecdb')}"/>
+      <circle cx="-12" cy="-6" r="3.6" fill="#2b2f36"/><circle cx="12" cy="-6" r="3.6" fill="#2b2f36"/>
+      <ellipse cx="0" cy="8" rx="7" ry="5" fill="#2b2f36"/>`;
+    if (kind === 'rabbit') return `
+      <ellipse cx="-14" cy="-58" rx="11" ry="32" fill="#fffdf8"${line}/>
+      <ellipse cx="14" cy="-58" rx="11" ry="32" fill="#fffdf8"${line}/>
+      <ellipse cx="-14" cy="-56" rx="5" ry="22" fill="${c('#f6b3c4', '#f8c9d4')}"/>
+      <ellipse cx="14" cy="-56" rx="5" ry="22" fill="${c('#f6b3c4', '#f8c9d4')}"/>
+      <ellipse cx="0" cy="44" rx="40" ry="36" fill="#fffdf8"${line}/>
+      <circle cx="0" cy="0" r="34" fill="#fffdf8"${line}/>
+      <circle cx="-12" cy="-2" r="4" fill="#2b2f36"/><circle cx="12" cy="-2" r="4" fill="#2b2f36"/>
+      <ellipse cx="0" cy="9" rx="5" ry="3.6" fill="#f08aa2"/>
+      <circle cx="-22" cy="10" r="6" fill="#f8c9d4" opacity=".8"/><circle cx="22" cy="10" r="6" fill="#f8c9d4" opacity=".8"/>`;
+    return '';
+  }
+
+  const EN = "font-family:'Andika','Segoe UI',sans-serif";
+  const ZH = "font-family:'Huninn','PingFang TC','Microsoft JhengHei',sans-serif";
+
+  // ---------- A 手帳貼紙風 ----------
+  function buildA() {
+    const cards = [
+      { k: 'lion', x: 330, r: -3 }, { k: 'panda', x: 545, r: 2, hit: true },
+      { k: 'elephant', x: 760, r: -1.5 }, { k: 'dog', x: 975, r: 3 },
+    ];
+    // 貼紙卡：白邊（粗白描邊）＋陰影，內容有墨線
+    const sticker = (c) => `
+      <g transform="translate(${c.x} 468) rotate(${c.r}) ${c.hit ? 'scale(1.08)' : ''}">
+        <g filter="url(#aShadow)">
+          <rect x="-92" y="-98" width="184" height="196" rx="26" fill="#ffffff"/>
+        </g>
+        <rect x="-80" y="-86" width="160" height="172" rx="18" fill="${c.hit ? '#e9f6ef' : '#fdf9f0'}" stroke="${INK}" stroke-width="3"/>
+        <g transform="translate(0 -6) scale(1.05)">${animal(c.k, { ink: true })}</g>
+        ${c.hit ? `
+          <g transform="translate(58 -70) rotate(-14)">
+            <circle r="34" fill="none" stroke="#2f8a5b" stroke-width="5"/>
+            <circle r="27" fill="none" stroke="#2f8a5b" stroke-width="2" stroke-dasharray="4 4"/>
+            <text y="8" text-anchor="middle" style="${EN};font-weight:700" font-size="22" fill="#2f8a5b">Yes!</text>
+          </g>` : ''}
+      </g>`;
+    const tape = (x, y, r, col) => `<g transform="translate(${x} ${y}) rotate(${r})"><rect x="-70" y="-17" width="140" height="34" fill="${col}" opacity=".82"/>
+      ${[...Array(7)].map((_, i) => `<rect x="${-62 + i * 20}" y="-17" width="8" height="34" fill="#ffffff" opacity=".35"/>`).join('')}</g>`;
+    const label = (x, w, t) => `<g filter="url(#aShadow)"><rect x="${x}" y="22" width="${w}" height="54" rx="12" fill="#ffffff"/></g>
+      <rect x="${x + 6}" y="28" width="${w - 12}" height="42" rx="8" fill="#fdf9f0" stroke="${INK}" stroke-width="2.5"/>
+      <text x="${x + w / 2}" y="57" text-anchor="middle" style="${ZH}" font-size="22" fill="${INK}">${t}</text>`;
+    const dots = `<pattern id="aDots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="14" cy="14" r="1.8" fill="#d6c9ac"/></pattern>`;
+    return `
+      <defs>
+        <filter id="aShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#3a2e1a" flood-opacity=".28"/></filter>
+        <filter id="aGrain"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .25  0 0 0 .09 0"/></filter>
+        ${dots}
+      </defs>
+      <!-- 背景：天藍色的厚紙 -->
+      <rect width="1280" height="720" fill="#bfe1ee"/>
+      <rect width="1280" height="720" filter="url(#aGrain)"/>
+      <!-- 背景裡的浮島貼紙 -->
+      <g filter="url(#aShadow)" opacity=".9"><path d="M-40 640 Q200 560 520 600 Q560 700 460 740 L-40 740 Z" fill="#ffffff"/></g>
+      <path d="M-30 646 Q200 572 508 606 Q540 690 450 740 L-30 740 Z" fill="#7cc46a" stroke="${INK}" stroke-width="3"/>
+      <g filter="url(#aShadow)"><circle cx="1150" cy="120" r="54" fill="#fff"/></g>
+      <circle cx="1150" cy="120" r="44" fill="#ffd24a" stroke="${INK}" stroke-width="3"/>
+      <!-- 上方：標籤貼紙按鈕與星砂印章 -->
+      ${label(28, 110, '圖鑑')}${label(150, 110, '日記')}
+      <g transform="translate(1180 50) rotate(-6)"><rect x="-74" y="-26" width="148" height="52" rx="8" fill="none" stroke="#c24f3a" stroke-width="4"/>
+        <text x="0" y="11" text-anchor="middle" style="${EN};font-weight:700" font-size="30" fill="#c24f3a">★ 24</text></g>
+      <!-- 手帳內頁 -->
+      <g filter="url(#aShadow)"><rect x="150" y="110" width="980" height="560" rx="10" fill="#fbf6ea"/></g>
+      <rect x="150" y="110" width="980" height="560" rx="10" fill="url(#aDots)"/>
+      <line x1="210" y1="110" x2="210" y2="670" stroke="#f0a7a0" stroke-width="2.5"/>
+      ${tape(220, 116, -8, '#f2b84b')}${tape(1060, 118, 7, '#8fc6d9')}
+      <text x="640" y="168" text-anchor="middle" style="${ZH}" font-size="26" fill="#a0573a" letter-spacing="4">市集 Market</text>
+      <!-- 兔子貼紙 -->
+      <g transform="translate(300 286)">
+        <g filter="url(#aShadow)"><ellipse cx="0" cy="-6" rx="72" ry="110" fill="#ffffff"/></g>
+        <g transform="scale(.92)">${animal('rabbit', { ink: true })}</g>
+      </g>
+      <!-- 對話：手寫框 -->
+      <path d="M402 214 Q640 196 1016 210 Q1030 262 1012 318 Q700 332 420 320 L392 352 L398 318 Q386 262 402 214 Z" fill="#ffffff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+      <text x="430" y="268" style="${EN};font-weight:700" font-size="46" fill="${INK}">Where is the panda?</text>
+      <text x="432" y="304" style="${ZH}" font-size="22" fill="#6b7686">貓熊在哪裡？</text>
+      <g transform="translate(964 262)"><circle r="26" fill="#e6f1f6" stroke="${INK}" stroke-width="2.5"/>
+        <path d="M-10 -6 L-3 -6 L5 -13 L5 13 L-3 6 L-10 6 Z" fill="${INK}"/><path d="M10 -7 Q15 0 10 7" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/></g>
+      <!-- 四張貼紙卡 -->
+      ${cards.map(sticker).join('')}
+      <!-- 下方：索引標籤工具列 -->
+      ${['seeds', 'water', 'shovel'].map((t, i) => `<g transform="translate(${60 + i * 120} 690)"><path d="M0 30 L0 -14 Q0 -24 10 -24 L94 -24 Q104 -24 104 -14 L104 30 Z" fill="${['#f6c45a', '#8fc6d9', '#b9d98f'][i]}" stroke="${INK}" stroke-width="2.5"/>
+        <text x="52" y="4" text-anchor="middle" style="${EN};font-weight:700" font-size="20" fill="${INK}">${t}</text></g>`).join('')}`;
+  }
+
+  // ---------- B 繪本水彩風 ----------
+  function buildB() {
+    const cards = [
+      { k: 'lion', x: 330, tint: '#f7dcc0' }, { k: 'panda', x: 545, tint: '#d7ecdf', hit: true },
+      { k: 'elephant', x: 760, tint: '#dbe6f1' }, { k: 'dog', x: 975, tint: '#f1e3d3' },
+    ];
+    const wash = (cx, cy, rx, ry, col, op, f) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${col}" opacity="${op}" filter="url(#${f || 'bWash'})"/>`;
+    const card = (c) => `
+      <g transform="translate(${c.x} 470)">
+        ${c.hit ? wash(0, 0, 112, 118, '#bfe6c9', .75, 'bSoft') : ''}
+        ${wash(0, 0, 88, 94, c.tint, .95)}
+        ${wash(-20, -26, 46, 40, '#ffffff', .45, 'bSoft')}
+        <g filter="url(#bEdge)" transform="translate(0 -4)">${animal(c.k, { ink: false })}</g>
+      </g>`;
+    return `
+      <defs>
+        <filter id="bWash" x="-30%" y="-30%" width="160%" height="160%">
+          <feTurbulence type="fractalNoise" baseFrequency=".018" numOctaves="3" seed="7" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="34" xChannelSelector="R" yChannelSelector="G" result="d"/>
+          <feGaussianBlur in="d" stdDeviation="2.2"/>
+        </filter>
+        <filter id="bSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14"/></filter>
+        <filter id="bEdge" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="2" result="n"/>
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/>
+          <feGaussianBlur in="d" stdDeviation=".7"/>
+        </filter>
+        <filter id="bPaper"><feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="3" seed="9"/><feColorMatrix values="0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .38  0 0 0 .1 0"/></filter>
+        <linearGradient id="bSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6f1"/><stop offset=".7" stop-color="#eef3ec"/><stop offset="1" stop-color="#f8ecd8"/></linearGradient>
+      </defs>
+      <rect width="1280" height="720" fill="#fbf7ef"/>
+      <rect width="1280" height="720" fill="url(#bSky)" opacity=".9"/>
+      ${wash(260, 120, 300, 90, '#a9d2e6', .55)}${wash(980, 90, 360, 80, '#b8dbe9', .5)}${wash(1120, 600, 260, 70, '#f1d4b0', .45)}
+      <!-- 太陽 -->
+      ${wash(1150, 118, 62, 62, '#ffd98a', .9)}${wash(1150, 118, 110, 110, '#ffe9b8', .45, 'bSoft')}
+      <!-- 浮島 -->
+      ${wash(250, 690, 330, 80, '#9a7356', .75)}${wash(250, 640, 360, 60, '#93c97c', .85)}${wash(140, 590, 70, 60, '#5f9e5a', .8)}${wash(200, 560, 48, 44, '#76b46a', .8)}
+      <!-- 上方：圓形按鈕 -->
+      ${['圖鑑', '日記'].map((t, i) => `${wash(78 + i * 118, 50, 52, 30, '#ffffff', .85, 'bWash')}<text x="${78 + i * 118}" y="58" text-anchor="middle" style="${ZH}" font-size="22" fill="#4b5a6c">${t}</text>`).join('')}
+      ${wash(1176, 50, 70, 30, '#ffffff', .85)}<text x="1176" y="60" text-anchor="middle" style="${EN};font-weight:700" font-size="28" fill="#b9853a">★ 24</text>
+      <!-- 繪本頁 -->
+      <rect x="150" y="110" width="980" height="560" rx="34" fill="#fffaf1" opacity=".93" filter="url(#bEdge)"/>
+      <rect x="150" y="110" width="980" height="560" rx="34" filter="url(#bPaper)"/>
+      <text x="640" y="168" text-anchor="middle" style="font-family:'Iansui','Huninn','PingFang TC',sans-serif" font-size="28" fill="#b57b4f" letter-spacing="4">市集 Market</text>
+      <!-- 兔子 -->
+      ${wash(300, 300, 90, 110, '#f6e7ea', .7, 'bSoft')}
+      <g transform="translate(300 286) scale(.92)" filter="url(#bEdge)">${animal('rabbit', { ink: false })}</g>
+      <!-- 對話 -->
+      ${wash(708, 266, 320, 66, '#ffffff', .95)}
+      <text x="430" y="268" style="${EN};font-weight:700" font-size="46" fill="#3e4c5f">Where is the panda?</text>
+      <text x="432" y="304" style="${ZH}" font-size="22" fill="#7d8796">貓熊在哪裡？</text>
+      ${wash(964, 262, 28, 28, '#dcebf2', .95)}
+      <path d="M954 256 L961 256 L969 249 L969 275 L961 268 L954 268 Z" fill="#4b5a6c"/>
+      <!-- 四張水彩卡 -->
+      ${cards.map(card).join('')}
+      <text x="545" y="606" text-anchor="middle" style="${EN};font-weight:700" font-size="26" fill="#3f8a5c">Yes!</text>
+      <!-- 下方工具 -->
+      ${['seeds', 'water', 'shovel'].map((t, i) => `${wash(112 + i * 120, 690, 52, 22, ['#f6d68a', '#b7dcea', '#cfe4b0'][i], .9)}<text x="${112 + i * 120}" y="697" text-anchor="middle" style="${EN};font-weight:700" font-size="20" fill="#4b5a6c">${t}</text>`).join('')}`;
+  }
+
+  document.getElementById('mockA').innerHTML = buildA();
+  document.getElementById('mockB').innerHTML = buildB();
+})();
+</script>

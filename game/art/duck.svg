@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffe896"/><stop offset="0.55" stop-color="#ffd84a"/><stop offset="1" stop-color="#d6b747"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffc486"/><stop offset="0.55" stop-color="#ff9a2e"/><stop offset="1" stop-color="#d68430"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fadd85"/><stop offset="0.55" stop-color="#f6c42d"/><stop offset="1" stop-color="#cfa72f"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M50 170 Q44 120 96 112 Q100 76 130 64 Q170 56 180 96 Q186 126 160 140 Q206 140 200 174 Q190 210 124 210 Q60 210 50 170Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M176 98 Q214 96 220 110 Q208 124 172 118Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="150" cy="92" rx="6.88" ry="8" fill="#2b3a55" /><circle cx="147.6" cy="88.96" r="2.72" fill="#fff" /><circle cx="152.24" cy="94.4" r="1.12" fill="#fff" />
+    <ellipse cx="152" cy="116" rx="8" ry="4.96" fill="#f48fa6" opacity=".55"/>
+    <path d="M78 164 Q104 140 140 166 Q110 186 78 164Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="120" cy="82" rx="14" ry="8" fill="#ffffff" opacity=".45" transform="rotate(-30 120 82)"/>
+  </g>
+</svg>

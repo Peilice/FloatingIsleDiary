@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-16T17:02:37+00:00",
+  "title": "Design System: 浮島日記 Floating Isle Diary",
+  "extensions": {
+    "colorMeta": {
+      "ink-navy": {
+        "role": "primary",
+        "displayName": "深藍墨線 Ink Navy",
+        "canonical": "#2b3a55",
+        "tonalRamp": [
+          "#141c2d",
+          "#1a2438",
+          "#202c42",
+          "#26344d",
+          "#556177",
+          "#8a93a2",
+          "#bfc4cc",
+          "#eaebee"
+        ]
+      },
+      "notebook-paper": {
+        "role": "neutral",
+        "displayName": "手帳內頁 Notebook Paper",
+        "canonical": "#fbf6ea",
+        "tonalRamp": [
+          "#484b52",
+          "#78797b",
+          "#a8a6a3",
+          "#d7d4cc",
+          "#fcf8ee",
+          "#fdfaf3",
+          "#fefcf9",
+          "#fffefd"
+        ]
+      },
+      "card-paper": {
+        "role": "neutral",
+        "displayName": "卡片內紙 Card Paper",
+        "canonical": "#fdf9f0",
+        "tonalRamp": [
+          "#494c54",
+          "#797a7e",
+          "#a9a8a7",
+          "#d9d6d1",
+          "#fdfaf3",
+          "#fefcf7",
+          "#fefdfa",
+          "#fffefe"
+        ]
+      },
+      "sticker-white": {
+        "role": "neutral",
+        "displayName": "貼紙白邊 Sticker White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#4a4d58",
+          "#7a7d84",
+          "#aaacb1",
+          "#dbdbde",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff",
+          "#ffffff"
+        ]
+      },
+      "dot-grid-tan": {
+        "role": "neutral",
+        "displayName": "點格淡褐 Dot Grid Tan",
+        "canonical": "#ddd0b2",
+        "tonalRamp": [
+          "#414244",
+          "#6b6862",
+          "#948e7f",
+          "#beb39c",
+          "#e4d9c1",
+          "#ece5d5",
+          "#f5f1e8",
+          "#fcfaf7"
+        ]
+      },
+      "binding-coral": {
+        "role": "neutral",
+        "displayName": "裝訂線珊瑚 Binding Coral",
+        "canonical": "#ef9f96",
+        "tonalRamp": [
+          "#46353e",
+          "#735155",
+          "#a06e6d",
+          "#cd8a84",
+          "#f2b2ab",
+          "#f6cac5",
+          "#fae2e0",
+          "#fdf5f4"
+        ]
+      },
+      "binding-hole": {
+        "role": "neutral",
+        "displayName": "裝訂孔 Binding Hole",
+        "canonical": "#e6dcc6",
+        "tonalRamp": [
+          "#43444a",
+          "#6f6d6b",
+          "#9a958c",
+          "#c5bead",
+          "#ebe3d1",
+          "#f1ece0",
+          "#f8f4ee",
+          "#fcfcf9"
+        ]
+      },
+      "binding-hole-rim": {
+        "role": "neutral",
+        "displayName": "裝訂孔邊 Binding Hole Rim",
+        "canonical": "#cfc2a4",
+        "tonalRamp": [
+          "#3e3e41",
+          "#64615b",
+          "#8b8476",
+          "#b2a890",
+          "#d9ceb6",
+          "#e5ddcd",
+          "#f1ede4",
+          "#faf9f6"
+        ]
+      },
+      "washi-mustard": {
+        "role": "tertiary",
+        "displayName": "芥末紙膠帶 Washi Mustard",
+        "canonical": "#f2b84b",
+        "tonalRamp": [
+          "#463c2b",
+          "#745d33",
+          "#a27e3c",
+          "#d09f45",
+          "#f5c66f",
+          "#f8d89c",
+          "#fbeac9",
+          "#fef8ed"
+        ]
+      },
+      "washi-lake": {
+        "role": "tertiary",
+        "displayName": "湖水紙膠帶 Washi Lake",
+        "canonical": "#7fc4dc",
+        "tonalRamp": [
+          "#2a3e4f",
+          "#406275",
+          "#57869a",
+          "#6ea9c0",
+          "#99d0e3",
+          "#b9dfec",
+          "#d9edf4",
+          "#f2f9fc"
+        ]
+      },
+      "stamp-green": {
+        "role": "secondary",
+        "displayName": "印章綠 Stamp Green",
+        "canonical": "#2f8a5b",
+        "tonalRamp": [
+          "#16302f",
+          "#1c483b",
+          "#236046",
+          "#2a7852",
+          "#59a17c",
+          "#8dbfa5",
+          "#c1dcce",
+          "#eaf3ef"
+        ]
+      },
+      "close-coral": {
+        "role": "secondary",
+        "displayName": "關閉珊瑚 Close Coral",
+        "canonical": "#f26b55",
+        "tonalRamp": [
+          "#46282d",
+          "#743a38",
+          "#a24c42",
+          "#d05e4d",
+          "#f58977",
+          "#f8aea2",
+          "#fbd3cc",
+          "#fef0ee"
+        ]
+      },
+      "market-coral": {
+        "role": "secondary",
+        "displayName": "市集珊瑚 Market Coral",
+        "canonical": "#c4473d",
+        "tonalRamp": [
+          "#432a35",
+          "#6e3e45",
+          "#995156",
+          "#c56467",
+          "#ea8f8f",
+          "#f1b2b2",
+          "#f7d5d5",
+          "#fcf1f1"
+        ]
+      },
+      "clear-slate": {
+        "role": "neutral",
+        "displayName": "安靜石板 Clear Slate",
+        "canonical": "#8fa3b3",
+        "tonalRamp": [
+          "#2e3645",
+          "#485362",
+          "#627080",
+          "#7c8d9d",
+          "#a5b5c2",
+          "#c1ccd5",
+          "#dde3e8",
+          "#f4f6f7"
+        ]
+      },
+      "listen-mist": {
+        "role": "neutral",
+        "displayName": "聽一次霧藍 Listen Mist",
+        "canonical": "#dcedf4",
+        "tonalRamp": [
+          "#414955",
+          "#6a757f",
+          "#94a0aa",
+          "#bdccd4",
+          "#e3f1f6",
+          "#ecf5f9",
+          "#f4fafc",
+          "#fcfdfe"
+        ]
+      },
+      "subtitle-slate": {
+        "role": "neutral",
+        "displayName": "字幕石板灰 Subtitle Slate",
+        "canonical": "#4f5a6b",
+        "tonalRamp": [
+          "#1e2433",
+          "#2b3242",
+          "#384151",
+          "#454f60",
+          "#727b89",
+          "#9ea4ae",
+          "#caced3",
+          "#edeef0"
+        ]
+      },
+      "reward-berry": {
+        "role": "neutral",
+        "displayName": "獎勵莓紅 Reward Berry",
+        "canonical": "#c2185b",
+        "tonalRamp": [
+          "#3a142f",
+          "#5e153b",
+          "#831646",
+          "#a71752",
+          "#ce467c",
+          "#dd80a5",
+          "#edbace",
+          "#f9e8ef"
+        ]
+      },
+      "warm-shadow": {
+        "role": "neutral",
+        "displayName": "暖影 Warm Shadow",
+        "canonical": "#3b2f1e",
+        "tonalRamp": [
+          "#181920",
+          "#221f1f",
+          "#2b251f",
+          "#342b1e",
+          "#62594b",
+          "#938d83",
+          "#c4c1bc",
+          "#ebeae8"
+        ]
+      },
+      "scrim-night": {
+        "role": "neutral",
+        "displayName": "夜幕遮罩 Scrim Night",
+        "canonical": "#10243a",
+        "tonalRamp": [
+          "#0e1626",
+          "#0e1a2c",
+          "#0f1e31",
+          "#102136",
+          "#405061",
+          "#7c8793",
+          "#b7bdc4",
+          "#e7e9eb"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "dialogue": {
+        "displayName": "對話英文",
+        "purpose": "居民說的一句英文；46px 起，超過 560px 寬每次縮 2px，最小 34px。"
+      },
+      "card-label": {
+        "displayName": "卡片英文",
+        "purpose": "卡片英文字與印章 Yes!。"
+      },
+      "button-label": {
+        "displayName": "按鈕字",
+        "purpose": "白色粗體；純 ASCII 用 Andika，含中文用粉圓。"
+      },
+      "title-tape": {
+        "displayName": "膠帶標題",
+        "purpose": "寫在芥末紙膠帶上的畫面名稱，-7°。"
+      },
+      "subtitle": {
+        "displayName": "中文字幕",
+        "purpose": "對話框裡的中文，可在設定關閉。"
+      },
+      "card-caption": {
+        "displayName": "卡片中文",
+        "purpose": "第一次見到的字才顯示；十字路口縮小卡片用 30px。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "sticker-card",
+        "value": "0 5px 0 rgba(59,47,30,.10), 0 9px 0 rgba(59,47,30,.10)",
+        "purpose": "貼紙卡落影（canvas 以兩層色塊模擬）。"
+      },
+      {
+        "name": "sticker-button",
+        "value": "0 6px 0 rgba(59,47,30,.16)",
+        "purpose": "貼紙按鈕、重聽貼紙（關閉貼紙為 .18）。"
+      },
+      {
+        "name": "ink-bubble",
+        "value": "2px 6px 0 rgba(59,47,30,.10)",
+        "purpose": "墨線對話框。"
+      },
+      {
+        "name": "notebook-page",
+        "value": "0 7px 0 rgba(16,36,58,.12), 0 14px 0 rgba(16,36,58,.16)",
+        "purpose": "內頁浮在夜幕遮罩上。"
+      },
+      {
+        "name": "svg-sticker",
+        "value": "feMorphology dilate 9 (#ffffff) + feGaussianBlur 4 + feOffset dy 6, #3b2f1e @ .3",
+        "purpose": "SVG 貼紙素材的白邊與落影。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "stamp-in",
+        "value": "scale 1.8→1, alpha 0→1, 260ms, Back.easeOut",
+        "purpose": "選對蓋章。"
+      },
+      {
+        "name": "wrong-shake",
+        "value": "x +8px yoyo ×3, 60ms each",
+        "purpose": "選錯的卡片搖動（衣物卡 +10px）。"
+      },
+      {
+        "name": "wrong-fade",
+        "value": "alpha 0.35",
+        "purpose": "選錯的卡片變淡並鎖住。"
+      },
+      {
+        "name": "resident-hop",
+        "value": "y -30px yoyo, 200ms",
+        "purpose": "訂單完成時居民跳一下。"
+      },
+      {
+        "name": "next-order",
+        "value": "1400ms delay",
+        "purpose": "完成後換下一單。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "canvas",
+        "value": "1280x720, Phaser.Scale.FIT, CENTER_BOTH"
+      },
+      {
+        "name": "ipad-4x3",
+        "value": "1024x768 CSS px，約 0.8 倍，上下留白不重排"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "貼紙卡 Sticker Card",
+      "kind": "card",
+      "refersTo": "sticker-card",
+      "description": "答案卡：白色切割邊、墨線框、暖色落影、小角度。選錯變淡，選對蓋章。",
+      "html": "<div class=\"ds-card\" tabindex=\"0\"><div class=\"ds-card-in\"><svg width=\"96\" height=\"96\" viewBox=\"0 0 96 96\"><circle cx=\"48\" cy=\"50\" r=\"34\" fill=\"#fbfaf5\" stroke=\"#2b3a55\" stroke-width=\"3\"/><circle cx=\"36\" cy=\"46\" r=\"4\" fill=\"#2b3a55\"/><circle cx=\"60\" cy=\"46\" r=\"4\" fill=\"#2b3a55\"/></svg><span class=\"ds-card-zh\">貓熊</span></div></div>",
+      "css": ".ds-card{width:196px;height:214px;box-sizing:border-box;padding:10px;background:#ffffff;border-radius:28px;box-shadow:0 5px 0 rgba(59,47,30,.10), 0 9px 0 rgba(59,47,30,.10);transform:rotate(-2.5deg);cursor:pointer;transition:opacity .2s} .ds-card-in{height:100%;box-sizing:border-box;background:#fdf9f0;border:3px solid #2b3a55;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px} .ds-card-zh{font-family:'Huninn','Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;font-size:20px;color:#4f5a6b} .ds-card:active{transform:rotate(-2.5deg) translateX(8px)} .ds-card:focus-visible{outline:3px dashed #2b3a55;outline-offset:4px}"
+    },
+    {
+      "name": "主要貼紙按鈕 Go Button",
+      "kind": "button",
+      "refersTo": "sticker-button-go",
+      "description": "主要行動，例如「Here you are.」。",
+      "html": "<button class=\"ds-btn-go\"><span>Here you are.</span></button>",
+      "css": ".ds-btn-go{height:66px;padding:5px;border:none;background:#ffffff;border-radius:22px;box-shadow:0 6px 0 rgba(59,47,30,.16);cursor:pointer} .ds-btn-go span{display:flex;align-items:center;height:100%;box-sizing:border-box;padding:0 28px;background:#2f8a5b;border:3px solid #2b3a55;border-radius:17px;color:#fff;font-family:'Andika','Huninn','Segoe UI',sans-serif;font-weight:700;font-size:26px} .ds-btn-go:active{transform:scale(.97)} .ds-btn-go:focus-visible{outline:3px dashed #2b3a55;outline-offset:4px}"
+    },
+    {
+      "name": "市集入口按鈕 Market Button",
+      "kind": "button",
+      "refersTo": "sticker-button-market",
+      "description": "工具列上的市集入口。",
+      "html": "<button class=\"ds-btn-market\"><span style=\"font-family:&#39;Huninn&#39;,&#39;Noto Sans TC&#39;,&#39;Microsoft JhengHei&#39;,&#39;PingFang TC&#39;,sans-serif\">市集</span></button>",
+      "css": ".ds-btn-market{height:70px;padding:5px;border:none;background:#ffffff;border-radius:22px;box-shadow:0 6px 0 rgba(59,47,30,.16);cursor:pointer} .ds-btn-market span{display:flex;align-items:center;height:100%;box-sizing:border-box;padding:0 34px;background:#c4473d;border:3px solid #2b3a55;border-radius:17px;color:#fff;font-family:'Andika','Huninn','Segoe UI',sans-serif;font-weight:700;font-size:26px} .ds-btn-market:active{transform:scale(.97)} .ds-btn-market:focus-visible{outline:3px dashed #2b3a55;outline-offset:4px}"
+    },
+    {
+      "name": "次要貼紙按鈕 Quiet Button",
+      "kind": "button",
+      "refersTo": "sticker-button-quiet",
+      "description": "次要行動，例如「Clear」。",
+      "html": "<button class=\"ds-btn-quiet\"><span>Clear</span></button>",
+      "css": ".ds-btn-quiet{height:56px;padding:5px;border:none;background:#ffffff;border-radius:22px;box-shadow:0 6px 0 rgba(59,47,30,.16);cursor:pointer} .ds-btn-quiet span{display:flex;align-items:center;height:100%;box-sizing:border-box;padding:0 24px;background:#8fa3b3;border:3px solid #2b3a55;border-radius:17px;color:#fff;font-family:'Andika','Huninn','Segoe UI',sans-serif;font-weight:700;font-size:24px} .ds-btn-quiet:active{transform:scale(.97)} .ds-btn-quiet:focus-visible{outline:3px dashed #2b3a55;outline-offset:4px}"
+    },
+    {
+      "name": "關閉貼紙 Close Sticker",
+      "kind": "button",
+      "refersTo": "close-sticker",
+      "description": "視窗右上角的珊瑚色圓貼紙，白色粗叉。",
+      "html": "<button class=\"ds-close\" aria-label=\"關閉\"><svg width=\"72\" height=\"72\" viewBox=\"-36 -36 72 72\"><circle r=\"36\" fill=\"#fff\"/><circle r=\"28\" fill=\"#f26b55\" stroke=\"#2b3a55\" stroke-width=\"3\"/><path d=\"M-10 -10L10 10M-10 10L10 -10\" stroke=\"#fff\" stroke-width=\"6\" stroke-linecap=\"round\"/></svg></button>",
+      "css": ".ds-close{width:72px;height:72px;padding:0;border:none;background:none;border-radius:50%;filter:drop-shadow(0 6px 0 rgba(59,47,30,.18));cursor:pointer} .ds-close:active{transform:scale(.94)} .ds-close:focus-visible{outline:3px dashed #2b3a55;outline-offset:4px}"
+    },
+    {
+      "name": "墨線對話框 Ink Bubble",
+      "kind": "custom",
+      "refersTo": "ink-bubble",
+      "description": "居民說的英文句子（Andika 46→34px）與中文字幕。",
+      "html": "<div class=\"ds-bubble\"><div class=\"ds-bubble-en\">Where is the panda?</div><div class=\"ds-bubble-zh\">貓熊在哪裡？</div></div>",
+      "css": ".ds-bubble{position:relative;width:600px;height:128px;box-sizing:border-box;padding:16px 32px;background:#fff;border:3px solid #2b3a55;border-radius:26px;box-shadow:2px 6px 0 rgba(59,47,30,.10)} .ds-bubble-en{font-family:'Andika','Huninn','Segoe UI',sans-serif;font-weight:700;font-size:46px;line-height:1.2;color:#2b3a55;white-space:nowrap} .ds-bubble-zh{font-family:'Huninn','Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;font-size:22px;color:#4f5a6b}"
+    },
+    {
+      "name": "標題紙膠帶 Washi Title Tape",
+      "kind": "custom",
+      "refersTo": "washi-tape-title",
+      "description": "芥末膠帶上寫畫面名稱，-7°，不可點。",
+      "html": "<div class=\"ds-tape\">市集 Market</div>",
+      "css": ".ds-tape{width:200px;height:36px;display:flex;align-items:center;justify-content:center;background:repeating-linear-gradient(110deg,rgba(242,184,75,.88) 0 12px,rgba(247,212,145,.92) 12px 22px);box-shadow:inset 0 -4px 0 rgba(0,0,0,.06);transform:rotate(-7deg);font-family:'Huninn','Noto Sans TC','Microsoft JhengHei','PingFang TC',sans-serif;font-size:22px;color:#2b3a55}"
+    },
+    {
+      "name": "手帳內頁 Notebook Page",
+      "kind": "card",
+      "refersTo": "notebook-page",
+      "description": "米白點格紙、珊瑚裝訂線、裝訂孔；所有視窗的底。",
+      "html": "<div class=\"ds-page\"><i></i><i></i></div>",
+      "css": ".ds-page{position:relative;width:480px;height:300px;background-color:#fbf6ea;background-image:radial-gradient(circle,#ddd0b2 2px,transparent 2.5px),linear-gradient(#ef9f96,#ef9f96);background-size:30px 30px,3px 100%;background-position:75px 15px,66px 0;background-repeat:repeat,no-repeat;border-radius:16px;box-shadow:0 7px 0 rgba(16,36,58,.12),0 14px 0 rgba(16,36,58,.16)} .ds-page i{position:absolute;left:23px;width:18px;height:18px;border-radius:50%;background:#e6dcc6;border:2px solid #cfc2a4} .ds-page i:nth-child(1){top:51px} .ds-page i:nth-child(2){top:143px}"
+    },
+    {
+      "name": "Yes! 印章 Stamp",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "選對時蓋在卡片右上角；雙圈、-14°、無貼紙白邊。",
+      "html": "<div class=\"ds-stamp\"><svg width=\"120\" height=\"120\" viewBox=\"0 0 240 240\"><g transform=\"rotate(-14 120 120)\"><circle cx=\"120\" cy=\"120\" r=\"86\" fill=\"none\" stroke=\"#2f8a5b\" stroke-width=\"10\"/><circle cx=\"120\" cy=\"120\" r=\"70\" fill=\"none\" stroke=\"#2f8a5b\" stroke-width=\"3.5\" stroke-dasharray=\"7 7\"/></g></svg><span>Yes!</span></div>",
+      "css": ".ds-stamp{position:relative;width:120px;height:120px;animation:ds-stamp .26s cubic-bezier(.34,1.56,.64,1)} .ds-stamp span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg);font-family:'Andika','Huninn','Segoe UI',sans-serif;font-weight:700;font-size:30px;color:#2f8a5b} @keyframes ds-stamp{from{opacity:0;transform:scale(1.8)}to{opacity:1;transform:scale(1)}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "孩子的貼紙手帳",
+    "overview": "每一個畫面都是孩子手帳裡的一頁：米白點格紙、珊瑚色裝訂線、斜斜貼上的條紋紙膠帶；角色、物品和答案都是一張張有白色切割邊、深藍墨線、柔和落影的貼紙。孩子「選答案」的動作在這個世界裡就是「挑一張貼紙貼上去」，選對就蓋一個綠色圓章。拒絕一般兒童遊戲的圓角塑膠按鈕與漸層面板（使用者在 A／B 對照稿中選定 A，2026-11-17，要求「素材要精緻點」）。\n\n畫面以 Phaser canvas 1280×720 為座標，等比縮放（`Phaser.Scale.FIT`、置中）。密度偏低：一頁只有一位說話者、一句英文、一排四張卡，大字、大目標，給在家自己用平板玩的國小學童。所有尺寸以 canvas px 記錄；在 iPad 1024×768 上約乘 0.8。\n\n這套系統目前**只套用在市集視窗與全域共用元件**（`makeButton` 貼紙按鈕、`closeButton` 關閉貼紙）。草地、日記本、圖鑑、實驗站、邀請卡等其他視窗仍是舊的程式繪製風格，改版時以本文件為準，不要反過來以舊畫面為準。",
+    "keyCharacteristics": [
+      "一切可點的東西都是貼紙：白色切割邊＋深藍墨線＋暖色柔和落影",
+      "紙張與紙膠帶是背景材質，不是按鈕",
+      "每張貼紙卡有不同的小角度（-2.5° 到 2.5°），像手貼上去",
+      "英文用 Andika、中文用粉圓（Huninn），兩者分工固定",
+      "對錯回饋同時用形狀、動作、聲音、文字，不只靠顏色"
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "輪廓線只有深藍墨線一種顏色。不要用黑色、灰色或物件本身的深色描邊；新素材的線條一律是墨線色。",
+        "section": "colors"
+      },
+      {
+        "name": "The Tape Is Paper Rule",
+        "body": "紙膠帶只用芥末與湖水兩色、半透明（0.88）加白色斜紋；它是頁面材質，可以承載標題，但永遠不可點。",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Hands Rule",
+        "body": "英文永遠用 Andika，中文永遠用粉圓；不要用粉圓排英文句子，也不要用 Andika 排中文。",
+        "section": "typography"
+      },
+      {
+        "name": "The Shrink Not Wrap Rule",
+        "body": "對話英文不換行：太長就從 46px 往下縮，最小 34px。比 34px 還長的句子要改短，不是再縮。",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper Shadow Rule",
+        "body": "落影一律是暖褐（或頁面的夜幕色）、向下、柔和低透明度；不要用黑色硬邊偏移陰影，也不要向上或向四周發光。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** 讓每個可點的東西都是貼紙：白色切割邊、3px 深藍墨線、向下的暖色柔和落影。",
+      "**Do** 把答案做成一排貼紙卡，每張給不同的小角度（-2.5°～2.5°）。",
+      "**Do** 英文用 Andika、中文用粉圓；對話英文 46px 起、最小 34px。",
+      "**Do** 選對用印章＋動作＋語音，選錯用變淡＋搖動＋語音＋中文字幕，不只靠顏色。",
+      "**Do** 新圖片用 `tools/art/stickers.js` 的同一套規格產生，不手畫不同線寬或不同墨色的素材。",
+      "**Do** 中文字幕與卡片中文用字幕石板灰，維持 4.5:1 以上的對比。"
+    ],
+    "donts": [
+      "**Don't** 用一般兒童遊戲的圓角塑膠按鈕或漸層面板（使用者在 A／B 對照稿中否決的方向）。",
+      "**Don't** 用黑色或硬邊偏移陰影；落影永遠是暖褐、柔和、向下。",
+      "**Don't** 讓紙膠帶變成按鈕，或增加第三種膠帶色。",
+      "**Don't** 把英文對話換行或縮到 34px 以下；改寫句子。",
+      "**Don't** 把印章做成貼紙白邊，或把「Yes!」烘進 SVG（SVG 讀不到網頁字型）。"
+    ]
+  }
+}

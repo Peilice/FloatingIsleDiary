@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f9b78d"/><stop offset="0.55" stop-color="#f4823a"/><stop offset="1" stop-color="#cd713a"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fbc496"/><stop offset="0.55" stop-color="#f8994a"/><stop offset="1" stop-color="#d18447"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f9b78d"/><stop offset="0.55" stop-color="#f4823a"/><stop offset="1" stop-color="#cd713a"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M30 126 L8 92 Q12 126 8 160Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M30 126 Q60 64 140 66 Q206 70 222 126 Q206 184 140 186 Q60 188 30 126Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M110 68 Q130 36 168 50 Q160 64 160 72Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M90 110 Q100 126 90 142 M114 104 Q126 126 114 148 M138 104 Q150 126 138 148" fill="none" stroke="#c17b46" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="178" cy="112" rx="7.74" ry="9" fill="#2b3a55" /><circle cx="175.3" cy="108.58" r="3.06" fill="#fff" /><circle cx="180.52" cy="114.7" r="1.2600000000000002" fill="#fff" />
+    <path d="M194 140 Q197 144.2 200 140 Q203 144.2 206 140" fill="none" stroke="#2b3a55" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="172" cy="142" rx="7" ry="4.34" fill="#f48fa6" opacity=".55"/>
+    <ellipse cx="130" cy="84" rx="26" ry="8" fill="#ffffff" opacity=".45" transform="rotate(-6 130 84)"/>
+  </g>
+</svg>

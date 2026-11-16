@@ -4,7 +4,15 @@
  * 偵錯：?fast=1 為 4 倍速（也可 ?fast=20）、?reset=1 清除存檔、?bot=1 亂點機器人（忽略測試，用另一個存檔）。 */
 (() => {
   const W = 1280, H = 720;
-  const FONT = '"Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif';
+  const FONT = '"Huninn","Noto Sans TC","Microsoft JhengHei","PingFang TC","Heiti TC",sans-serif';
+  // 英文用 Andika：識字教學字型，a、g 是手寫形狀，I、l、1 好分辨
+  const FONT_EN = '"Andika","Huninn","Segoe UI",sans-serif';
+  // 手帳貼紙風（DESIGN：PRODUCT.md、.impeccable/briefs/market.md）
+  const INK = 0x2b3a55;             // 墨線
+  const PAPER = 0xfbf6ea;           // 手帳內頁
+  // 貼紙素材（tools/art/stickers.js 產生，放在 game/art/）
+  const ART_KEYS = ['panda', 'lion', 'tiger', 'bear', 'dog', 'pig', 'chicken', 'elephant', 'snake', 'deer', 'dolphin', 'whale',
+    'rabbit', 'frog', 'duck', 'fish', 'bird', 'monkey', 'cow', 'horse', 'fox', 'stamp'];
   const params = new URLSearchParams(location.search);
   const FAST = Number(params.get('fast')) || 0;
   const SPEED = FAST > 1 ? FAST : (FAST ? 4 : 1);
@@ -1324,14 +1332,66 @@
     g.fillTriangle(tailX - 12, y + h - 2, tailX + 12, y + h - 2, tailX, y + h + 18);
   }
 
+  // 貼紙卡：白色切割邊＋柔和落影＋內頁紙＋墨線（手帳貼紙風）
+  function drawStickerCard(g, w, h, fill) {
+    g.clear();
+    g.fillStyle(0x3b2f1e, 0.10); g.fillRoundedRect(-w / 2 + 2, -h / 2 + 9, w, h, 28);
+    g.fillStyle(0x3b2f1e, 0.10); g.fillRoundedRect(-w / 2 + 1, -h / 2 + 5, w, h, 28);
+    g.fillStyle(0xffffff, 1); g.fillRoundedRect(-w / 2, -h / 2, w, h, 28);
+    g.fillStyle(fill == null ? 0xfdf9f0 : fill, 1); g.fillRoundedRect(-w / 2 + 10, -h / 2 + 10, w - 20, h - 20, 20);
+    g.lineStyle(3, INK, 1); g.strokeRoundedRect(-w / 2 + 10, -h / 2 + 10, w - 20, h - 20, 20);
+  }
+  // 紙膠帶：半透明色條＋白色斜紋
+  function washiTape(scene, x, y, w, color, angle) {
+    const t = scene.add.graphics({ x, y }).setAngle(angle);
+    t.fillStyle(color, 0.88); t.fillRect(-w / 2, -18, w, 36);
+    t.fillStyle(0xffffff, 0.32);
+    for (let i = -w / 2 + 6; i < w / 2 - 6; i += 22) t.fillTriangle(i, -18, i + 10, -18, i - 4, 18);
+    t.fillStyle(0x000000, 0.06); t.fillRect(-w / 2, 14, w, 4);
+    return t;
+  }
+  // 手帳內頁：米白紙、淡褐點格、珊瑚色裝訂線
+  function notebookPage(scene, x0, y0, w, h) {
+    const key = 'nb-' + w + 'x' + h;
+    if (!scene.textures.exists(key)) {
+      const x = 0, y = 0;
+      const g = scene.make.graphics({ add: false });
+    g.fillStyle(0x10243a, 0.16); g.fillRoundedRect(x + 4, y + 14, w, h, 16);
+    g.fillStyle(0x10243a, 0.12); g.fillRoundedRect(x + 2, y + 7, w, h, 16);
+    g.fillStyle(PAPER, 1); g.fillRoundedRect(x, y, w, h, 16);
+    g.fillStyle(0xddd0b2, 1);
+    for (let yy = y + 30; yy < y + h - 12; yy += 30) for (let xx = x + 90; xx < x + w - 12; xx += 30) g.fillCircle(xx, yy, 2);
+    g.lineStyle(3, 0xef9f96, 1); g.lineBetween(x + 66, y + 4, x + 66, y + h - 4);
+    g.fillStyle(0xe6dcc6, 1); for (let yy = y + 60; yy < y + h - 30; yy += 92) g.fillCircle(x + 32, yy, 9);
+    g.lineStyle(2, 0xcfc2a4, 1); for (let yy = y + 60; yy < y + h - 30; yy += 92) g.strokeCircle(x + 32, yy, 9);
+      g.generateTexture(key, w + 6, h + 16);
+      g.destroy();
+    }
+    return scene.add.image(x0, y0, key).setOrigin(0);
+  }
+  // 手寫感的對話框：圓角框＋尾巴，墨線
+  function inkBubble(g, x, y, w, h, tailX) {
+    g.clear();
+    g.fillStyle(0x3b2f1e, 0.10); g.fillRoundedRect(x + 2, y + 6, w, h, 26);
+    g.fillStyle(0xffffff, 1); g.lineStyle(3, INK, 1);
+    g.fillRoundedRect(x, y, w, h, 26); g.strokeRoundedRect(x, y, w, h, 26);
+    g.fillTriangle(tailX, y + h - 22, tailX, y + h + 6, tailX - 34, y + h + 26);
+    g.lineBetween(tailX, y + h + 4, tailX - 34, y + h + 26); g.lineBetween(tailX - 34, y + h + 26, tailX - 22, y + h - 2);
+  }
+
   // 圓角按鈕：回傳 container，bg 可以重畫
   function makeButton(scene, x, y, w, h, color, label, size, onTap) {
     const c = scene.add.container(x, y);
     const bg = scene.add.graphics();
-    bg.fillStyle(0x000000, 0.15); bg.fillRoundedRect(-w / 2, -h / 2 + 5, w, h, h / 2);
-    bg.fillStyle(color, 1); bg.fillRoundedRect(-w / 2, -h / 2, w, h, h / 2);
+    // 貼紙按鈕：白色切割邊、墨線、柔和落影
+    const r = Math.min(h / 2, 22);
+    bg.fillStyle(0x3b2f1e, 0.16); bg.fillRoundedRect(-w / 2, -h / 2 + 6, w, h, r);
+    bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-w / 2, -h / 2, w, h, r);
+    bg.fillStyle(color, 1); bg.fillRoundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, Math.max(4, r - 5));
+    bg.lineStyle(3, INK, 1); bg.strokeRoundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, Math.max(4, r - 5));
     c.add(bg);
-    if (label) c.add(txt(scene, 0, 0, label, size || 28, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+    const en = label && /^[ -~]+$/.test(label);
+    if (label) c.add(txt(scene, 0, 0, label, size || 28, '#ffffff', { fontStyle: 'bold', fontFamily: en ? FONT_EN : FONT }).setOrigin(0.5));
     c.setSize(w, h).setInteractive({ useHandCursor: true });
     c.on('pointerdown', onTap);
     return c;
@@ -1369,6 +1429,11 @@
 
   // ---------- 島嶼主畫面 ----------
   class Island extends Phaser.Scene {
+    preload() {
+      // 貼紙用 2 倍解析度點陣化，顯示時縮小，平板上才清楚
+      ART_KEYS.forEach((k) => this.load.svg('st-' + k, 'art/' + k + '.svg', { width: 320, height: 320 }));
+    }
+
     constructor() { super('Island'); }
 
     create() {
@@ -1787,8 +1852,10 @@
     closeButton(c, x, y, onTap) {
       const close = this.add.container(x, y);
       const cg = this.add.graphics();
-      cg.fillStyle(0xff7043, 1); cg.fillCircle(0, 0, 30);
-      cg.lineStyle(6, 0xffffff, 1); cg.lineBetween(-11, -11, 11, 11); cg.lineBetween(-11, 11, 11, -11);
+      cg.fillStyle(0x3b2f1e, 0.18); cg.fillCircle(0, 6, 36);
+      cg.fillStyle(0xffffff, 1); cg.fillCircle(0, 0, 36);
+      cg.fillStyle(0xf26b55, 1); cg.fillCircle(0, 0, 28); cg.lineStyle(3, INK, 1); cg.strokeCircle(0, 0, 28);
+      cg.lineStyle(6, 0xffffff, 1); cg.lineBetween(-10, -10, 10, 10); cg.lineBetween(-10, 10, 10, -10);
       close.add(cg); close.setSize(70, 70).setInteractive({ useHandCursor: true });
       close.on('pointerdown', onTap);
       c.add(close);
@@ -2938,28 +3005,35 @@
 
     buildMarket() {
       // 工具列右側的市集按鈕（開放後才出現）
-      this.mkBtn = makeButton(this, 1165, 662, 140, 70, 0xe57373, '市集', 26, () => this.openMarket()).setDepth(31);
+      this.mkBtn = makeButton(this, 1165, 662, 140, 70, 0xc4473d, '市集', 26, () => this.openMarket()).setDepth(31);
 
-      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Market 市集', 28, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.mkWho = makeIcon(this, 'rabbit', 260, 210, 2);
-      const bub = this.add.graphics(); drawBubble(bub, 330, 140, 600, 110, 360);
-      this.mkSay = txt(this, 352, 158, '', 32, '#27384a', { fontStyle: 'bold' });
-      this.mkZh = txt(this, 352, 206, '', 20, '#6b7c8c');
-      c.add([this.mkWho, bub, this.mkSay, this.mkZh]);
-      const lis = this.add.container(990, 195);
-      const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 32);
-      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 1)]);
+      // 手帳貼紙風：市集是一頁手帳，訂單的答案是可以貼上去的貼紙
+      const c = this.add.container(0, 0).setDepth(80).setVisible(false);
+      c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x10243a, 0.55).setInteractive());
+      c.add(notebookPage(this, 150, 64, 980, 610));
+      c.add([washiTape(this, 262, 74, 200, 0xf2b84b, -7), washiTape(this, 1030, 74, 170, 0x7fc4dc, 6)]);
+      c.add(txt(this, 262, 74, '市集 Market', 22, '#2b3a55').setOrigin(0.5).setAngle(-7));
+      this.mkWho = makeIcon(this, 'rabbit', 285, 222, 2).setVisible(false);
+      this.mkWhoImg = this.add.image(285, 222, 'st-rabbit').setDisplaySize(170, 170);
+      const bub = this.add.graphics(); inkBubble(bub, 392, 150, 600, 128, 412);
+      this.mkSay = txt(this, 424, 166, '', 46, '#2b3a55', { fontFamily: FONT_EN, fontStyle: 'bold' });
+      this.mkZh = txt(this, 426, 230, '', 22, '#4f5a6b');
+      c.add([this.mkWho, this.mkWhoImg, bub, this.mkSay, this.mkZh]);
+      const lis = this.add.container(1060, 214);
+      const lg = this.add.graphics();
+      lg.fillStyle(0x3b2f1e, 0.16); lg.fillCircle(0, 5, 34); lg.fillStyle(0xffffff, 1); lg.fillCircle(0, 0, 34);
+      lg.fillStyle(0xdcedf4, 1); lg.fillCircle(0, 0, 26); lg.lineStyle(3, INK, 1); lg.strokeCircle(0, 0, 26);
+      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 0.9)]);
       lis.setSize(70, 70).setInteractive({ useHandCursor: true });
       lis.on('pointerdown', () => { if (this.mo) speak(this.mo.text); });
       c.add(lis);
 
       // 水果：6 籃，點幾下放幾個；換一籃就重新開始
       this.mkBins = BINS.map(([item, color], i) => {
-        const b = this.add.container(310 + (i % 3) * 165, 345 + Math.floor(i / 3) * 125);
-        const bg = this.add.graphics();
-        bg.fillStyle(0xd7b98e, 1); bg.fillRoundedRect(-72, -52, 144, 104, 18);
-        bg.fillStyle(0xbf9a68, 1); bg.fillRoundedRect(-72, 20, 144, 32, 12);
+        const b = this.add.container(320 + (i % 3) * 170, 392 + Math.floor(i / 3) * 140).setAngle([-2, 1.5, -1, 1, -1.5, 2][i]);
+        const bg = this.add.graphics(); drawStickerCard(bg, 156, 124, 0xf3e3c4);
+        bg.fillStyle(0xdcc49b, 1); bg.fillRoundedRect(-68, 18, 136, 34, { tl: 0, tr: 0, bl: 18, br: 18 });
+        bg.lineStyle(3, INK, 1); bg.lineBetween(-68, 18, 68, 18);
         const g = this.add.graphics({ y: -6 }).setScale(1.5); drawFruit(g, item, color);
         b.add([bg, g]);
         b.setSize(144, 104).setInteractive({ useHandCursor: true });
@@ -2967,26 +3041,22 @@
         c.add(b);
         return b;
       });
-      this.mkBasket = this.add.container(905, 365);
-      const bk = this.add.graphics();
-      bk.fillStyle(0xffffff, 1); bk.fillRoundedRect(-125, -75, 250, 150, 20);
-      bk.lineStyle(4, 0xbf9a68, 1); bk.strokeRoundedRect(-125, -75, 250, 150, 20);
+      this.mkBasket = this.add.container(915, 395).setAngle(1.5);
+      const bk = this.add.graphics(); drawStickerCard(bk, 270, 170);
       this.mkBasketG = [0, 1, 2, 3, 4].map(() => this.add.graphics({ y: -4 }).setScale(1.1).setVisible(false));
-      this.mkBasketN = txt(this, 0, 48, '', 22, '#6b7c8c').setOrigin(0.5);
-      this.mkBasket.add([bk].concat(this.mkBasketG, [this.mkBasketN, txt(this, 0, -58, 'Basket 籃子', 18, '#8d6e4a').setOrigin(0.5)]));
-      this.mkClear = makeButton(this, 835, 490, 110, 54, 0x90a4ae, 'Clear', 22, () => this.clearFruit());
-      this.mkGive = makeButton(this, 905, 565, 250, 64, 0x43a047, 'Here you are.', 24, () => this.giveFruit());
+      this.mkBasketN = txt(this, 0, 48, '', 24, '#6b7686', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5);
+      this.mkBasket.add([bk].concat(this.mkBasketG, [this.mkBasketN, txt(this, 0, -58, 'Basket 籃子', 20, '#a0573a').setOrigin(0.5)]));
+      this.mkClear = makeButton(this, 830, 524, 120, 56, 0x8fa3b3, 'Clear', 24, () => this.clearFruit());
+      this.mkGive = makeButton(this, 930, 604, 270, 66, 0x2f8a5b, 'Here you are.', 26, () => this.giveFruit());
       c.add([this.mkBasket, this.mkClear, this.mkGive]);
 
       // 衣物：4 張卡片，點一張就交出去
       this.mkClothes = [0, 1, 2, 3].map((i) => {
-        const card = this.add.container(640 + (i - 1.5) * 190, 435);
-        const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-85, -100, 170, 200, 24);
-        bg.lineStyle(4, 0xef9a9a, 1); bg.strokeRoundedRect(-85, -100, 170, 200, 24);
+        const card = this.add.container(640 + (i - 1.5) * 210, 470).setAngle([-2.5, 1.5, -1, 2.5][i]);
+        const bg = this.add.graphics(); drawStickerCard(bg, 180, 214);
         const icon = makeIcon(this, 'hat', 0, -28, 1.8);
-        const en = txt(this, 0, 48, '', 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 80, '', 20, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 48, '', 30, '#2b3a55', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 80, '', 20, '#4f5a6b').setOrigin(0.5);
         card.add([bg, icon, en, zh]);
         card.setSize(170, 200).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickCloth(i));
@@ -2998,22 +3068,26 @@
       this.mkRoad.fillStyle(0xbdbdbd, 1); this.mkRoad.fillRect(610, 290, 60, 300); this.mkRoad.fillRect(420, 410, 440, 60);
       this.mkRoad.fillStyle(0xffffff, 1); for (let y = 300; y < 580; y += 30) this.mkRoad.fillRect(637, y, 6, 14); for (let x = 430; x < 850; x += 30) this.mkRoad.fillRect(x, 437, 14, 6);
       c.add(this.mkRoad);
-      this.mkWay = [[640, 320], [450, 440], [830, 440], [640, 560]].map(([x, y], i) => {
-        const card = this.add.container(x, y);
-        const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-62, -48, 124, 96, 14); bg.lineStyle(3, 0xb0bec5, 1); bg.strokeRoundedRect(-62, -48, 124, 96, 14);
-        const pic = this.add.graphics({ y: -6 }).setScale(1.1);
-        const zh = txt(this, 0, 36, '', 16, '#6b7c8c').setOrigin(0.5);
-        const en = txt(this, 0, -6, '', 17, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        card.add([bg, pic, zh, en]);
-        card.setSize(124, 96).setInteractive({ useHandCursor: true });
+      this.mkWay = [0, 1, 2, 3].map((i) => {
+        const card = this.add.container(640, 470);
+        const bg = this.add.graphics(); drawStickerCard(bg, 196, 214);
+        const pic = this.add.graphics({ y: -14 }).setScale(1.7);
+        const img = this.add.image(0, -10, 'st-panda').setDisplaySize(158, 158).setVisible(false);
+        const zh = txt(this, 0, 76, '', 20, '#4f5a6b').setOrigin(0.5);
+        const en = txt(this, 0, -14, '', 30, '#2b3a55', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5);
+        const stamp = this.add.container(46, -62).setVisible(false);
+        stamp.add([this.add.image(0, 0, 'st-stamp').setDisplaySize(120, 120),
+          txt(this, 0, 2, 'Yes!', 30, '#2f8a5b', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5).setAngle(-14)]);
+        card.add([bg, pic, img, zh, en, stamp]);
+        card.setSize(196, 214).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickWay(i));
         c.add(card);
-        return { card, pic, zh, en, x };
+        return { card, pic, img, zh, en, stamp, x: 640, tilt: [-2.5, 1.5, -1, 2.5][i] };
       });
       this.mkHint = this.add.graphics({ x: 330, y: 615 });
       this.mkHintT = txt(this, 360, 615, '', 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0, 0.5);
       c.add([this.mkHint, this.mkHintT]);
-      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.closeButton(c, 1122, 74, () => this.closeModal());
       this.mkBox = c;
     }
 
@@ -3068,23 +3142,36 @@
       const o = this.mo;
       if (!o) return;
       drawIcon(this.mkWho, o.who);
+      const whoTex = 'st-' + o.who, hasWho = this.textures.exists(whoTex);
+      this.mkWho.setVisible(!hasWho); this.mkWhoImg.setVisible(hasWho);
+      if (hasWho) this.mkWhoImg.setTexture(whoTex).setDisplaySize(170, 170);
       const st = Math.min.apply(null, o.words.map((w) => L.stage(this.s.words, w)));
       this.mkSay.setText(o.text);
+      for (let fs = 46; fs >= 34; fs -= 2) { this.mkSay.setFontSize(fs); if (this.mkSay.width <= 560) break; }
       this.mkZh.setText(this.subs() && (st === 0 || o.reveal) ? o.zh : '');
       const fruit = o.type === 'fruit', way = !!o.pick;
       this.mkBins.forEach((b) => b.setVisible(fruit));
       [this.mkBasket, this.mkClear, this.mkGive].forEach((x) => x.setVisible(fruit));
       this.mkRoad.setVisible(o.type === 'way');
+      const road = o.type === 'way';
       this.mkWay.forEach((c, i) => {
         c.card.setVisible(way);
         if (!way) return;
-        const P = PICK_ORDERS[o.type];
+        const P = PICK_ORDERS[o.type], k = o.spots[i];
+        // 指路：縮小排在十字路口的四個方向；其他：4 張貼紙排一排
+        const pos = road ? [[640, 330], [452, 450], [828, 450], [640, 572]][i] : [640 + (i - 1.5) * 222, 470];
+        c.x = pos[0]; c.card.setPosition(pos[0], pos[1]).setScale(road ? 0.56 : 1).setAngle(road ? 0 : c.tilt);
+        const tex = 'st-' + k, useImg = o.type === 'zoo' && this.textures.exists(tex);
+        c.img.setVisible(useImg); c.pic.setVisible(!useImg);
+        if (useImg) c.img.setTexture(tex).setDisplaySize(158, 158);
         // 身體部位的小人比較細，放大一點才看得清楚五官
-        if (o.type === 'body') c.pic.setScale(1.3).setY(0); else c.pic.setScale(1.1).setY(-6);
-        P.draw(c.pic, o.spots[i]);
-        c.en.setText(P.label ? P.label(o.spots[i]) : '');
-        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? zhOf(o.spots[i]) : '');
-        c.card.setAlpha(o.wrong[o.spots[i]] ? 0.35 : 1);
+        c.pic.setScale(o.type === 'body' ? 2.2 : road ? 1.9 : 1.7).setY(o.type === 'body' ? -4 : -14);
+        P.draw(c.pic, k);
+        c.en.setText(P.label ? P.label(k) : '');
+        c.zh.setFontSize(road ? 30 : 20);
+        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? zhOf(k) : '');
+        c.stamp.setVisible(!!o.done && k === o.answer);
+        c.card.setAlpha(o.wrong[k] ? 0.35 : 1);
       });
       this.mkClothes.forEach((c, i) => {
         c.card.setVisible(!fruit && !way);
@@ -3146,7 +3233,7 @@
       if (all) { this.orderDone(); return; }
       o.tries += 1; o.reveal = true;
       o.basket = { bin: null, n: 0 };
-      this.tweens.add({ targets: this.mkWho, angle: 10, yoyo: true, repeat: 2, duration: 90, onComplete: () => this.mkWho.setAngle(0) });
+      this.tweens.add({ targets: [this.mkWho, this.mkWhoImg], angle: 10, yoyo: true, repeat: 2, duration: 90, onComplete: () => { this.mkWho.setAngle(0); this.mkWhoImg.setAngle(0); } });
       speak('No, thank you. ' + o.text);
       this.renderMarket();
     }
@@ -3161,7 +3248,13 @@
       if (o.tries === 0) { st.q += 1; if (right) st.first += 1; }
       if (!o.recorded) { L.answer(s.words, o.answer, { day: s.day, options: 4, firstTry: right, peeked: false }); o.recorded = true; }
       speak(k);
-      if (right) { speak(PICK_ORDERS[o.type].thanks(k)); this.orderDone(); return; }
+      if (right) {
+        speak(PICK_ORDERS[o.type].thanks(k));
+        c.stamp.setVisible(true).setAlpha(0).setScale(1.8);
+        this.tweens.add({ targets: c.stamp, alpha: 1, scale: 1, duration: 260, ease: 'Back.easeOut' });
+        this.orderDone();
+        return;
+      }
       o.tries += 1; o.reveal = true; o.wrong[k] = true;
       this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
       speak('No. ' + o.text);
@@ -3194,8 +3287,8 @@
       const paid = s.mkPaid.n < MARKET_PAID + (s.fixed.dock ? 1 : 0); // 碼頭修好：每天多 1 單
       if (paid) { s.mkPaid.n += 1; s.stardust += 4; }
       if (o.type === 'fruit') speak('Thank you!');
-      this.floatText(640, 300, paid ? 'Thank you!  +4 ★' : 'Thank you!' + (this.subs() ? '  今天的星砂拿完了' : ''), '#d81b60', true);
-      this.tweens.add({ targets: this.mkWho, y: this.mkWho.y - 30, yoyo: true, duration: 200 });
+      this.floatText(640, 648, paid ? 'Thank you!  星砂 +4' : 'Thank you!' + (this.subs() ? '  今天的星砂拿完了' : ''), '#c2185b', true);
+      this.tweens.add({ targets: [this.mkWho, this.mkWhoImg], y: '-=30', yoyo: true, duration: 200 });
       this.refreshAll();
       this.time.delayedCall(BOT ? 50 : 1400, () => { if (this.modal === 'market' && this.mo === o) this.newOrder(); });
     }
@@ -6835,7 +6928,14 @@
     }
   }
 
-  new Phaser.Game({
+  const fontsReady = (document.fonts && document.fonts.load)
+    ? Promise.race([
+      Promise.all([['20px Huninn', '浮島日記市集圖鑑在哪裡貓熊星砂今天'], ['bold 20px Andika', 'Where is the panda?'], ['20px Andika', 'abg Il1']]
+        .map(([f, t]) => document.fonts.load(f, t).catch(() => null))),
+      new Promise((r) => setTimeout(r, 2500)),
+    ])
+    : Promise.resolve();
+  fontsReady.then(() => new Phaser.Game({
     type: Phaser.AUTO,
     width: W, height: H,
     parent: 'game',
@@ -6843,5 +6943,5 @@
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 2 },
     scene: [Title, Island],
-  });
+  }));
 })();
