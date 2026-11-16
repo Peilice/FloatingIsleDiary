@@ -203,6 +203,34 @@
   // 拼字（§4.24）：180 個拼寫字裡、遊戲中有圖可畫的字
   const SPELL = ['bean', 'sunny', 'cloudy', 'rainy', 'windy', 'fish', 'bird', 'apple', 'grape', 'banana', 'hat', 'coat', 'rock', 'mud', 'moon', 'star', 'bell', 'drum', 'paper', 'bottle', 'water', 'tree', 'grass', 'lamp', 'box', 'rain'];
 
+  // 家長端的課綱清單：keys 是 touch() 記錄的機制
+  const CURRICULUM = [
+    { name: '植物生長與部位', codes: 'INb-Ⅱ-6、INa-Ⅱ-7、INe-Ⅱ-11', keys: ['plant'] },
+    { name: '天氣與觀測', codes: 'INd-Ⅱ-4、INd-Ⅱ-6、INd-Ⅱ-7', keys: ['weather'] },
+    { name: '衣物與天氣', codes: 'INf-Ⅱ-4', keys: ['clothes'] },
+    { name: '動物與棲地', codes: 'INc-Ⅱ-8、INb-Ⅱ-5、INb-Ⅱ-7', keys: ['habitat'] },
+    { name: '聲音與振動', codes: 'INe-Ⅱ-5、INe-Ⅱ-10', keys: ['sound', 'music', 'fog'] },
+    { name: '溶解與溫度', codes: 'INe-Ⅱ-2、INe-Ⅱ-3', keys: ['tea'] },
+    { name: '酸鹼與變色', codes: 'INe-Ⅱ-4', keys: ['acid'] },
+    { name: '光與方位', codes: 'INe-Ⅱ-6、INa-Ⅱ-6', keys: ['light'] },
+    { name: '月亮盈虧', codes: 'INc-Ⅱ-10、INc-Ⅱ-7', keys: ['moon'] },
+    { name: '磁鐵', codes: 'INe-Ⅱ-7', keys: ['magnet'] },
+    { name: '電路與導體', codes: 'INe-Ⅱ-8、INe-Ⅱ-9', keys: ['circuit'] },
+    { name: '力與運動', codes: 'INc-Ⅱ-3、INd-Ⅱ-8', keys: ['push'] },
+    { name: '岩石砂土', codes: 'INc-Ⅱ-9、INd-Ⅱ-5', keys: ['dig'] },
+    { name: '地震防災', codes: 'INf-Ⅱ-6', keys: ['drill'] },
+    { name: '環境與回收', codes: 'INf-Ⅱ-5、INf-Ⅱ-7、INg-Ⅱ-1～3', keys: ['recycle'] },
+    { name: '水循環', codes: 'INd-Ⅲ-11、INd-Ⅲ-12、INc-Ⅲ-12', keys: ['water'] },
+    { name: '天氣圖與颱風', codes: 'INd-Ⅲ-7、INf-Ⅲ-5', keys: ['typhoon'] },
+    { name: '食物鏈', codes: 'INa-Ⅲ-10、INc-Ⅲ-9、INe-Ⅲ-12', keys: ['food'] },
+    { name: '光合作用', codes: 'INa-Ⅲ-9', keys: ['photo'] },
+    { name: '音調', codes: 'INe-Ⅲ-6', keys: ['pitch'] },
+    { name: '化石與地層', codes: 'INc-Ⅲ-11、INd-Ⅲ-8～10', keys: ['fossil'] },
+    { name: '英語：生活對話（市集、日曆）', codes: '英語 B-Ⅱ-1、C-Ⅱ-2、D-Ⅱ-1', keys: ['market', 'calendar'] },
+    { name: '英語：句子回顧（日記）', codes: '英語 Ae-Ⅲ-12、B-Ⅲ-1、Ad-Ⅲ-11', keys: ['diary'] },
+    { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
+  ];
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -295,6 +323,17 @@
       s.harvestedV = 1;
     }
     while (s.lots.length < LOT_X.length) s.lots.push({ hab: null, animal: null }); // 森林擴建前的存檔
+    // 家長端的「接觸過的機制」：舊存檔從已有的資料推算（只算看得出來玩過的）
+    if (!s.touched) {
+      const t = s.touched = {};
+      if ((s.harvested || 0) > 0 || (s.gaveTotal || 0) > 0) t.plant = 1;
+      if ((s.askedDay || 0) > 0) t.weather = 1;
+      if (s.lots && s.lots.some((l) => l.animal)) t.habitat = 1;
+      if (s.diary && s.diary.length) t.diary = 1;
+      if (s.party || (s.lastInvite || 0) > 0) t.calendar = 1;
+      if ((s.drillDay || 0) > 0) t.drill = 1;
+      if (s.paid) Object.keys(s.paid).forEach((k) => { if (k !== 'day') t[k] = 1; });
+    }
     if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; s.caveOpen = true; s.lightOpen = true; } // 偵錯：直接開放所有區域
     return s;
   }
@@ -915,6 +954,7 @@
       this.buildDrill();
       this.buildRecycle();
       this.buildLab();
+      this.buildParent();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1196,7 +1236,19 @@
       sg.fillStyle(0xffffff, 1); sg.fillCircle(0, 0, 6);
       sb.add(sg);
       sb.setSize(60, 60).setInteractive({ useHandCursor: true });
-      sb.on('pointerdown', () => this.openSettings());
+      // 點一下：設定；長按 3 秒：家長端（§3.6）
+      sb.on('pointerdown', () => {
+        if (this.gearTimer) this.gearTimer.remove();
+        this.gearLong = false;
+        this.gearTimer = this.time.delayedCall(3000, () => { this.gearLong = true; this.gearTimer = null; this.openParentGate(); });
+      });
+      const up = () => {
+        if (!this.gearTimer) return;
+        this.gearTimer.remove(); this.gearTimer = null;
+        if (!this.gearLong) this.openSettings();
+      };
+      sb.on('pointerup', up);
+      sb.on('pointerout', () => { if (this.gearTimer) { this.gearTimer.remove(); this.gearTimer = null; } });
 
       // 日進度
       this.dayBar = this.add.graphics().setDepth(40);
@@ -1436,7 +1488,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1546,6 +1598,7 @@
       this.floatText(o.x, o.y - 70, '+1 ' + key, '#e65100');
       this.sparkle(o.x, o.y - 40);
       this.markDone('pick');
+      this.touch('plant');
       this.checkBeach();
       this.refreshAll();
     }
@@ -1961,6 +2014,7 @@
       if (right) {
         if (!q.recorded) L.answer(s.words, A.clue, { day: s.day, options: HAB_KEYS.length, firstTry: q.tries === 0, peeked: q.peeked });
         lot.animal = v; s.visitor = null;
+        this.touch('habitat');
         s.lib[v] = true;
         s.ev.came.push(v);
         s.stardust += 3;
@@ -2109,6 +2163,7 @@
       if (k === q.answer) {
         q.done = true;
         if (!q.recorded) L.answer(this.s.words, k, { day: this.s.day, options: q.order.length, firstTry: q.tries === 0, peeked: q.peeked });
+        this.touch('sound');
         this.s.stardust += 2;
         c.bg.lineStyle(6, 0x43a047, 1); c.bg.strokeRoundedRect(-85, -100, 170, 200, 24);
         this.tweens.add({ targets: c.card, scale: 1.12, yoyo: true, duration: 200 });
@@ -2334,6 +2389,7 @@
     orderDone() {
       const o = this.mo;
       o.done = true;
+      this.touch(o.type === 'fruit' ? 'market' : 'clothes');
       this.s.stardust += 4;
       if (o.type === 'fruit') speak('Thank you!');
       this.floatText(640, 300, 'Thank you!  +4 ★', '#d81b60', true);
@@ -2439,6 +2495,7 @@
       if (right) {
         q.done = true;
         s.party = { day: q.target, who: q.who };
+        this.touch('calendar');
         c.bg.lineStyle(6, 0x43a047, 1); c.bg.strokeRoundedRect(-62, -60, 124, 120, 18);
         this.time.delayedCall(BOT ? 20 : 900, () => {
           this.ivBox.setVisible(false); this.modal = null;
@@ -2513,6 +2570,7 @@
     // 實驗站開著時時間暫停，為了不讓星砂可以無限刷：每站每天只有前 STATION_PAID 回合給星砂，之後照樣能玩
     stationDone(key, reward, msg) {
       const s = this.s;
+      this.touch(key);
       if (CAVE.some((c) => c.k === key)) { s.caveDone = (s.caveDone || 0) + 1; this.checkLight(); }
       if (LIGHTHOUSE.some((c) => c.k === key)) s.lightDone = (s.lightDone || 0) + 1;
       if (!s.paid || s.paid.day !== s.day) s.paid = { day: s.day };
@@ -3780,6 +3838,7 @@
       if (q.step >= DRILL.length) {
         q.done = true;
         s.drillDay = s.day;
+        this.touch('drill');
         speak('You are safe! Great job!');
         this.renderDrill();
         this.drMsg.setText(s.bagReady ? 'Your bag is ready, too! 防災包也準備好了' : '');
@@ -4364,6 +4423,127 @@
       this.labDone('fossil', 'Great!');
     }
 
+    // ---------- 家長端（§3.6）：長按設定 3 秒＋兩位數加法；資料只存本機 ----------
+    touch(key) { const t = this.s.touched || (this.s.touched = {}); t[key] = (t[key] || 0) + 1; }
+
+    buildParent() {
+      const c = this.modalBase(110, 120, 40, 1040, 640, 0xffffff);
+      this.paTitle = txt(this, 640, 78, '家長端', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add(this.paTitle);
+      this.paContent = this.add.container(0, 0);
+      c.add(this.paContent);
+      this.closeButton(c, 1130, 80, () => this.closeModal());
+      this.paBox = c;
+    }
+
+    // 加進家長端內容，固定在畫面上
+    pa(o) { const fix = (x) => { if (x.setScrollFactor) x.setScrollFactor(0); if (x.list) x.list.forEach(fix); }; fix(o); this.paContent.add(o); return o; }
+    paText(x, y, str, size, color, extra) { return this.pa(txt(this, x, y, str, size, color || '#27384a', extra)); }
+
+    // 長按設定 3 秒才會進來；先出一題兩位數加法，用數字鍵輸入（不是選擇題，孩子亂猜進不來）
+    openParentGate() {
+      if (this.modal && this.modal !== 'settings') return;
+      [this.setBox].forEach((b) => b.setVisible(false));
+      this.modal = 'parent';
+      const a = 12 + Math.floor(Math.random() * 30), b = 11 + Math.floor(Math.random() * 30);
+      this.pg = { a, b, input: '' };
+      this.paContent.removeAll(true);
+      this.paTitle.setText('家長確認');
+      this.paBox.setVisible(true);
+      this.paText(640, 160, '請家長回答：' + a + ' + ' + b + ' = ?', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pgShow = this.paText(640, 220, '', 40, '#1e88e5', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pgMsg = this.paText(640, 600, '', 20, '#c62828').setOrigin(0.5);
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', '←', '0', 'OK'].forEach((k, i) => {
+        const x = 520 + (i % 3) * 120, y = 300 + Math.floor(i / 3) * 74;
+        this.pa(makeButton(this, x, y, 104, 60, k === 'OK' ? 0x43a047 : 0x90a4ae, k, 26, () => this.gateKey(k)));
+      });
+    }
+
+    gateKey(k) {
+      const g = this.pg;
+      if (k === '←') g.input = g.input.slice(0, -1);
+      else if (k === 'OK') {
+        if (Number(g.input) === g.a + g.b) { this.openParent('summary'); return; }
+        this.pgMsg.setText('答案不對，請再試一次'); g.input = '';
+      } else if (g.input.length < 3) g.input += k;
+      this.pgShow.setText(g.input);
+    }
+
+    openParent(tab) {
+      this.modal = 'parent';
+      this.paTab = tab;
+      this.paContent.removeAll(true);
+      this.paTitle.setText('家長端');
+      this.paBox.setVisible(true);
+      const tabs = [['summary', '總覽'], ['words', '單字'], ['curr', '課綱'], ['reset', '重設']];
+      tabs.forEach(([k, label], i) => this.pa(makeButton(this, 300 + i * 160, 130, 140, 50, k === tab ? 0x1e88e5 : 0xb0bec5, label, 22, () => this.openParent(k))));
+      this['parent_' + tab]();
+    }
+
+    parent_summary() {
+      const s = this.s, min = Math.round((s.playSec || 0) / 60);
+      const zones = [['草地', true], ['池塘森林', s.forestOpen], ['海灘', s.beachOpen], ['洞穴', s.caveOpen], ['燈塔', s.lightOpen], ['研究島', this.researchOpen()]];
+      const words = Object.keys(s.words).filter((w) => (s.words[w].ok || 0) + (s.words[w].miss || 0) > 0);
+      const okSum = words.reduce((a, w) => a + s.words[w].ok, 0), missSum = words.reduce((a, w) => a + s.words[w].miss, 0);
+      const lines = [
+        '遊玩時間：約 ' + min + ' 分鐘（遊戲內第 ' + s.day + ' 天）',
+        '開放的區域：' + zones.filter((z) => z[1]).map((z) => z[0]).join('、'),
+        '作答過的單字：' + words.length + ' 個（答對 ' + okSum + ' 次、答錯或用提示 ' + missSum + ' 次）',
+        '提示已淡出的字：階段 1 有 ' + words.filter((w) => s.words[w].stage === 1).length + ' 個、階段 2 有 ' + words.filter((w) => s.words[w].stage === 2).length + ' 個',
+        '日記：' + s.diary.length + ' 頁　圖鑑：' + this.libCount() + ' / ' + LIB.length + ' 項　星砂：' + s.stardust,
+        '',
+        '說明：「答對」只算有 3 個以上選項、第一次就選對、沒用提示的情況。',
+        '只有 2 個選項的科學題（例如熱水或冷水）不算進單字答對。',
+        '所有資料只存在這台裝置的瀏覽器裡。',
+      ];
+      lines.forEach((l, i) => this.paText(200, 200 + i * 44, l, 22, i >= 6 ? '#6b7c8c' : '#27384a'));
+    }
+
+    parent_words() {
+      const s = this.s;
+      const list = Object.keys(s.words).filter((w) => (s.words[w].ok || 0) + (s.words[w].miss || 0) > 0)
+        .sort((a, b) => (s.words[b].miss - s.words[b].ok) - (s.words[a].miss - s.words[a].ok));
+      const per = 9, pages = Math.max(1, Math.ceil(list.length / per));
+      this.paWordPage = Math.min(this.paWordPage || 0, pages - 1);
+      const head = ['單字', '中文', '答對', '答錯', '天數', '階段'], xs = [200, 360, 560, 660, 760, 860];
+      head.forEach((h, i) => this.paText(xs[i], 190, h, 20, '#6b7c8c', { fontStyle: 'bold' }));
+      if (!list.length) this.paText(200, 240, '還沒有作答紀錄。', 22);
+      list.slice(this.paWordPage * per, this.paWordPage * per + per).forEach((w, r) => {
+        const o = s.words[w], y = 232 + r * 40;
+        [w, zhOf(w), o.ok, o.miss, o.days, ['圖＋英＋中', '圖＋英', '只有英文'][o.stage]].forEach((v, i) => this.paText(xs[i], y, String(v), 20, i === 3 && o.miss > o.ok ? '#c62828' : '#27384a'));
+      });
+      this.paText(640, 610, '排序：答錯比答對多的字排前面　' + (this.paWordPage + 1) + ' / ' + pages, 18, '#6b7c8c').setOrigin(0.5);
+      if (pages > 1) {
+        this.pa(makeButton(this, 300, 610, 90, 44, 0x90a4ae, '◀', 22, () => { this.paWordPage = (this.paWordPage + pages - 1) % pages; this.openParent('words'); }));
+        this.pa(makeButton(this, 980, 610, 90, 44, 0x90a4ae, '▶', 22, () => { this.paWordPage = (this.paWordPage + 1) % pages; this.openParent('words'); }));
+      }
+    }
+
+    parent_curr() {
+      const t = this.s.touched || {};
+      const rows = CURRICULUM.map((c) => ({ c, on: c.keys.some((k) => t[k]) }));
+      const done = rows.filter((r) => r.on).length;
+      this.paText(200, 190, '接觸過的課綱條目：' + done + ' / ' + rows.length + '（✓ 表示玩過對應的機制）', 20, '#6b7c8c');
+      rows.forEach((r, i) => {
+        const col = i < 13 ? 0 : 1, row = i % 13;
+        this.paText(200 + col * 480, 228 + row * 29, (r.on ? '✓ ' : '・ ') + r.c.name + '：' + r.c.codes, 16, r.on ? '#2e7d32' : '#9e9e9e');
+      });
+    }
+
+    parent_reset() {
+      this.paText(640, 230, '重設會刪除這台裝置上的所有進度（島嶼、單字紀錄、日記）。', 22).setOrigin(0.5);
+      this.paText(640, 270, '這個動作無法復原。', 22, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.paResetArm = false;
+      const b = this.pa(makeButton(this, 640, 380, 300, 70, 0xc62828, '重設進度', 26, () => {
+        if (!this.paResetArm) { this.paResetArm = true; this.paResetMsg.setText('確定嗎？5 秒內再按一次就會重設'); this.time.delayedCall(5000, () => { this.paResetArm = false; if (this.paResetMsg.active) this.paResetMsg.setText(''); }); return; }
+        // 用網址參數重設：在新頁面載入時才清除，避免舊頁面關閉時把存檔寫回去
+        const q = new URLSearchParams(location.search); q.set('reset', '1');
+        location.search = q.toString();
+      }));
+      this.paResetMsg = this.paText(640, 450, '', 22, '#c62828').setOrigin(0.5);
+      return b;
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -4403,6 +4583,7 @@
         q.done = true;
         if (!q.recorded) L.answer(this.s.words, k, { day: this.s.day, options: 4, firstTry: q.tries === 0, peeked: q.peeked });
         this.s.askedDay = this.s.day;
+        this.touch('weather');
         c.bg.lineStyle(6, 0x43a047, 1); c.bg.strokeRoundedRect(-85, -105, 170, 210, 24);
         this.tweens.add({ targets: c.card, scale: 1.12, yoyo: true, duration: 200 });
         speak(k);
@@ -4480,6 +4661,7 @@
         q.done = true;
         if (!q.recorded) L.answer(s.words, w, { day: s.day, options: q.options.length, firstTry: q.tries === 0, peeked: false });
         s.diary.push({ day: q.day, text: q.text, weather: s.weather });
+        this.touch('diary');
         speak(q.text);
       } else {
         q.tries += 1;
@@ -4913,6 +5095,7 @@
       const s = this.s, w = WEATHER[s.weather];
       const tSec = time / 1000;
       const running = !this.paused();
+      s.playSec = (s.playSec || 0) + Math.min(delta, 100) / 1000;
 
       if (running) {
         s.t += dt;
