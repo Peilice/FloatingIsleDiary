@@ -161,6 +161,48 @@
   const POLLUTERS = [{ k: 'pipe', zh: '排水管' }, { k: 'trashpile', zh: '垃圾堆' }, { k: 'oilboat', zh: '小船' }];
   const POLL_POS = [{ x: 360, y: 320 }, { x: 640, y: 290 }, { x: 920, y: 320 }];
 
+  // 研究島（M6 延伸層）：在池塘森林右邊。三組各自的解鎖條件見 groupOpen（§5；生態研究所原定圖鑑 40 項，圖鑑目前只有 14 項，暫定全部 14 項）
+  const ROFF = 2560;
+  const GEO_NEED = 3;
+  const RGROUPS = [
+    { k: 'weather', zh: '氣象站',     x0: 130, x1: 410,  color: 0x1e88e5 },
+    { k: 'eco',     zh: '生態研究所', x0: 450, x1: 870,  color: 0x43a047 },
+    { k: 'geo',     zh: '地質洞窟',   x0: 910, x1: 1180, color: 0x8d6e63 },
+  ];
+  const RLABS = [
+    { k: 'water',   g: 'weather', x: 200,  en: 'Rain',     zh: '水循環' },
+    { k: 'typhoon', g: 'weather', x: 340,  en: 'Typhoon',  zh: '颱風' },
+    { k: 'food',    g: 'eco',     x: 520,  en: 'Food',     zh: '食物鏈' },
+    { k: 'photo',   g: 'eco',     x: 660,  en: 'Sunlight', zh: '光合作用' },
+    { k: 'spell',   g: 'eco',     x: 800,  en: 'Spell',    zh: '拼字' },
+    { k: 'pitch',   g: 'geo',     x: 980,  en: 'Pitch',    zh: '音調' },
+    { k: 'fossil',  g: 'geo',     x: 1110, en: 'Fossil',   zh: '化石' },
+  ];
+  const WC_SPOTS = [{ k: 'sun', x: 330, y: 420 }, { k: 'high', x: 800, y: 300 }, { k: 'under', x: 800, y: 460 }];
+  const WC_PARTS = [{ k: 'heater', zh: '加熱面' }, { k: 'cold', zh: '冷凝板' }, { k: 'cup', zh: '集水槽' }];
+  const PREP = [
+    { k: 'boat', zh: '把小船綁好', good: true }, { k: 'pots', zh: '把花盆收進屋裡', good: true },
+    { k: 'kite', zh: '去放風箏', good: false }, { k: 'swim', zh: '去海邊游泳', good: false },
+  ];
+  // 食物鏈（§4.20 承載量模型）：草的平衡＝面積×10、兔＝草÷10、狐＝兔÷4，每天往平衡靠近一格，至少保留 1 隻（不會滅絕）
+  const FOOD_CASES = [
+    { say: 'Too many rabbits! The grass is gone.', zh: '兔子太多了！草都被吃光了，怎麼辦？', start: { A: 3, G: 4, R: 9, F: 1 }, good: ['grass', 'den'] },
+    { say: 'The foxes are hungry. There are few rabbits.', zh: '狐狸肚子餓，兔子太少了，怎麼辦？', start: { A: 2, G: 20, R: 1, F: 3 }, good: ['grass'] },
+  ];
+  const FOOD_ACTS = [
+    { k: 'grass',   zh: '多種一些草',   apply: (e) => { e.A += 2; }, why: '' },
+    { k: 'den',     zh: '蓋一個狐狸窩', apply: (e) => { e.F += 1; e.R = Math.max(1, e.R - 3); }, why: '兔子已經太少，再多狐狸，牠們更沒東西吃。' },
+    { k: 'rabbits', zh: '再放更多兔子', apply: (e) => { e.R += 3; }, why: '兔子更多，草更不夠吃。' },
+    { k: 'cut',     zh: '把草割掉',     apply: (e) => { e.A = Math.max(1, e.A - 1); e.G = Math.max(0, e.G - 5); }, why: '草變少，兔子和狐狸都更沒東西吃。' },
+  ];
+  function foodStep(e) {
+    const gt = e.A * 10; e.G += Math.max(-5, Math.min(5, gt - e.G));
+    const rt = Math.max(1, Math.floor(e.G / 10)); e.R += Math.sign(rt - e.R);
+    const ft = Math.max(1, Math.floor(e.R / 4)); e.F += Math.sign(ft - e.F);
+  }
+  // 拼字（§4.24）：180 個拼寫字裡、遊戲中有圖可畫的字
+  const SPELL = ['bean', 'sunny', 'cloudy', 'rainy', 'windy', 'fish', 'bird', 'apple', 'grape', 'banana', 'hat', 'coat', 'rock', 'mud', 'moon', 'star', 'bell', 'drum', 'paper', 'bottle', 'water', 'tree', 'grass', 'lamp', 'box', 'rain'];
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -211,7 +253,7 @@
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
       harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
-      bagReady: false, drillDay: 0,
+      bagReady: false, drillDay: 0, lightDone: 0,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -618,6 +660,66 @@
     else { g.fillStyle(0x8d6e63, 1); g.fillTriangle(-26, -2, 26, -2, 18, 12); g.fillTriangle(-26, -2, -18, 12, 18, 12); g.fillStyle(0xeceff1, 1); g.fillTriangle(0, -2, 0, -28, 16, -6); }
   }
 
+  // 研究島的圖
+  function waterPart(g, k) {
+    g.clear();
+    if (k === 'heater') { g.fillStyle(0x37474f, 1); g.fillRoundedRect(-36, -8, 72, 16, 4); g.fillStyle(0x4fc3f7, 0.7); g.fillRect(-30, -6, 60, 6); }
+    else if (k === 'cold') { g.fillStyle(0xb0bec5, 1); g.fillRect(-40, -6, 80, 12); g.fillStyle(0xffffff, 0.7); g.fillRect(-40, -6, 80, 3); }
+    else { g.fillStyle(0x90caf9, 1); g.fillRoundedRect(-18, -12, 36, 26, 6); g.fillStyle(0x1e88e5, 1); g.fillRect(-14, 4, 28, 6); }
+  }
+  function mapSymbol(g, sym) {
+    g.clear();
+    if (sym === 'T') {
+      g.lineStyle(6, 0xe53935, 1); g.strokeCircle(0, 0, 18);
+      g.beginPath(); g.arc(-10, -18, 18, -0.2, 1.4, false); g.strokePath(); g.beginPath(); g.arc(10, 18, 18, Math.PI - 0.2, Math.PI + 1.4, false); g.strokePath();
+    } else {
+      const c = sym === 'H' ? 0x1e88e5 : 0xe53935;
+      g.lineStyle(4, c, 1); g.strokeCircle(0, 0, 30);
+      g.lineStyle(6, c, 1);
+      if (sym === 'H') { g.lineBetween(-10, -14, -10, 14); g.lineBetween(10, -14, 10, 14); g.lineBetween(-10, 0, 10, 0); }
+      else { g.lineBetween(-8, -14, -8, 14); g.lineBetween(-8, 14, 10, 14); }
+    }
+  }
+  function prepIcon(g, k) {
+    g.clear();
+    if (k === 'boat') { drawPolluter(g, 'oilboat'); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(-26, 4, -40, 20); }
+    else if (k === 'pots') { g.fillStyle(0xbf6c3a, 1); g.fillRect(-14, 0, 28, 20); g.fillStyle(0xe53956, 1); g.fillCircle(0, -10, 9); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -24, 6, 48); g.fillTriangle(-34, -24, -20, -24, -27, -34); }
+    else if (k === 'kite') { g.fillStyle(0xff7043, 1); g.fillTriangle(0, -26, -16, 0, 16, 0); g.fillTriangle(0, 22, -16, 0, 16, 0); g.lineStyle(2, 0x424242, 1); g.lineBetween(0, 22, 12, 34); }
+    else { g.fillStyle(0x4fc3f7, 1); g.fillRect(-30, 6, 60, 12); g.fillStyle(0xf2994a, 1); g.fillCircle(0, 0, 8); g.lineStyle(4, 0xf2994a, 1); g.lineBetween(-14, 2, 14, 2); }
+  }
+  function foxIcon(g) {
+    g.clear();
+    g.fillStyle(0xf2994a, 1); g.fillTriangle(-16, -12, -6, -26, -2, -10); g.fillTriangle(16, -12, 6, -26, 2, -10); g.fillCircle(0, 0, 14);
+    g.fillStyle(0xfff4e6, 1); g.fillEllipse(0, 6, 18, 10); g.fillStyle(0x333333, 1); g.fillCircle(-5, -2, 2); g.fillCircle(5, -2, 2); g.fillCircle(0, 6, 2.5);
+  }
+  function fossilIcon(g, i) {
+    if (i === 0) { g.lineStyle(3, 0x5d4037, 1); g.beginPath(); g.arc(-120, 0, 16, Math.PI, 0, false); g.strokePath(); for (let k = -2; k <= 2; k++) g.lineBetween(-120, 0, -120 + k * 7, -14); }
+    else if (i === 1) { g.lineStyle(3, 0xefebe9, 1); g.lineBetween(-140, 0, -100, 0); for (let k = 0; k < 5; k++) g.lineBetween(-134 + k * 8, -8, -134 + k * 8, 8); g.fillStyle(0xefebe9, 1); g.fillTriangle(-100, 0, -88, -8, -88, 8); }
+    else { g.fillStyle(0x4e342e, 1); g.fillEllipse(-120, 0, 30, 40); g.lineStyle(2, 0xbcaaa4, 1); for (let k = -12; k <= 12; k += 6) g.lineBetween(-133, k, -107, k); }
+  }
+  function labIcon(g, k) {
+    g.clear();
+    if (k === 'water') drawIcon(g, 'rainy');
+    else if (k === 'typhoon') { mapSymbol(g, 'T'); g.setScale(0.8 * g.scaleX); }
+    else if (k === 'food') foxIcon(g);
+    else if (k === 'photo') drawIcon(g, 'sun');
+    else if (k === 'spell') { g.fillStyle(0x00897b, 1); [-18, 0, 18].forEach((x) => g.fillRoundedRect(x - 8, -8, 16, 16, 3)); }
+    else if (k === 'pitch') { g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, -18, 8, 30, 3); g.fillRoundedRect(4, -6, 8, 18, 3); }
+    else { g.fillStyle(0x8d6e63, 1); g.fillRect(-24, -14, 48, 10); g.fillStyle(0xbcaaa4, 1); g.fillRect(-24, -4, 48, 10); g.fillStyle(0x5d4037, 1); g.fillRect(-24, 6, 48, 10); }
+  }
+  function spellIcon(g, w) {
+    g.clear();
+    if (['rock', 'mud'].includes(w)) drawSoil(g, w, 1);
+    else if (w === 'moon') drawMoon(g, 4);
+    else if (w === 'star') { g.fillStyle(0xffd54a, 1); const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 8 : 20; const a = -Math.PI / 2 + i * Math.PI / 5; pts.push(new Phaser.Geom.Point(Math.cos(a) * r, Math.sin(a) * r)); } g.fillPoints(pts, true); }
+    else if (['bell', 'drum'].includes(w)) drawInstr(g, w);
+    else if (w === 'paper') drawTrash(g, 'newspaper');
+    else if (w === 'bottle') drawTrash(g, 'pbottle');
+    else if (w === 'water') drawBagItem(g, 'water');
+    else if (w === 'rain') drawIcon(g, 'rainy');
+    else drawIcon(g, w);
+  }
+
   // 磁鐵站的東西
   function drawMagItem(g, k) {
     g.clear();
@@ -766,7 +868,8 @@
       this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, bag: { q: 0, first: 0 }, drill: { q: 0, first: 0 }, recycle: { q: 0, first: 0 }, pond: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, bag: { q: 0, first: 0 }, drill: { q: 0, first: 0 }, recycle: { q: 0, first: 0 }, pond: { q: 0, first: 0 },
+        water: { q: 0, first: 0 }, typhoon: { q: 0, first: 0 }, prep: { q: 0, first: 0 }, food: { q: 0, first: 0 }, photo: { q: 0, first: 0 }, spell: { q: 0, first: 0 }, pitch: { q: 0, first: 0 }, fossil: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -785,6 +888,7 @@
       grab('beach', () => this.buildBeach());
       grab('cave', () => this.buildCave());
       grab('lighthouse', () => this.buildLighthouse());
+      grab('research', () => this.buildResearch());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
       this.buildHud();
@@ -810,6 +914,7 @@
       this.buildFog();
       this.buildDrill();
       this.buildRecycle();
+      this.buildLab();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1331,7 +1436,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1589,6 +1694,13 @@
       this.navCL = makeButton(this, 1226, 400, 92, 92, 0x6d6475, '', 0, () => this.goZone('cave')).setDepth(40);
       this.navCL.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
       this.navCL.add(txt(this, 0, 22, '洞穴', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      // 森林 → 研究島（放在右上，避開訪客）；研究島 ← 森林
+      this.navR = makeButton(this, 1226, 250, 92, 92, 0x00897b, '', 0, () => this.goZone('research')).setDepth(40);
+      this.navR.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navR.add(txt(this, 0, 22, '研究島', 16, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navFR = makeButton(this, 54, 400, 92, 92, 0x43a047, '', 0, () => this.goZone('forest')).setDepth(40);
+      this.navFR.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navFR.add(txt(this, 0, 22, '森林', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
     }
 
     checkLight() {
@@ -1636,6 +1748,9 @@
       this.navL.setAlpha(s.lightOpen ? 1 : 0.55);
       this.navLLabel.setText(s.lightOpen ? '燈塔' : '實驗 ' + Math.min(s.caveDone || 0, LIGHT_NEED) + '/' + LIGHT_NEED);
       this.navCL.setVisible(this.zone === 'lighthouse');
+      this.navR.setVisible(this.zone === 'forest');
+      this.navR.setAlpha(this.researchOpen() ? 1 : 0.55);
+      this.navFR.setVisible(this.zone === 'research');
       if (this.mkBtn) this.mkBtn.setVisible(!!s.town);
     }
 
@@ -1652,6 +1767,10 @@
         this.floatText(260, 330, '再' + need.join('、'), '#e65100', true);
         return;
       }
+      if (z === 'research' && !this.researchOpen()) {
+        this.floatText(1060, 200, '延伸區：' + this.groupNeed('weather'), '#00695c', true);
+        return;
+      }
       if (z === 'lighthouse' && !this.s.lightOpen) {
         this.floatText(260, 330, '洞穴實驗再完成 ' + (LIGHT_NEED - (this.s.caveDone || 0)) + ' 回合', '#e53935', true);
         return;
@@ -1664,7 +1783,7 @@
       this.zone = z;
       // 平移時兩個區域都要畫，結束後只留目前的區域
       this.showZones([from, z]);
-      this.tweens.add({ targets: this.cameras.main, scrollX: { forest: OFF, beach: BOFF, cave: COFF, lighthouse: LOFF }[z] || 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
+      this.tweens.add({ targets: this.cameras.main, scrollX: { forest: OFF, beach: BOFF, cave: COFF, lighthouse: LOFF, research: ROFF }[z] || 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
         onComplete: () => { if (this.zone === z) this.showZones([z]); } });
       this.renderNav();
       if (z === 'forest' && this.s.visitor) this.time.delayedCall(700, () => this.sayVisitor());
@@ -2395,6 +2514,7 @@
     stationDone(key, reward, msg) {
       const s = this.s;
       if (CAVE.some((c) => c.k === key)) { s.caveDone = (s.caveDone || 0) + 1; this.checkLight(); }
+      if (LIGHTHOUSE.some((c) => c.k === key)) s.lightDone = (s.lightDone || 0) + 1;
       if (!s.paid || s.paid.day !== s.day) s.paid = { day: s.day };
       const n = s.paid[key] || 0;
       if (n < STATION_PAID) {
@@ -3827,6 +3947,423 @@
       this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'recycle' && this.rq === cur) this.openRecycle(); });
     }
 
+    // ---------- 研究島（M6 延伸層，5～6 年級）：氣象站、生態研究所、地質洞窟 ----------
+    groupOpen(gk) {
+      const s = this.s;
+      if (gk === 'weather') return !!(s.forestOpen && s.beachOpen && s.caveOpen && s.lightOpen);
+      if (gk === 'geo') return !!(s.lightOpen && (s.lightDone || 0) >= GEO_NEED);
+      return this.libCount() >= LIB.length;
+    }
+    groupNeed(gk) {
+      if (gk === 'weather') return '要先開放草地、海灘、森林、洞穴、燈塔 5 區';
+      if (gk === 'geo') return '燈塔實驗再完成 ' + Math.max(0, GEO_NEED - (this.s.lightDone || 0)) + ' 回合';
+      return '圖鑑還差 ' + Math.max(0, LIB.length - this.libCount()) + ' 項';
+    }
+    researchOpen() { return RGROUPS.some((g) => this.groupOpen(g.k)); }
+
+    buildResearch() {
+      const X = ROFF + 640;
+      const g = this.add.graphics().setDepth(3);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
+      g.fillStyle(0x80cbc4, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x8fd3cc, 1); g.fillEllipse(X, 545, 940, 250);
+      // 三組的底板與名稱
+      RGROUPS.forEach((gr) => {
+        g.fillStyle(gr.color, 0.25); g.fillRoundedRect(ROFF + gr.x0, 360, gr.x1 - gr.x0, 220, 24);
+        txt(this, ROFF + (gr.x0 + gr.x1) / 2, 380, gr.zh, 22, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 5 }).setOrigin(0.5).setDepth(8);
+      });
+      this.rsSigns = RLABS.map((st) => {
+        const x = ROFF + st.x, y = 500;
+        const c = this.add.container(x, y).setDepth(9);
+        const sg = this.add.graphics();
+        sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 48, 120, 24);
+        sg.fillStyle(0xeceff1, 1); sg.fillRoundedRect(-58, -62, 116, 104, 14);
+        sg.lineStyle(4, RGROUPS.find((g2) => g2.k === st.g).color, 1); sg.strokeRoundedRect(-58, -62, 116, 104, 14);
+        const icon = this.add.graphics({ y: -18 }).setScale(1.2); labIcon(icon, st.k);
+        const en = txt(this, 0, 24, st.en, 17, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 62, st.zh, 15, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 4 }).setOrigin(0.5);
+        const lock = txt(this, 0, -18, '', 30, '#78909c', { fontStyle: 'bold' }).setOrigin(0.5);
+        c.add([sg, icon, en, zh, lock]);
+        const zone = this.add.zone(x, y - 10, 130, 140).setDepth(20).setInteractive();
+        zone.on('pointerdown', () => this.openLab(st.k));
+        return { c, icon, lock, st };
+      });
+    }
+
+    renderResearch() {
+      if (!this.rsSigns) return;
+      this.rsSigns.forEach((r) => {
+        const open = this.groupOpen(r.st.g);
+        r.c.setAlpha(open ? 1 : 0.5);
+        r.icon.setVisible(open);
+        r.lock.setText(open ? '' : '?');
+      });
+    }
+
+    // 共用的實驗室視窗：外框固定，內容每次打開時重建
+    buildLab() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfafafa);
+      this.rxTitle = txt(this, 640, 98, '', 28, '#00695c', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.rxSay = txt(this, 640, 148, '', 28, '#27384a', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
+      this.rxZh = txt(this, 640, 186, '', 19, '#6b7c8c').setOrigin(0.5);
+      this.rxMsg = txt(this, 640, 615, '', 21, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.rxContent = this.add.container(0, 0);
+      c.add([this.rxTitle, this.rxSay, this.rxZh, this.rxMsg, this.rxContent]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.rxBox = c;
+    }
+
+    // 加進實驗室內容：新建的物件也要固定在畫面上（scrollFactor 0），點擊才會對
+    rx(o) { const fix = (x) => { if (x.setScrollFactor) x.setScrollFactor(0); if (x.list) x.list.forEach(fix); }; fix(o); this.rxContent.add(o); return o; }
+    rxButton(x, y, w, h, color, label, size, fn) { return this.rx(makeButton(this, x, y, w, h, color, label, size, fn)); }
+    rxCard(x, y, w, h, draw, fn) {
+      const card = this.add.container(x, y);
+      const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-w / 2, -h / 2, w, h, 18);
+      bg.lineStyle(4, 0xb2dfdb, 1); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 18);
+      card.add(bg);
+      draw(card);
+      card.setSize(w, h).setInteractive({ useHandCursor: true });
+      card.on('pointerdown', fn);
+      this.rx(card);
+      card.bg = bg; card.x0 = x;
+      return card;
+    }
+    rxShake(o) { this.tweens.add({ targets: o, x: o.x0 + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => o.setX(o.x0) }); }
+    rxSet(say, zh, msg) { this.rxSay.setText(say); this.rxZh.setText(this.subs() ? zh : ''); if (msg !== undefined) this.rxMsg.setText(msg); }
+
+    openLab(k) {
+      if (this.paused()) return;
+      const st = RLABS.find((x) => x.k === k);
+      if (!this.groupOpen(st.g)) { this.floatText(ROFF + st.x - this.cameras.main.scrollX, 360, this.groupNeed(st.g), '#37474f', true); return; }
+      this.held = null; this.tool = null; this.redrawTools();
+      this.modal = 'lab';
+      this.labKind = k;
+      this.rxContent.removeAll(true);
+      this.rxMsg.setText('');
+      this.rxTitle.setText(st.en + ' ' + st.zh);
+      this.rxBox.setVisible(true);
+      this['lab_' + k]();
+    }
+
+    labDone(key, msg) {
+      this.stationDone(key, 3, msg);
+      const k = this.labKind;
+      this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'lab' && this.labKind === k) this.openLab(k); });
+    }
+
+    // --- 水循環（§4.19）：加熱面放太陽下、冷凝板放高處陰涼、集水槽放冷凝板下面 ---
+    lab_water() {
+      const q = this.xq = { place: {}, sel: null, tested: false, done: false };
+      ['sun', 'cloud', 'rain', 'steam'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.rxSet('Make rain! Put the parts in the right places.', '做出雨：把三個零件放到對的位置', 'Tap a part, then a place. 先點零件，再點位置');
+      const scene = this.add.graphics();
+      scene.fillStyle(0xfff59d, 1); scene.fillCircle(330, 250, 28);
+      scene.fillStyle(0x78909c, 0.25); scene.fillRect(700, 225, 200, 130);
+      scene.fillStyle(0x8d6e63, 1); scene.fillRect(260, 520, 700, 10);
+      this.rx(scene);
+      this.rx(txt(this, 330, 360, 'sunny 晒得到太陽', 16, '#f57f17').setOrigin(0.5));
+      this.rx(txt(this, 800, 240, 'high and shady 高處陰涼', 16, '#455a64').setOrigin(0.5));
+      this.rx(txt(this, 800, 510, 'under 下方', 16, '#455a64').setOrigin(0.5));
+      q.spotObjs = WC_SPOTS.map((sp) => this.rxCard(sp.x, sp.y, 130, 80, () => {}, () => this.waterSpot(sp.k)));
+      q.partObjs = WC_PARTS.map((p, i) => this.rxCard(560, 260 + i * 100, 150, 80, (card) => {
+        const g = this.add.graphics(); waterPart(g, p.k); card.add(g);
+        card.add(txt(this, 0, 30, p.zh, 16, '#455a64').setOrigin(0.5));
+      }, () => this.waterPart(p.k)));
+      q.fx = this.rx(this.add.graphics());
+      this.waterRender();
+    }
+
+    waterRender() {
+      const q = this.xq;
+      q.partObjs.forEach((o, i) => { const k = WC_PARTS[i].k; o.setAlpha(Object.values(q.place).includes(k) ? 0.35 : 1); o.bg.lineStyle(5, q.sel === k ? 0xff9800 : 0xb2dfdb, 1); o.bg.strokeRoundedRect(-75, -40, 150, 80, 18); });
+      q.spotObjs.forEach((o, i) => {
+        const k = q.place[WC_SPOTS[i].k];
+        if (o.part) { o.part.destroy(); o.part = null; }
+        if (k) { const g = this.add.graphics(); waterPart(g, k); g.setScrollFactor(0); o.add(g); o.part = g; }
+      });
+    }
+
+    waterPart(k) {
+      const q = this.xq;
+      if (q.done || Object.values(q.place).includes(k)) return;
+      q.sel = q.sel === k ? null : k;
+      this.waterRender();
+    }
+
+    waterSpot(spot) {
+      const q = this.xq;
+      if (q.done) return;
+      if (q.place[spot]) { delete q.place[spot]; q.fx.clear(); this.waterRender(); return; }
+      if (!q.sel) return;
+      q.place[spot] = q.sel; q.sel = null;
+      this.waterRender();
+      if (Object.keys(q.place).length === 3) this.waterTest();
+    }
+
+    waterTest() {
+      const q = this.xq, p = q.place, fx = q.fx;
+      const right = p.sun === 'heater' && p.high === 'cold' && p.under === 'cup';
+      if (!q.tested) { this.stats.water.q += 1; if (right) this.stats.water.first += 1; q.tested = true; }
+      fx.clear();
+      // 線索：加熱面在太陽下才有水氣（上升的箭頭）
+      const hs = WC_SPOTS.find((s2) => p[s2.k] === 'heater');
+      if (hs.k === 'sun') { fx.lineStyle(4, 0x90caf9, 0.9); [-20, 0, 20].forEach((d) => { fx.lineBetween(hs.x + d, hs.y - 40, hs.x + d + 40, hs.y - 120); }); }
+      if (right) {
+        q.done = true;
+        fx.fillStyle(0xeceff1, 1); fx.fillCircle(780, 330, 26); fx.fillCircle(812, 320, 30); fx.fillCircle(842, 332, 24);
+        fx.lineStyle(4, 0x1e88e5, 1); [790, 810, 830].forEach((x) => fx.lineBetween(x, 360, x - 4, 420));
+        this.rxSet('It rains into the cup!', '水氣上升、遇冷變成水滴，落進集水槽了！', 'Evaporate → condense → rain. 蒸發 → 凝結 → 降雨');
+        speak('It rains into the cup!');
+        this.labDone('water', 'Rain!');
+        return;
+      }
+      let why;
+      if (p.sun !== 'heater') why = 'No vapor. 加熱面要晒到太陽，水才會蒸發';
+      else if (p.high !== 'cold') why = 'The vapor does not turn into water. 冷凝板要在高處、陰涼的地方';
+      else why = 'The drops miss the cup. 集水槽要放在冷凝板下面';
+      this.rxMsg.setText(why + '（點位置可以拿回零件）');
+      speak('Try again.');
+    }
+
+    // --- 天氣圖與颱風（§4.25）：認出颱風符號，再選 2 件颱風前要做的事 ---
+    lab_typhoon() {
+      const q = this.xq = { step: 1, tries: 0, recorded: false, sel: {}, prepTries: 0, done: false, order: L.shuffle(['H', 'L', 'T']) };
+      this.rxSet('Which one is a typhoon?', '天氣圖上哪一個是颱風？', '');
+      q.cards = q.order.map((sym, i) => this.rxCard(470 + i * 170, 380, 140, 150, (card) => { const g = this.add.graphics(); mapSymbol(g, sym); card.add(g); }, () => this.pickSymbol(i)));
+      this.time.delayedCall(200, () => speak('Which one is a typhoon?'));
+    }
+
+    pickSymbol(i) {
+      const q = this.xq;
+      if (q.step !== 1 || q.done) return;
+      const right = q.order[i] === 'T';
+      if (!q.recorded) { L.answer(this.s.words, 'typhoon', { day: this.s.day, options: 3, firstTry: right, peeked: false }); q.recorded = true; this.stats.typhoon.q += 1; if (right) this.stats.typhoon.first += 1; }
+      if (!right) { this.rxShake(q.cards[i]); q.cards[i].setAlpha(0.35); this.rxMsg.setText(q.order[i] === 'H' ? 'H is high pressure. H 是高氣壓' : 'L is low pressure. L 是低氣壓'); return; }
+      q.step = 2;
+      this.rxContent.removeAll(true);
+      this.rxSet('A typhoon is coming! Pick 2 things to do.', '颱風要來了！選 2 件該做的事', '');
+      q.prep = L.shuffle(PREP.slice());
+      q.pcards = q.prep.map((p, j) => this.rxCard(340 + j * 200, 380, 180, 170, (card) => {
+        const g = this.add.graphics({ y: -20 }).setScale(1.3); prepIcon(g, p.k); card.add(g);
+        card.add(txt(this, 0, 50, p.zh, 18, '#37474f', { fontStyle: 'bold', align: 'center', wordWrap: { width: 160 } }).setOrigin(0.5));
+      }, () => this.pickPrep(j)));
+      this.rxButton(640, 560, 200, 56, 0x00897b, 'Done 完成', 22, () => this.prepDone());
+      speak('A typhoon is coming!');
+    }
+
+    pickPrep(j) {
+      const q = this.xq;
+      if (q.step !== 2 || q.done) return;
+      const n = Object.values(q.sel).filter(Boolean).length;
+      if (!q.sel[j] && n >= 2) return;
+      q.sel[j] = !q.sel[j];
+      const c = q.pcards[j];
+      c.bg.lineStyle(6, q.sel[j] ? 0xff9800 : 0xb2dfdb, 1); c.bg.strokeRoundedRect(-90, -85, 180, 170, 18);
+    }
+
+    prepDone() {
+      const q = this.xq;
+      if (q.step !== 2 || q.done) return;
+      const picked = q.prep.filter((p, j) => q.sel[j]);
+      if (picked.length !== 2) { this.rxMsg.setText('Pick 2. 選 2 件'); return; }
+      const ok = picked.every((p) => p.good);
+      if (q.prepTries === 0) { this.stats.prep.q += 1; if (ok) this.stats.prep.first += 1; }
+      q.prepTries += 1;
+      if (!ok) { this.rxMsg.setText(picked.filter((p) => !p.good).map((p) => p.zh).join('、') + '：颱風天很危險，換一個'); speak('That is dangerous.'); return; }
+      q.done = true;
+      this.rxSet('Safe! The island is ready.', '準備好了，小島很安全！', '');
+      speak('Safe! The island is ready.');
+      this.labDone('typhoon', 'Ready!');
+    }
+
+    // --- 食物鏈（§4.20）：承載量模型，每天向平衡值靠近，不會滅絕 ---
+    lab_food() {
+      const sc = FOOD_CASES[Math.floor(Math.random() * FOOD_CASES.length)];
+      const q = this.xq = { sc, eco: Object.assign({}, sc.start), tries: 0, done: false, order: L.shuffle(FOOD_ACTS.map((a, i) => i)), busy: false };
+      this.rxSet(sc.say, sc.zh, '');
+      q.board = this.rx(this.add.graphics());
+      q.nums = ['grass', 'rabbit', 'fox'].map((k, i) => this.rx(txt(this, 520, 250 + i * 70, '', 26, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5)));
+      q.icons = ['grass', 'rabbit', 'fox'].map((k, i) => { const g = this.add.graphics({ x: 330, y: 250 + i * 70 }); if (k === 'fox') foxIcon(g); else drawIcon(g, k); return this.rx(g); });
+      q.dayT = this.rx(txt(this, 820, 220, '', 20, '#6b7c8c').setOrigin(0.5));
+      q.cards = q.order.map((ai, j) => this.rxCard(340 + j * 200, 500, 180, 110, (card) => {
+        card.add(txt(this, 0, 0, FOOD_ACTS[ai].zh, 20, '#37474f', { fontStyle: 'bold', align: 'center', wordWrap: { width: 160 } }).setOrigin(0.5));
+      }, () => this.pickFood(j)));
+      this.foodRender(null);
+      this.time.delayedCall(200, () => speak(sc.say));
+    }
+
+    foodRender(prev) {
+      const q = this.xq, e = q.eco;
+      const arrow = (k) => (!prev ? '' : (e[k] > prev[k] ? '  ↑ 變多' : e[k] < prev[k] ? '  ↓ 變少' : '  － 穩定'));
+      q.nums[0].setText('grass 草 ' + e.G + arrow('G'));
+      q.nums[1].setText('rabbits 兔 ' + e.R + arrow('R'));
+      q.nums[2].setText('foxes 狐 ' + e.F + arrow('F'));
+      const b = q.board; b.clear();
+      b.fillStyle(0xc5e1a5, 1); b.fillRoundedRect(270, 215, 560, 210, 18);
+      b.fillStyle(0x7cb342, 1); b.fillRect(290, 235, Math.min(520, e.G * 8), 10);
+    }
+
+    pickFood(j) {
+      const q = this.xq;
+      if (q.done || q.busy) return;
+      const ai = q.order[j], act = FOOD_ACTS[ai], right = q.sc.good.includes(act.k);
+      if (q.tries === 0) { this.stats.food.q += 1; if (right) this.stats.food.first += 1; }
+      if (!right) { q.tries += 1; this.rxShake(q.cards[j]); q.cards[j].setAlpha(0.35); }
+      // 套用動作後模擬 5 天，讓玩家看到結果（就算選錯也會慢慢回到平衡，不會滅絕）
+      q.busy = true;
+      act.apply(q.eco);
+      let day = 0;
+      const tick = () => {
+        const prev = Object.assign({}, q.eco);
+        foodStep(q.eco); day += 1;
+        q.dayT.setText('Day +' + day);
+        this.foodRender(prev);
+        if (day < 5) this.time.delayedCall(BOT ? 1 : 450, tick);
+        else {
+          q.busy = false;
+          if (right) {
+            q.done = true;
+            this.rxSet('The island is in balance!', '草、兔子、狐狸都穩定下來了！', '');
+            speak('The island is in balance!');
+            this.labDone('food', 'Balance!');
+          } else {
+            this.rxMsg.setText(act.why + ' 再想想別的辦法');
+            q.eco = Object.assign({}, q.sc.start);
+            this.foodRender(null);
+          }
+        }
+      };
+      this.time.delayedCall(BOT ? 1 : 300, tick);
+    }
+
+    // --- 光合作用（§4.21）：一株蓋起來、一株晒太陽，預測哪株長得好 ---
+    lab_photo() {
+      const q = this.xq = { coverLeft: Math.random() < 0.5, tries: 0, done: false };
+      this.rxSet('Which plant will grow well?', '一株蓋住、一株晒太陽，哪一株會長得好？', 'Make a guess, then wait 3 days. 先猜，再等 3 天看看');
+      q.pots = [0, 1].map((i) => this.rxCard(500 + i * 280, 400, 220, 260, (card) => {
+        const covered = (i === 0) === q.coverLeft;
+        const g = this.add.graphics({ y: 60 }); drawPlant(g, 'bean', 0.45, false); card.add(g); card.plant = g;
+        const pot = this.add.graphics(); pot.fillStyle(0xbf6c3a, 1); pot.fillRect(-36, 60, 72, 50); card.add(pot);
+        if (covered) { const cov = this.add.graphics(); cov.fillStyle(0x37474f, 0.92); cov.fillRoundedRect(-60, -80, 120, 140, 16); card.add(cov); card.cov = cov; }
+        else { const sun = this.add.graphics(); sun.fillStyle(0xffd54a, 1); sun.fillCircle(70, -90, 16); card.add(sun); }
+        card.add(txt(this, 0, 122, covered ? '蓋起來' : '晒太陽', 18, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
+        card.covered = covered;
+      }, () => this.pickPhoto(i)));
+    }
+
+    pickPhoto(i) {
+      const q = this.xq;
+      if (q.done) return;
+      const c = q.pots[i], right = !c.covered;
+      if (q.tries === 0) { this.stats.photo.q += 1; if (right) this.stats.photo.first += 1; }
+      q.tries += 1;
+      q.done = true;
+      // 3 天後：晒太陽的長大變綠，蓋起來的又細又黃
+      q.pots.forEach((p) => { if (p.cov) p.cov.setAlpha(0.15); drawPlant(p.plant, 'bean', p.covered ? 0.3 : 1, p.covered); });
+      this.rxSet('3 days later...', '3 天後……', right ? 'Yes! Plants need light to make food. 植物要有光才能製造養分' : 'Look! The plant in the sun grows well. 晒太陽的那株長得好：植物要有光才能製造養分');
+      speak(right ? 'Yes! Plants need light.' : 'Look! Plants need light.');
+      this.labDone('photo', 'Sunlight!');
+    }
+
+    // --- 拼字（§4.24）：只出 180 個拼寫字裡、玩家看過的字；可以跳過 ---
+    lab_spell() {
+      const seenW = SPELL.filter((w) => (this.s.words[w] || {}).seen > 0);
+      const pool = seenW.length >= 3 ? seenW : SPELL;
+      const w = pool[Math.floor(Math.random() * pool.length)];
+      const extra = 'abcdefghijklmnoprstuwy'.split('').filter((ch) => !w.includes(ch));
+      const tiles = L.shuffle(w.split('').concat(L.shuffle(extra).slice(0, 2)));
+      const q = this.xq = { w, tiles, used: {}, pos: 0, mistakes: 0, done: false };
+      this.rxSet('Spell the word.', '拼出這個字：' + (zhOf(w) || ''), 'Tap the letters in order. 依序點字母；拼錯的會彈回去');
+      const pic = this.add.graphics({ x: 640, y: 250 }).setScale(1.5); spellIcon(pic, w); this.rx(pic);
+      q.slots = w.split('').map((ch, i) => this.rx(txt(this, 640 + (i - (w.length - 1) / 2) * 56, 350, '_', 44, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)));
+      q.tileObjs = tiles.map((ch, i) => this.rxCard(640 + (i - (tiles.length - 1) / 2) * 76, 470, 64, 72, (card) => card.add(txt(this, 0, 0, ch, 34, '#00695c', { fontStyle: 'bold' }).setOrigin(0.5)), () => this.pickLetter(i)));
+      this.rxButton(1000, 560, 150, 52, 0x90a4ae, 'Skip 跳過', 20, () => { if (!q.done) { q.done = true; this.openLab('spell'); } });
+      this.rxButton(280, 560, 70, 52, 0x4fc3f7, '♪', 26, () => speak(w));
+      this.time.delayedCall(200, () => speak(w));
+    }
+
+    pickLetter(i) {
+      const q = this.xq;
+      if (q.done || q.used[i]) return;
+      const ch = q.tiles[i], c = q.tileObjs[i];
+      if (ch !== q.w[q.pos]) { q.mistakes += 1; this.rxShake(c); return; }
+      q.used[i] = true; c.setAlpha(0.3);
+      q.slots[q.pos].setText(ch);
+      q.pos += 1;
+      if (q.pos < q.w.length) return;
+      q.done = true;
+      this.stats.spell.q += 1; if (!q.mistakes) this.stats.spell.first += 1;
+      L.answer(this.s.words, q.w, { day: this.s.day, options: 26, firstTry: q.mistakes === 0, peeked: false });
+      speak(q.w + '!');
+      this.rxSet('Great spelling!', '拼對了！', '');
+      this.labDone('spell', 'Great!');
+    }
+
+    // --- 音調（§4.22）：短的管子聲音高（叫小鳥）、長的管子聲音低（叫牛） ---
+    lab_pitch() {
+      const target = Math.random() < 0.5 ? 'bird' : 'cow';
+      const q = this.xq = { target, need: target === 'bird' ? 'high' : 'low', tries: 0, done: false, order: L.shuffle(['high', 'low']) };
+      ['high', 'low'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.rxSet('Call the ' + target + '! Pick a pipe.', '吹哪一根管子能叫來' + ANIMALS[target].zh + '？（小鳥喜歡高音，牛喜歡低音）', '');
+      const pic = this.add.graphics({ x: 640, y: 250 }).setScale(1.5); drawIcon(pic, target); this.rx(pic);
+      q.cards = q.order.map((p, i) => this.rxCard(520 + i * 240, 440, 200, 200, (card) => {
+        const g = this.add.graphics(); const len = p === 'high' ? 50 : 130;
+        g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, 60 - len, 28, len, 8); g.fillStyle(0x3e2723, 1); g.fillCircle(0, 70 - len, 5);
+        card.add(g); card.add(txt(this, 0, 80, p === 'high' ? '短管子' : '長管子', 18, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
+      }, () => this.pickPipe(i)));
+      this.time.delayedCall(200, () => speak('Call the ' + target + '!'));
+    }
+
+    pickPipe(i) {
+      const q = this.xq;
+      if (q.done) return;
+      const p = q.order[i], right = p === q.need;
+      if (q.tries === 0) { this.stats.pitch.q += 1; if (right) this.stats.pitch.first += 1; }
+      speak(p === 'high' ? 'Toot!' : 'Boooo!');
+      if (!right) { q.tries += 1; this.rxShake(q.cards[i]); this.rxMsg.setText((p === 'high' ? 'That is a high sound. 那是高音' : 'That is a low sound. 那是低音') + '，' + ANIMALS[q.target].zh + '沒有來'); return; }
+      q.done = true;
+      this.rxSet('Here comes the ' + q.target + '!', ANIMALS[q.target].zh + '來了！', p === 'high' ? 'Short pipe → high sound. 管子短，聲音高' : 'Long pipe → low sound. 管子長，聲音低');
+      this.labDone('pitch', 'Hello!');
+    }
+
+    // --- 化石與地層（§4.23）：越下面的地層越古老，從最古老排到最新 ---
+    lab_fossil() {
+      const q = this.xq = { picks: [], checks: 0, done: false };
+      ['fossil', 'rock'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.rxSet('Tap the layers from oldest to newest.', '從最古老的地層，點到最新的地層', 'Which layer is the oldest? 哪一層最古老？');
+      q.layers = [0, 1, 2].map((i) => {
+        const y = 270 + i * 95;   // i=0 最上面（最新），i=2 最下面（最古老）
+        return this.rxCard(560, y, 520, 90, (card) => {
+          const g = this.add.graphics(); g.fillStyle([0xd7ccc8, 0xbcaaa4, 0x8d6e63][i], 1); g.fillRect(-256, -41, 512, 82);
+          fossilIcon(g, i); card.add(g);
+          card.num = txt(this, 220, 0, '', 34, '#ffffff', { fontStyle: 'bold', stroke: '#3e2723', strokeThickness: 5 }).setOrigin(0.5); card.add(card.num);
+        }, () => this.pickLayer(i));
+      });
+      this.rxButton(960, 560, 160, 52, 0x8d6e63, 'Check 檢查', 20, () => this.checkLayers());
+    }
+
+    pickLayer(i) {
+      const q = this.xq;
+      if (q.done) return;
+      const at = q.picks.indexOf(i);
+      if (at >= 0) q.picks.splice(at, 1); else if (q.picks.length < 3) q.picks.push(i);
+      q.layers.forEach((l, j) => { const n = q.picks.indexOf(j); l.num.setText(n >= 0 ? String(n + 1) : ''); });
+    }
+
+    checkLayers() {
+      const q = this.xq;
+      if (q.done || q.picks.length < 3) return;
+      const right = q.picks.join() === '2,1,0';
+      if (q.checks === 0) { this.stats.fossil.q += 1; if (right) this.stats.fossil.first += 1; }
+      q.checks += 1;
+      if (!right) { this.rxMsg.setText('Hint: the bottom layer is the oldest. 提示：越下面的地層越早形成'); q.picks = []; q.layers.forEach((l) => l.num.setText('')); speak('Try again.'); return; }
+      q.done = true;
+      this.rxSet('Right! The bottom layer is the oldest.', '對了！越下面的地層越古老', '');
+      speak('Right! The bottom layer is the oldest.');
+      this.labDone('fossil', 'Great!');
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -4179,6 +4716,7 @@
       this.refreshWish();
       this.renderForest();
       this.renderNav();
+      this.renderResearch();
       this.refreshTut();
       this.redrawTools();
     }
@@ -4200,6 +4738,20 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'lab') {
+        if (Math.random() < 0.03) { this.closeModal(); return; }
+        const q = this.xq, R = (n) => Math.floor(Math.random() * n);
+        if (!q || q.done) return;
+        const k = this.labKind;
+        if (k === 'water') { if (Math.random() < 0.5) this.waterPart(WC_PARTS[R(3)].k); else this.waterSpot(WC_SPOTS[R(3)].k); }
+        else if (k === 'typhoon') { if (q.step === 1) this.pickSymbol(R(3)); else if (Math.random() < 0.7) this.pickPrep(R(4)); else this.prepDone(); }
+        else if (k === 'food') this.pickFood(R(4));
+        else if (k === 'photo') this.pickPhoto(R(2));
+        else if (k === 'spell') this.pickLetter(R(q.tiles.length));
+        else if (k === 'pitch') this.pickPipe(R(2));
+        else { if (Math.random() < 0.75) this.pickLayer(R(3)); else this.checkLayers(); }
+        return;
+      }
       if (this.modal === 'drill') {
         const q = this.dr;
         if (q.done || Math.random() < 0.02) { this.closeModal(); return; }
@@ -4250,7 +4802,10 @@
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
-      if (this.zone === 'lighthouse') {
+      if (this.zone === 'research') {
+        RLABS.forEach((b) => acts.push(() => this.openLab(b.k)));
+        acts.push(() => this.goZone('forest'));
+      } else if (this.zone === 'lighthouse') {
         LIGHTHOUSE.forEach((b) => acts.push(() => this.openLighthouse(b.k)));
         acts.push(() => this.goZone('cave'));
       } else if (this.zone === 'cave') {
@@ -4274,6 +4829,7 @@
         acts.push(() => this.onBush());
         acts.push(() => this.onBubble(this.s.fwho));
         acts.push(() => this.goZone('meadow'));
+        acts.push(() => this.goZone('research'));
       }
       pickOne(acts)();
     }
@@ -4308,6 +4864,14 @@
         演練口令第一次就對: pct(this.stats.drill),
         回收分類第一次就對: pct(this.stats.recycle),
         汙染源第一次就對: pct(this.stats.pond),
+        水循環第一次放對: pct(this.stats.water),
+        颱風符號第一次就對: pct(this.stats.typhoon),
+        颱風準備第一次全對: pct(this.stats.prep),
+        食物鏈第一次選對: pct(this.stats.food),
+        光合作用預測對: pct(this.stats.photo),
+        拼字零失誤: pct(this.stats.spell),
+        音調第一次就對: pct(this.stats.pitch),
+        地層第一次排對: pct(this.stats.fossil),
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
