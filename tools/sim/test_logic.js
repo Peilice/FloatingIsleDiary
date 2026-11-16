@@ -75,4 +75,42 @@ const L = require('../../game/logic.js');
     { weather: ['sunny', 'cloudy'], plant: [], animal: ['owl', 'frog', 'duck'] }, () => 0.99);
   assert.strictEqual(d.text, 'An owl came to my island.');
 }
+// §4.13 電路列舉：所有缺口數（1～2）、所有零件擺法（每個零件最多用一次、可拿回）、開關開或關，
+// 從任何狀態出發都能走到「燈亮」，而且燈亮的狀態一定是「全部導體＋開關打開」
+{
+  const TRAY = ['wire', 'lead', 'eraser', 'straw'];
+  let states = 0;
+  for (const n of [1, 2]) {
+    // 列舉所有狀態：每個缺口是 null 或某個零件（不可重複）
+    const all = [];
+    const rec = (i, cur) => {
+      if (i === n) { all.push(cur.slice()); return; }
+      for (const m of [null].concat(TRAY)) { if (m && cur.includes(m)) continue; cur.push(m); rec(i + 1, cur); cur.pop(); }
+    };
+    rec(0, []);
+    for (const gaps of all) for (const sw of [false, true]) {
+      states += 1;
+      const lit = L.circuitLit(gaps, sw);
+      assert.strictEqual(lit, sw && gaps.every((m) => m === 'wire' || m === 'lead'), '燈亮的條件');
+      // 可達性：BFS，動作＝拿回零件、放入未用的零件、切換開關
+      const key = (g, s) => g.join(',') + '|' + s;
+      const seenS = new Set([key(gaps, sw)]); const queue = [[gaps, sw]]; let ok = false;
+      while (queue.length) {
+        const [g, s] = queue.shift();
+        if (L.circuitLit(g, s)) { ok = true; break; }
+        const next = [[g, !s]];
+        g.forEach((m, i) => {
+          if (m) { const h = g.slice(); h[i] = null; next.push([h, s]); }
+          else TRAY.filter((t) => !g.includes(t)).forEach((t) => { const h = g.slice(); h[i] = t; next.push([h, s]); });
+        });
+        for (const [h, t] of next) { const k = key(h, t); if (!seenS.has(k)) { seenS.add(k); queue.push([h, t]); } }
+      }
+      assert.ok(ok, '沒有死局：' + key(gaps, sw));
+      // 檢查模式指出的不通處，正好就是燈不亮的原因
+      const chk = L.circuitCheck(gaps, sw);
+      assert.strictEqual(chk.every(Boolean), lit);
+    }
+  }
+  assert.ok(states > 0);
+}
 console.log('OK');

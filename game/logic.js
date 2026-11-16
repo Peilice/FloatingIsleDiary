@@ -180,5 +180,12 @@
     };
   }
 
-  return { stat, seen, stage, accuracy, answer, weights, pick, asked, shuffle, options, diary, NEW_PER_DAY, REVIEWS, GAP };
+  // ---------- 電路（§4.13） ----------
+  // 單一迴路：電池、燈泡、開關、缺口串在一起；每個缺口都放了導體、開關打開，燈才會亮
+  const CONDUCTOR = { wire: true, lead: true, eraser: false, straw: false };
+  function circuitLit(gaps, switchOn) { return !!switchOn && gaps.every((m) => m != null && CONDUCTOR[m]); }
+  // 檢查模式：回傳每一段是否通（缺口逐一，最後是開關）
+  function circuitCheck(gaps, switchOn) { return gaps.map((m) => m != null && !!CONDUCTOR[m]).concat([!!switchOn]); }
+
+  return { CONDUCTOR, circuitLit, circuitCheck, stat, seen, stage, accuracy, answer, weights, pick, asked, shuffle, options, diary, NEW_PER_DAY, REVIEWS, GAP };
 });

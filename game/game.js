@@ -110,6 +110,22 @@
   const LIGHT_ZH = { left: '左', right: '右', far: '遠處', near: '近處' };
   const PUSH_CARDS = [{ verb: 'push', dir: 'left' }, { verb: 'push', dir: 'right' }, { verb: 'pull', dir: 'left' }, { verb: 'pull', dir: 'right' }];
 
+  // 燈塔（M4）：在洞穴左邊。§5 原定「修好 3 個設施」，目前還沒有設施系統，先改成「完成洞穴實驗 3 回合」
+  const LOFF = -3840;
+  const LIGHT_NEED = 3;
+  const LIGHTHOUSE = [
+    { k: 'circuit', x: 260, en: 'Circuit', zh: '電路',     icon: 'bulb',  color: 0xf57f17 },
+    { k: 'music',   x: 520, en: 'Music',   zh: '修樂器',   icon: 'bell',  color: 0x8e24aa },
+    { k: 'fog',     x: 780, en: 'Fog',     zh: '霧中找朋友', icon: 'waves', color: 0x546e7a },
+  ];
+  // 電路板：一個方形迴路，左邊電池、上面燈泡、下面開關，缺口在右邊和左下
+  const CIRC = { loop: { x0: 300, y0: 250, x1: 800, y1: 530 }, bulb: { x: 550, y: 250 }, batt: { x: 300, y: 390 }, sw: { x: 550, y: 530 }, gaps: [{ x: 800, y: 390 }, { x: 425, y: 530 }] };
+  const CIRC_PARTS = ['wire', 'lead', 'eraser', 'straw'];
+  const CIRC_ZH = { wire: '銅線', lead: '鉛筆芯', eraser: '橡皮擦', straw: '吸管' };
+  const INSTR = ['bell', 'drum', 'guitar', 'piano'];
+  const INSTR_SOUND = { bell: 'Ding!', drum: 'Boom!', guitar: 'Strum!', piano: 'Plink!' };
+  const FOG_DIRS = ['left', 'front', 'right'];
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -159,7 +175,7 @@
       wishes: {}, fwho: null, lastWish: null, sched: { n: 0 }, gaveTotal: 0,
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
-      harvested: 0, beachOpen: false, caveOpen: false,
+      harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -201,7 +217,7 @@
       s.harvestedV = 1;
     }
     while (s.lots.length < LOT_X.length) s.lots.push({ hab: null, animal: null }); // 森林擴建前的存檔
-    if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; s.caveOpen = true; } // 偵錯：直接開放所有區域
+    if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; s.caveOpen = true; s.lightOpen = true; } // 偵錯：直接開放所有區域
     return s;
   }
   function saveState(s) {
@@ -414,6 +430,16 @@
         g.fillStyle(0xa1887f, 1); g.fillRect(-20, -20, 40, 40);
         g.lineStyle(3, 0x6d4c41, 1); g.strokeRect(-20, -20, 40, 40); g.lineBetween(-20, -20, 20, 20); g.lineBetween(20, -20, -20, 20);
         break;
+      case 'bulb':
+        g.fillStyle(0xffeb3b, 1); g.fillCircle(0, -6, 16); g.fillStyle(0x90a4ae, 1); g.fillRect(-8, 8, 16, 12);
+        g.lineStyle(2, 0xf9a825, 1); g.lineBetween(-5, -6, 0, 2); g.lineBetween(5, -6, 0, 2);
+        break;
+      case 'bell': drawInstr(g, 'bell'); break;
+      case 'waves':
+        g.lineStyle(4, 0x546e7a, 1);
+        [8, 16, 24].forEach((r) => { g.beginPath(); g.arc(-10, 0, r, -0.7, 0.7, false); g.strokePath(); });
+        g.fillStyle(0x546e7a, 1); g.fillCircle(-14, 0, 5);
+        break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
       case 'banana': drawFruit(g, 'banana', 'yellow'); break;
@@ -473,6 +499,23 @@
     }
     // 箭頭：箱子移動的方向
     g.fillStyle(0x43a047, 1); g.fillRect(-26, 46, 52, 8); g.fillTriangle(s * 26, 38, s * 26, 62, s * 42, 50);
+  }
+
+  // 電路零件
+  function drawPart(g, k) {
+    g.clear();
+    if (k === 'wire') { g.lineStyle(6, 0xd2691e, 1); g.beginPath(); g.arc(0, 0, 14, Math.PI, 0, false); g.strokePath(); g.lineBetween(-26, 0, -14, 0); g.lineBetween(14, 0, 26, 0); }
+    else if (k === 'lead') { g.fillStyle(0x424242, 1); g.fillRect(-26, -4, 52, 8); g.fillStyle(0x757575, 1); g.fillRect(-26, -4, 52, 3); }
+    else if (k === 'eraser') { g.fillStyle(0xf8bbd0, 1); g.fillRoundedRect(-22, -11, 44, 22, 5); g.fillStyle(0x64b5f6, 1); g.fillRect(-22, -11, 15, 22); }
+    else { g.fillStyle(0x81d4fa, 1); g.fillRect(-26, -5, 52, 10); g.fillStyle(0xffffff, 0.6); g.fillRect(-26, -5, 52, 3); g.fillStyle(0xe57373, 1); g.fillRect(-6, -5, 4, 10); g.fillRect(8, -5, 4, 10); }
+  }
+  // 樂器
+  function drawInstr(g, k) {
+    g.clear();
+    if (k === 'bell') { g.fillStyle(0xffca28, 1); g.fillTriangle(-20, 16, 20, 16, 0, -22); g.fillCircle(0, -10, 14); g.fillRect(-22, 12, 44, 6); g.fillStyle(0x8d6e63, 1); g.fillCircle(0, 22, 5); g.fillRect(-3, -30, 6, 8); }
+    else if (k === 'drum') { g.fillStyle(0xe53935, 1); g.fillRect(-24, -10, 48, 30); g.fillStyle(0xeceff1, 1); g.fillEllipse(0, -10, 48, 16); g.lineStyle(2, 0xffffff, 1); g.lineBetween(-24, -4, 24, 20); g.lineBetween(24, -4, -24, 20); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(14, -26, 4, -14); }
+    else if (k === 'guitar') { g.fillStyle(0xa1887f, 1); g.fillCircle(-4, 10, 16); g.fillCircle(6, -4, 12); g.fillStyle(0x5d4037, 1); g.fillCircle(-2, 6, 5); g.fillRect(8, -34, 6, 30); g.lineStyle(1, 0xffffff, 1); g.lineBetween(11, -32, -4, 18); }
+    else { g.fillStyle(0x37474f, 1); g.fillRoundedRect(-28, -16, 56, 34, 4); g.fillStyle(0xffffff, 1); for (let i = 0; i < 6; i++) g.fillRect(-25 + i * 9, -2, 8, 18); g.fillStyle(0x212121, 1); [0, 1, 3, 4].forEach((i) => g.fillRect(-19 + i * 9, -2, 5, 10)); }
   }
 
   // 磁鐵站的東西
@@ -623,7 +666,7 @@
       this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -641,6 +684,7 @@
       grab('forest', () => this.buildForest());
       grab('beach', () => this.buildBeach());
       grab('cave', () => this.buildCave());
+      grab('lighthouse', () => this.buildLighthouse());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
       this.buildHud();
@@ -661,6 +705,9 @@
       this.buildLight();
       this.buildMoon();
       this.buildPush();
+      this.buildCircuit();
+      this.buildMusic();
+      this.buildFog();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -684,6 +731,7 @@
       this.checkTown();
       this.checkBeach();
       this.checkCave();
+      this.checkLight();
       this.renderForest();
       this.renderNav();
 
@@ -1181,7 +1229,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1431,6 +1479,22 @@
       this.navBC = makeButton(this, 1226, 400, 92, 92, 0xf2b84b, '', 0, () => this.goZone('beach')).setDepth(40);
       this.navBC.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
       this.navBC.add(txt(this, 0, 22, '海灘', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      // 洞穴 ← 燈塔；燈塔 → 洞穴
+      this.navL = makeButton(this, 54, 400, 92, 92, 0xe53935, '', 0, () => this.goZone('lighthouse')).setDepth(40);
+      this.navL.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navLLabel = txt(this, 0, 22, '', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.navL.add(this.navLLabel);
+      this.navCL = makeButton(this, 1226, 400, 92, 92, 0x6d6475, '', 0, () => this.goZone('cave')).setDepth(40);
+      this.navCL.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navCL.add(txt(this, 0, 22, '洞穴', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+    }
+
+    checkLight() {
+      const s = this.s;
+      if (s.lightOpen || !s.caveOpen || (s.caveDone || 0) < LIGHT_NEED) return;
+      s.lightOpen = true;
+      if (this.zone === 'cave') this.floatText(180, 320, 'New place!', '#e53935', true);
+      if (this.navL) this.renderNav();
     }
 
     checkCave() {
@@ -1466,6 +1530,10 @@
       this.navC.setAlpha(s.caveOpen ? 1 : 0.55);
       this.navCLabel.setText(s.caveOpen ? '洞穴' : '圖鑑 ' + Math.min(this.libCount(), CAVE_LIB) + '/' + CAVE_LIB);
       this.navBC.setVisible(this.zone === 'cave');
+      this.navL.setVisible(this.zone === 'cave');
+      this.navL.setAlpha(s.lightOpen ? 1 : 0.55);
+      this.navLLabel.setText(s.lightOpen ? '燈塔' : '實驗 ' + Math.min(s.caveDone || 0, LIGHT_NEED) + '/' + LIGHT_NEED);
+      this.navCL.setVisible(this.zone === 'lighthouse');
       if (this.mkBtn) this.mkBtn.setVisible(!!s.town);
     }
 
@@ -1482,6 +1550,10 @@
         this.floatText(260, 330, '再' + need.join('、'), '#e65100', true);
         return;
       }
+      if (z === 'lighthouse' && !this.s.lightOpen) {
+        this.floatText(260, 330, '洞穴實驗再完成 ' + (LIGHT_NEED - (this.s.caveDone || 0)) + ' 回合', '#e53935', true);
+        return;
+      }
       if (z === 'cave' && !this.s.caveOpen) {
         this.floatText(260, 330, '圖鑑再 ' + (CAVE_LIB - this.libCount()) + ' 項', '#5e35b1', true);
         return;
@@ -1490,7 +1562,7 @@
       this.zone = z;
       // 平移時兩個區域都要畫，結束後只留目前的區域
       this.showZones([from, z]);
-      this.tweens.add({ targets: this.cameras.main, scrollX: { forest: OFF, beach: BOFF, cave: COFF }[z] || 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
+      this.tweens.add({ targets: this.cameras.main, scrollX: { forest: OFF, beach: BOFF, cave: COFF, lighthouse: LOFF }[z] || 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
         onComplete: () => { if (this.zone === z) this.showZones([z]); } });
       this.renderNav();
       if (z === 'forest' && this.s.visitor) this.time.delayedCall(700, () => this.sayVisitor());
@@ -2216,6 +2288,7 @@
     // 實驗站開著時時間暫停，為了不讓星砂可以無限刷：每站每天只有前 STATION_PAID 回合給星砂，之後照樣能玩
     stationDone(key, reward, msg) {
       const s = this.s;
+      if (CAVE.some((c) => c.k === key)) { s.caveDone = (s.caveDone || 0) + 1; this.checkLight(); }
       if (!s.paid || s.paid.day !== s.day) s.paid = { day: s.day };
       const n = s.paid[key] || 0;
       if (n < STATION_PAID) {
@@ -2986,6 +3059,364 @@
       }
     }
 
+    // ---------- 燈塔（M4：§4.13 電路、§4.11 聲音） ----------
+    buildLighthouse() {
+      const X = LOFF + 640;
+      const g = this.add.graphics().setDepth(3);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
+      g.fillStyle(0x8fbf7a, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x9ccb86, 1); g.fillEllipse(X, 545, 940, 250);
+      // 後方的燈塔（紅白條紋）
+      const tx = X + 360;
+      g.fillStyle(0xffffff, 1); g.fillTriangle(tx - 40, 440, tx + 40, 440, tx + 26, 230); g.fillTriangle(tx - 40, 440, tx - 26, 230, tx + 26, 230);
+      g.fillStyle(0xe53935, 1); g.fillRect(tx - 34, 380, 68, 30); g.fillRect(tx - 30, 310, 60, 28);
+      g.fillStyle(0x37474f, 1); g.fillRect(tx - 32, 200, 64, 32);
+      g.fillStyle(0xfff59d, 1); g.fillRect(tx - 24, 206, 48, 20);
+      g.fillStyle(0xe53935, 1); g.fillTriangle(tx - 36, 202, tx + 36, 202, tx, 172);
+      LIGHTHOUSE.forEach((st) => {
+        const x = LOFF + st.x, y = 500;
+        const c = this.add.container(x, y).setDepth(9);
+        const sg = this.add.graphics();
+        sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 52, 150, 30);
+        sg.fillStyle(0x8d6e63, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        const icon = makeIcon(this, st.icon, 0, -40, 1.5);
+        c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4e6b41', strokeThickness: 4 }).setOrigin(0.5)]);
+        const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
+        zone.on('pointerdown', () => this.openLighthouse(st.k));
+      });
+    }
+
+    openLighthouse(k) {
+      if (this.paused()) return;
+      this.held = null; this.tool = null; this.redrawTools();
+      if (k === 'circuit') this.openCircuit(); else if (k === 'music') this.openMusic(); else this.openFog();
+    }
+
+    // --- 電路（§4.13）：缺口補上導體、打開開關，燈才會亮；有檢查模式 ---
+    buildCircuit() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Circuit 電路', 28, '#f57f17', { fontStyle: 'bold' }).setOrigin(0.5));
+      const bub = this.add.graphics(); drawBubble(bub, 250, 125, 560, 80, 300);
+      this.ciSay = txt(this, 272, 136, '', 30, '#27384a', { fontStyle: 'bold' });
+      this.ciZh = txt(this, 272, 174, '', 18, '#6b7c8c');
+      c.add([bub, this.ciSay, this.ciZh]);
+      this.ciWire = this.add.graphics();
+      this.ciBulb = this.add.graphics({ x: CIRC.bulb.x, y: CIRC.bulb.y });
+      this.ciBatt = this.add.graphics({ x: CIRC.batt.x, y: CIRC.batt.y });
+      c.add([this.ciWire, this.ciBatt, this.ciBulb]);
+      // 開關：點一下切換
+      this.ciSw = this.add.container(CIRC.sw.x, CIRC.sw.y);
+      this.ciSwG = this.add.graphics();
+      this.ciSwT = txt(this, 0, 34, '', 18, '#6b7c8c').setOrigin(0.5);
+      this.ciSw.add([this.ciSwG, this.ciSwT]);
+      this.ciSw.setSize(110, 80).setInteractive({ useHandCursor: true });
+      this.ciSw.on('pointerdown', () => this.toggleSwitch());
+      c.add(this.ciSw);
+      // 缺口：點一下放入選好的零件，或把已放的零件拿回
+      this.ciGaps = CIRC.gaps.map((p, i) => {
+        const z = this.add.container(p.x, p.y);
+        const bg = this.add.graphics(); const m = this.add.graphics().setScale(1.1);
+        z.add([bg, m]);
+        z.setSize(100, 80).setInteractive({ useHandCursor: true });
+        z.on('pointerdown', () => this.tapGap(i));
+        c.add(z);
+        return { z, bg, m };
+      });
+      this.ciTray = CIRC_PARTS.map((k, i) => {
+        const b = this.add.container(980, 260 + i * 92);
+        const bg = this.add.graphics();
+        const m = this.add.graphics({ x: -40 }).setScale(1.1);
+        drawPart(m, k);
+        const zh = txt(this, 18, 0, CIRC_ZH[k], 18, '#5d4037', { fontStyle: 'bold' }).setOrigin(0, 0.5);
+        b.add([bg, m, zh]);
+        b.setSize(200, 80).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => this.pickPart(k));
+        c.add(b);
+        return { b, bg, k };
+      });
+      this.ciCheck = makeButton(this, 560, 610, 190, 56, 0x5c6bc0, 'Check 檢查', 22, () => this.checkCircuit());
+      this.ciMsg = txt(this, 560, 568, '', 20, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.ciCheck, this.ciMsg]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.ciBox = c;
+    }
+
+    openCircuit() {
+      this.modal = 'circuit';
+      const n = this.cq && this.cq.n === 1 && this.cq.done ? 2 : 1; // 第一回合 1 個缺口，下一回合 2 個
+      this.cq = { n, gaps: Array(n).fill(null), sw: false, sel: null, step: 'on', check: false, firstFill: Array(n).fill(true), done: false };
+      L.seen(this.s.words, 'lamp', this.s.day);
+      this.ciBox.setVisible(true);
+      this.renderCircuit();
+      this.time.delayedCall(200, () => speak('Turn on the lamp.'));
+    }
+
+    renderCircuit() {
+      const q = this.cq, lit = L.circuitLit(q.gaps, q.sw);
+      this.ciSay.setText(q.done ? 'Good job!' : (q.step === 'on' ? 'Turn on the lamp.' : 'Turn off the lamp.'));
+      this.ciZh.setText(this.subs() ? (q.done ? '做得好！' : (q.step === 'on' ? '把燈打開。' : '把燈關掉。')) : '');
+      // 導線（迴路的四邊），檢查模式時不通的那段標紅
+      const chk = L.circuitCheck(q.gaps, q.sw);
+      const w = this.ciWire; w.clear();
+      w.lineStyle(6, lit ? 0xffb300 : 0x78909c, 1);
+      const { x0, y0, x1, y1 } = CIRC.loop;
+      w.strokeRect(x0, y0, x1 - x0, y1 - y0);
+      if (lit) { w.lineStyle(14, 0xffe082, 0.35); w.strokeRect(x0, y0, x1 - x0, y1 - y0); }
+      // 電池、燈泡
+      const b = this.ciBatt; b.clear();
+      b.fillStyle(0x455a64, 1); b.fillRoundedRect(-22, -40, 44, 80, 8); b.fillStyle(0xffca28, 1); b.fillRoundedRect(-22, -40, 44, 30, 8);
+      b.fillStyle(0x90a4ae, 1); b.fillRect(-8, -48, 16, 8);
+      const u = this.ciBulb; u.clear();
+      if (lit) { u.fillStyle(0xfff59d, 0.6); u.fillCircle(0, -6, 40); }
+      u.fillStyle(lit ? 0xffeb3b : 0xeceff1, 1); u.fillCircle(0, -6, 24);
+      u.lineStyle(3, 0x90a4ae, 1); u.strokeCircle(0, -6, 24);
+      u.fillStyle(0x90a4ae, 1); u.fillRect(-12, 14, 24, 14);
+      // 開關
+      const sg = this.ciSwG; sg.clear();
+      sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-50, -24, 100, 48, 12);
+      sg.lineStyle(4, q.check && !q.sw ? 0xe53935 : 0x90a4ae, 1); sg.strokeRoundedRect(-50, -24, 100, 48, 12);
+      sg.fillStyle(0x546e7a, 1); sg.fillCircle(-30, 0, 6); sg.fillCircle(30, 0, 6);
+      sg.lineStyle(6, 0x546e7a, 1);
+      if (q.sw) sg.lineBetween(-30, 0, 30, 0); else sg.lineBetween(-30, 0, 22, -20);
+      this.ciSwT.setText(q.sw ? 'on' : 'off');
+      // 缺口
+      this.ciGaps.forEach((gp, i) => {
+        const has = i < q.n;
+        gp.z.setVisible(has);
+        if (!has) return;
+        const m = q.gaps[i];
+        gp.bg.clear();
+        gp.bg.fillStyle(0xfffaf0, 1); gp.bg.fillRoundedRect(-48, -36, 96, 72, 12);
+        gp.bg.lineStyle(4, q.check ? (chk[i] ? 0x43a047 : 0xe53935) : 0xffb74d, 1); gp.bg.strokeRoundedRect(-48, -36, 96, 72, 12);
+        gp.m.clear(); if (m) drawPart(gp.m, m);
+      });
+      this.ciTray.forEach((t) => {
+        const used = q.gaps.includes(t.k);
+        t.bg.clear();
+        t.bg.fillStyle(0xffffff, 1); t.bg.fillRoundedRect(-100, -38, 200, 76, 14);
+        t.bg.lineStyle(q.sel === t.k ? 5 : 3, q.sel === t.k ? 0xff9800 : 0xd7ccc8, 1); t.bg.strokeRoundedRect(-100, -38, 200, 76, 14);
+        t.b.setAlpha(used ? 0.35 : 1);
+      });
+      if (!q.check) this.ciMsg.setText('');
+    }
+
+    pickPart(k) {
+      const q = this.cq;
+      if (this.modal !== 'circuit' || q.done || q.gaps.includes(k)) return;
+      q.sel = q.sel === k ? null : k;
+      this.renderCircuit();
+    }
+
+    tapGap(i) {
+      const q = this.cq;
+      if (this.modal !== 'circuit' || q.done || i >= q.n) return;
+      if (q.gaps[i]) { q.gaps[i] = null; q.check = false; this.renderCircuit(); return; }
+      if (!q.sel) { this.ciMsg.setText('Pick a part first. 先選右邊的零件'); return; }
+      // 每個缺口第一次放的零件：是不是導體（科學統計）
+      if (q.firstFill[i]) { this.stats.circuit.q += 1; if (L.CONDUCTOR[q.sel]) this.stats.circuit.first += 1; q.firstFill[i] = false; }
+      q.gaps[i] = q.sel; q.sel = null; q.check = false;
+      this.afterCircuit();
+    }
+
+    toggleSwitch() {
+      const q = this.cq;
+      if (this.modal !== 'circuit' || q.done) return;
+      q.sw = !q.sw; q.check = false;
+      speak(q.sw ? 'on' : 'off');
+      this.afterCircuit();
+    }
+
+    afterCircuit() {
+      const q = this.cq, lit = L.circuitLit(q.gaps, q.sw);
+      if (q.step === 'on' && lit) { q.step = 'off'; speak('The lamp is on! Now turn off the lamp.'); }
+      else if (q.step === 'off' && !q.sw && q.gaps.every((m) => m && L.CONDUCTOR[m])) {
+        q.done = true; speak('Good job!');
+        this.stationDone('circuit', 3, 'Good job!');
+        const cur = q;
+        this.time.delayedCall(BOT ? 30 : 1600, () => { if (this.modal === 'circuit' && this.cq === cur) this.openCircuit(); });
+      }
+      this.renderCircuit();
+    }
+
+    checkCircuit() {
+      const q = this.cq;
+      if (this.modal !== 'circuit' || q.done) return;
+      q.check = true;
+      const chk = L.circuitCheck(q.gaps, q.sw);
+      const bad = [];
+      q.gaps.forEach((m, i) => { if (!chk[i]) bad.push(m ? CIRC_ZH[m] + '不導電' : '缺口是空的'); });
+      if (!q.sw) bad.push('開關沒打開');
+      this.renderCircuit();
+      this.ciMsg.setText(bad.length ? bad.join('、') : 'All good! 都通了');
+    }
+
+    // --- 修樂器（§4.11 B）：點樂器聽聽看，正常的會振動；找出卡住不振動的那個 ---
+    buildMusic() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Music 樂器', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.muTitle = txt(this, 640, 150, 'Which one is broken?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.muZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.muMsg = txt(this, 640, 610, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.muTitle, this.muZh, this.muMsg]);
+      this.muItems = INSTR.map((k, i) => {
+        const x = 640 + (i - 1.5) * 200;
+        const b = this.add.container(x, 360);
+        const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-85, -95, 170, 190, 20);
+        bg.lineStyle(3, 0xd1c4e9, 1); bg.strokeRoundedRect(-85, -95, 170, 190, 20);
+        const ic = this.add.graphics({ y: -20 }).setScale(1.6); drawInstr(ic, k);
+        const waves = this.add.graphics({ y: -20 });
+        const nm = txt(this, 0, 52, k, 26, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const snd = txt(this, 0, -82, '', 22, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+        b.add([bg, ic, waves, nm, snd]);
+        b.setSize(170, 190).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => this.playInstr(i));
+        const fix = makeButton(this, x, 515, 150, 56, 0x8e24aa, 'Fix 修理', 22, () => this.fixInstr(i));
+        c.add([b, fix]);
+        return { b, ic, waves, snd, fix, x };
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.muBox = c;
+    }
+
+    openMusic() {
+      this.modal = 'music';
+      this.uq = { broken: Math.floor(Math.random() * INSTR.length), tried: {}, tries: 0, done: false, wrong: {} };
+      INSTR.forEach((k) => L.seen(this.s.words, k, this.s.day));
+      this.muBox.setVisible(true);
+      this.renderMusic();
+      this.time.delayedCall(200, () => speak('Which one is broken?'));
+    }
+
+    renderMusic() {
+      const q = this.uq;
+      this.muZh.setText(this.subs() ? '哪一個壞了？點樂器聽聽看、看看它有沒有振動' : '');
+      this.muItems.forEach((it, i) => { it.b.setAlpha(q.wrong[i] ? 0.4 : 1); it.fix.setAlpha(q.wrong[i] ? 0.4 : 1); });
+      if (!q.done) this.muMsg.setText('Tap to play. Sound comes from shaking. 聲音來自振動');
+    }
+
+    playInstr(i) {
+      const q = this.uq, it = this.muItems[i];
+      if (this.modal !== 'music') return;
+      q.tried[i] = true;
+      const broken = i === q.broken && !q.done;
+      it.waves.clear();
+      if (broken) {
+        // 卡住了：不振動、沒有聲音
+        it.snd.setText('...');
+        this.time.delayedCall(700, () => it.snd.setText(''));
+        return;
+      }
+      speak(INSTR_SOUND[INSTR[i]]);
+      it.snd.setText(INSTR_SOUND[INSTR[i]]);
+      it.waves.lineStyle(3, 0xff9800, 0.9);
+      [34, 46].forEach((r) => { it.waves.beginPath(); it.waves.arc(0, 0, r, -0.6, 0.6, false); it.waves.strokePath(); it.waves.beginPath(); it.waves.arc(0, 0, r, Math.PI - 0.6, Math.PI + 0.6, false); it.waves.strokePath(); });
+      this.tweens.add({ targets: it.ic, x: 4, yoyo: true, repeat: 5, duration: 40, onComplete: () => { it.ic.setX(0); it.waves.clear(); it.snd.setText(''); } });
+    }
+
+    fixInstr(i) {
+      const q = this.uq, it = this.muItems[i];
+      if (this.modal !== 'music' || q.done || q.wrong[i]) return;
+      const right = i === q.broken;
+      if (q.tries === 0) { this.stats.music.q += 1; if (right) this.stats.music.first += 1; }
+      if (!right) {
+        q.tries += 1; q.wrong[i] = true;
+        this.tweens.add({ targets: it.b, x: it.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => it.b.setX(it.x) });
+        this.muMsg.setText('It is not broken. Tap it to hear. 它沒壞，點點看會不會振動');
+        this.renderMusic();
+        return;
+      }
+      q.done = true;
+      speak('You fixed the ' + INSTR[i] + '!');
+      this.muMsg.setText('Fixed! Now it can shake. 修好了！它又能振動了');
+      this.renderMusic();
+      this.time.delayedCall(300, () => this.playInstr(i));
+      this.stationDone('music', 3, 'Fixed!');
+      const cur = q;
+      this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'music' && this.uq === cur) this.openMusic(); });
+    }
+
+    // --- 霧中找動物（§4.11 A）：看波紋、聽聲音往哪邊走；走對會 louder，走錯會 quieter ---
+    buildFog() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xcfd8dc);
+      c.add(txt(this, 640, 98, 'Fog 霧中找朋友', 28, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.fgTitle = txt(this, 640, 150, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fgZh = txt(this, 640, 188, '', 20, '#546e7a').setOrigin(0.5);
+      this.fgField = this.add.graphics();
+      this.fgWaves = this.add.graphics();
+      this.fgFriend = this.add.graphics({ x: 640, y: 330 }).setScale(1.6);
+      this.fgMe = makeIcon(this, 'rabbit', 640, 500, 1.4);
+      this.fgFeed = txt(this, 640, 420, '', 30, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.fgTitle, this.fgZh, this.fgField, this.fgWaves, this.fgFriend, this.fgMe, this.fgFeed]);
+      this.fgKeys = FOG_DIRS.map((d, i) => {
+        const b = makeButton(this, 640 + (i - 1) * 150, 600, 120, 60, 0x546e7a, { left: '←', front: '↑', right: '→' }[d], 32, () => this.fogMove(d));
+        c.add(b);
+        return b;
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.fgBox = c;
+    }
+
+    openFog() {
+      this.modal = 'fog';
+      const who = L.shuffle(SOUND_KEYS)[0];
+      this.fq = { who, dist: 3, dir: FOG_DIRS[Math.floor(Math.random() * 3)], firstStep: true, done: false, feed: '' };
+      ['loud', 'quiet'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.fgBox.setVisible(true);
+      this.renderFog();
+      this.time.delayedCall(250, () => this.fogCall());
+    }
+
+    fogCall() { if (this.fq && !this.fq.done) { const t = ANIMALS[this.fq.who].sound; speak(t); } }
+
+    renderFog() {
+      const q = this.fq;
+      this.fgTitle.setText(q.done ? 'You found ' + art(q.who) + '!' : 'Where is your friend?');
+      this.fgZh.setText(this.subs() ? (q.done ? '找到了！' : '霧好濃，看波紋、聽聲音，往聲音那邊走') : '');
+      const f = this.fgField; f.clear();
+      f.fillStyle(0xeceff1, 0.9); f.fillRoundedRect(250, 220, 780, 330, 24);
+      // 波紋：從朋友那邊傳來，越近越大、越多圈（靜音也能玩）
+      const w = this.fgWaves; w.clear();
+      if (!q.done) {
+        const cx = { left: 330, front: 640, right: 950 }[q.dir], cy = q.dir === 'front' ? 250 : 330;
+        const rings = 4 - q.dist;
+        w.lineStyle(4, 0x5c6bc0, 0.4 + 0.15 * rings);
+        for (let r = 0; r <= rings; r++) w.strokeCircle(cx, cy, 18 + r * 16);
+      }
+      this.fgFriend.setVisible(q.done);
+      if (q.done) drawIcon(this.fgFriend, q.who);
+      this.fgFeed.setText(q.feed);
+    }
+
+    fogMove(d) {
+      const q = this.fq;
+      if (this.modal !== 'fog' || q.done) return;
+      const right = d === q.dir;
+      // 每一步的第一次選擇算統計（3 選 1，記科學統計：看波紋／聽聲音判斷方向）
+      if (q.firstStep) { this.stats.fog.q += 1; if (right) this.stats.fog.first += 1; }
+      if (right) {
+        q.dist -= 1; q.firstStep = true;
+        q.feed = q.dist > 0 ? 'It is louder!' : '';
+        if (q.dist > 0) q.dir = FOG_DIRS[Math.floor(Math.random() * 3)]; // 路會轉彎
+      } else {
+        q.dist = Math.min(4, q.dist + 1); q.firstStep = false;
+        q.feed = 'It is quieter.';
+      }
+      if (q.feed) speak(q.feed);
+      if (q.dist <= 0) {
+        q.done = true;
+        speak('You found ' + art(q.who) + '!');
+        this.renderFog();
+        this.stationDone('fog', 3, 'Found!');
+        const cur = q;
+        this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'fog' && this.fq === cur) this.openFog(); });
+        return;
+      }
+      this.renderFog();
+      this.time.delayedCall(BOT ? 10 : 900, () => this.fogCall());
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -3359,6 +3790,14 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (['circuit', 'music', 'fog'].includes(this.modal)) {
+        if (Math.random() < 0.03) { this.closeModal(); return; }
+        const r = Math.random();
+        if (this.modal === 'circuit') { if (r < 0.35) this.pickPart(CIRC_PARTS[Math.floor(Math.random() * 4)]); else if (r < 0.7) this.tapGap(Math.floor(Math.random() * 2)); else if (r < 0.9) this.toggleSwitch(); else this.checkCircuit(); }
+        else if (this.modal === 'music') { if (r < 0.6) this.playInstr(Math.floor(Math.random() * 4)); else this.fixInstr(Math.floor(Math.random() * 4)); }
+        else this.fogMove(FOG_DIRS[Math.floor(Math.random() * 3)]);
+        return;
+      }
       if (['light', 'moon', 'push'].includes(this.modal)) {
         if (Math.random() < 0.03) { this.closeModal(); return; }
         if (this.modal === 'light') this.moveLamp(LIGHT_DIRS[Math.floor(Math.random() * 4)]);
@@ -3389,9 +3828,13 @@
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
-      if (this.zone === 'cave') {
+      if (this.zone === 'lighthouse') {
+        LIGHTHOUSE.forEach((b) => acts.push(() => this.openLighthouse(b.k)));
+        acts.push(() => this.goZone('cave'));
+      } else if (this.zone === 'cave') {
         CAVE.forEach((b) => acts.push(() => this.openCave(b.k)));
         acts.push(() => this.goZone('beach'));
+        acts.push(() => this.goZone('lighthouse'));
       } else if (this.zone === 'beach') {
         BEACH.forEach((b) => acts.push(() => this.openStation(b.k)));
         acts.push(() => this.goZone('meadow'));
@@ -3436,6 +3879,9 @@
         燈的方向第一次就對: pct(this.stats.light),
         月相第一次排對: pct(this.stats.moon),
         推拉第一次就對: pct(this.stats.push),
+        電路缺口第一次放導體: pct(this.stats.circuit),
+        樂器第一次就修對: pct(this.stats.music),
+        霧中每步第一次走對: pct(this.stats.fog),
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
