@@ -105,7 +105,7 @@
 
   // 洞穴（M4）：在海灘左邊。§5 原定「圖鑑 20 項」解鎖，但目前圖鑑只有 14 項，先暫定 12 項，圖鑑擴充後改回
   const COFF = -2560;
-  const CAVE_LIB = 12;
+  const CAVE_LIB = 20;     // §5：圖鑑 20 項（圖鑑擴充到 23 項後改回原定值）
   const CAVE = [
     { k: 'light', x: 330, en: 'Light', zh: '找植物', color: 0xf9a825 },
     { k: 'moon',  x: 640, en: 'Moon',  zh: '月亮',   color: 0x3949ab },
@@ -284,6 +284,15 @@
     { k: 'windy',  en: 'windy',  zh: '有風',   kind: 'weather', fact: '空氣流動就會產生風，風會讓土壤的水分乾得更快。' },
   ];
   ANIMAL_KEYS.forEach((k) => LIB.push({ k, en: k, zh: ANIMALS[k].zh, kind: 'animal', fact: ANIMALS[k].fact }));
+  // 特定條件才會出現的發現（遊戲企劃「稀有項需特定條件組合」）；hint 是還沒發現時的提示
+  [
+    { k: 'butterfly', en: 'butterfly', zh: '蝴蝶', kind: 'bug', fact: '蝴蝶用長長的口器吸花蜜，晴天花開的時候最常出現。', hint: '晴天的時候，看看開花的玫瑰' },
+    { k: 'bee',       en: 'bee',       zh: '蜜蜂', kind: 'bug', fact: '蜜蜂在花和花之間飛，幫植物傳花粉，才會結出果實和種子。', hint: '玉米或葡萄長大的時候，看看它們附近' },
+    { k: 'ant',       en: 'ant',       zh: '螞蟻', kind: 'bug', fact: '螞蟻會把找到的食物搬回巢裡，和同伴一起分享。', hint: '多雲的日子，看看長好的紅蘿蔔' },
+    { k: 'rainbow',   en: 'rainbow',   zh: '彩虹', kind: 'sky', fact: '雨停後空氣裡有很多小水滴，陽光穿過水滴就會分出七種顏色。', hint: '下雨之後放晴的早上，看看天空' },
+    { k: 'moon',      en: 'moon',      zh: '月亮', kind: 'thing', fact: '月亮自己不會發光，我們看到的是它反射的太陽光；每天看起來的形狀都不一樣。', hint: '去洞穴把月亮排排看' },
+    { k: 'magnet',    en: 'magnet',    zh: '磁鐵', kind: 'thing', fact: '磁鐵會吸住鐵做的東西，但銅和鋁做的東西吸不住。', hint: '去海灘試試磁鐵' },
+  ].forEach((e) => LIB.push(e));
   const LIB_PER_PAGE = 8;
 
   // 工具列：種子袋（點了選種子、買種子）、澆水壺、鏟子；背包依作物順序排，只顯示有種子的作物
@@ -613,6 +622,23 @@
       case 'potato':
         g.fillStyle(0xc8a165, 1); g.fillEllipse(0, 2, 40, 28);
         g.fillStyle(0x8d6e4a, 1); g.fillCircle(-8, -2, 2); g.fillCircle(6, 4, 2); g.fillCircle(10, -5, 1.5);
+        break;
+      case 'butterfly':
+        g.fillStyle(0xba68c8, 1); g.fillEllipse(-11, -6, 20, 16); g.fillEllipse(11, -6, 20, 16);
+        g.fillStyle(0xf48fb1, 1); g.fillEllipse(-9, 8, 14, 12); g.fillEllipse(9, 8, 14, 12);
+        g.fillStyle(0x4e342e, 1); g.fillEllipse(0, 2, 5, 22); g.lineStyle(2, 0x4e342e, 1); g.lineBetween(0, -8, -6, -18); g.lineBetween(0, -8, 6, -18);
+        break;
+      case 'bee':
+        g.fillStyle(0xe3f2fd, 0.9); g.fillEllipse(-6, -12, 14, 12); g.fillEllipse(6, -12, 14, 12);
+        g.fillStyle(0xfdd835, 1); g.fillEllipse(0, 2, 30, 20);
+        g.fillStyle(0x3e2723, 1); g.fillRect(-4, -8, 5, 20); g.fillRect(6, -6, 4, 16); g.fillCircle(-14, 0, 5);
+        break;
+      case 'ant':
+        g.fillStyle(0x3e2723, 1); g.fillCircle(-12, 0, 5); g.fillCircle(-2, 0, 4); g.fillEllipse(10, 0, 14, 10);
+        g.lineStyle(2, 0x3e2723, 1); [-6, 0, 6].forEach((x) => { g.lineBetween(x - 2, 0, x - 6, 9); g.lineBetween(x - 2, 0, x + 2, 9); }); g.lineBetween(-15, -3, -20, -10);
+        break;
+      case 'rainbow':
+        [0xe53935, 0xfb8c00, 0xfdd835, 0x43a047, 0x1e88e5, 0x5e35b1].forEach((c, i) => { g.lineStyle(4, c, 0.9); g.beginPath(); g.arc(0, 14, 36 - i * 4, Math.PI, 0, false); g.strokePath(); });
         break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
@@ -1038,7 +1064,7 @@
       const before = new Set(this.children.list);
       const zoneObjs = {};
       const grab = (z, fn) => { const b = new Set(this.children.list); fn(); zoneObjs[z] = this.children.list.filter((o) => !b.has(o)); };
-      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); });
+      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); this.buildCritter(); });
       grab('forest', () => { this.buildForest(); this.buildFacility('bridge'); });
       grab('beach', () => { this.buildBeach(); this.buildFacility('dock'); });
       grab('cave', () => { this.buildCave(); this.buildFacility('stairs'); });
@@ -1730,7 +1756,7 @@
       if (s.stardust < price) { this.sdMsg.setText('星砂不夠，需要 ★' + price); return; }
       s.stardust -= price;
       s.seeds.push(k);
-      s.lib[k] = true;
+      this.discover(k);
       L.seen(s.words, k, s.day);
       this.sdMsg.setText('買到了！New seeds: ' + k);
       speak('New seeds! ' + k);
@@ -1778,7 +1804,7 @@
       if (this.tool && PLANTS[this.tool] && this.s.seeds.includes(this.tool) && !p.plant) {
         const k = this.tool;
         p.plant = k; p.progress = 0;
-        this.s.lib[k] = true;
+        this.discover(k);
         this.s.ev.planted.push(k);
         this.stats.planted += 1;
         L.seen(this.s.words, k, this.s.day);
@@ -1980,6 +2006,75 @@
       s.caveOpen = true;
       if (this.zone === 'beach') this.floatText(180, 320, 'New place!', '#5e35b1', true);
       this.renderNav();
+    }
+
+    // 草地上偶爾出現的小生物／彩虹：條件符合時出現，點了就記入圖鑑
+    buildCritter() {
+      this.critG = this.add.graphics().setDepth(18).setVisible(false);
+      this.critZone = this.add.zone(0, 0, 90, 80).setDepth(23).setInteractive();
+      this.critZone.input.enabled = false;
+      this.critZone.on('pointerdown', () => this.tapCritter());
+      this.critT = 4; this.critter = null;
+    }
+
+    // 找一塊符合條件的成熟作物
+    critterSpot(plants) {
+      const i = this.s.plots.findIndex((p) => plants.includes(p.plant) && p.progress >= 1);
+      return i < 0 ? null : { x: this.plotObjs[i].x + 30, y: this.plotObjs[i].y - 90 };
+    }
+
+    tickCritter(dt) {
+      const s = this.s;
+      if (this.critter) {
+        this.critter.life -= dt;
+        if (this.critter.life <= 0) this.hideCritter();
+        return;
+      }
+      this.critT -= dt;
+      if (this.critT > 0) return;
+      this.critT = 6;
+      const opts = [];
+      if (s.weather === 'sunny') { const p = this.critterSpot(['rose']); if (p) opts.push(['butterfly', p]); }
+      if (s.weather !== 'rainy') { const p = this.critterSpot(['corn', 'grape']); if (p) opts.push(['bee', p]); }
+      if (s.weather === 'cloudy') { const p = this.critterSpot(['carrot']); if (p) opts.push(['ant', { x: p.x - 30, y: p.y + 60 }]); }
+      if (s.weather === 'sunny' && s.prevWeather === 'rainy' && s.t < 40) opts.push(['rainbow', { x: 820, y: 230 }]);
+      if (!opts.length) return;
+      // 還沒發現的優先出現
+      const fresh = opts.filter(([k]) => !s.lib[k]);
+      const [k, p] = (fresh.length ? fresh : opts)[Math.floor(Math.random() * (fresh.length || opts.length))];
+      this.critter = { k, x: p.x, y: p.y, life: 20 };
+      drawIcon(this.critG, k);
+      this.critG.setPosition(p.x, p.y).setScale(k === 'rainbow' ? 2.2 : 1.1).setVisible(true);
+      this.critZone.setPosition(p.x, p.y).setSize(k === 'rainbow' ? 200 : 90, k === 'rainbow' ? 110 : 80);
+      this.critZone.input.enabled = true;
+    }
+
+    hideCritter() {
+      this.critter = null;
+      this.critG.setVisible(false);
+      this.critZone.input.enabled = false;
+      this.critT = 12;
+    }
+
+    tapCritter() {
+      if (this.paused() || !this.critter) return;
+      const k = this.critter.k;
+      speak(k === 'rainbow' ? 'A rainbow!' : 'A ' + k + '!');
+      this.discover(k);
+      this.hideCritter();
+    }
+
+    // 圖鑑新發現：記入圖鑑並給 ★3（§3.4）；已經發現過就不做事
+    discover(k) {
+      const s = this.s;
+      if (s.lib[k]) return false;
+      s.lib[k] = true;
+      s.stardust += 3;
+      const e = LIB.find((x) => x.k === k);
+      this.floatText(640, 120, 'New! ' + (e ? e.en : k) + (this.subs() && e ? ' ' + e.zh : '') + '  圖鑑 +1  +3 ★', '#6a1b9a', true);
+      if (this.libCards) this.refreshLibrary();
+      if (this.dustText) this.dustText.setText(String(s.stardust));
+      return true;
     }
 
     libCount() { return Object.keys(this.s.lib).filter((k) => this.s.lib[k]).length; }
@@ -2309,7 +2404,7 @@
         if (!q.recorded) L.answer(s.words, A.clue, { day: s.day, options: HAB_KEYS.length, firstTry: q.tries === 0, peeked: q.peeked });
         lot.animal = v; s.visitor = null;
         this.touch('habitat');
-        s.lib[v] = true;
+        this.discover(v);
         s.ev.came.push(v);
         s.stardust += 3;
         this.hearts(o.x, o.y - 20);
@@ -2880,6 +2975,7 @@
     stationDone(key, reward, msg) {
       const s = this.s;
       reward = STATION_REWARD;
+      if (key === 'moon' || key === 'magnet') this.discover(key);
       this.touch(key);
       if (CAVE.some((c) => c.k === key)) { s.caveDone = (s.caveDone || 0) + 1; this.checkLight(); }
       if (LIGHTHOUSE.some((c) => c.k === key)) s.lightDone = (s.lightDone || 0) + 1;
@@ -5149,7 +5245,7 @@
     pickCard(e) {
       if (!this.s.lib[e.k]) {
         this.libDetailEn.setText('?');
-        this.libDetailZh.setText(e.kind === 'animal' ? '還沒遇到。完成居民的願望，去池塘森林幫牠蓋一個家' : '還沒發現，試試看種下它或等到那種天氣');
+        this.libDetailZh.setText(e.hint || (e.kind === 'animal' ? '還沒遇到。完成居民的願望，去池塘森林幫牠蓋一個家' : (PLANTS[e.k] && PLANTS[e.k].price ? '用星砂在種子袋買種子' : '還沒發現，試試看種下它或等到那種天氣')));
         return;
       }
       speak(e.en);
@@ -5159,7 +5255,7 @@
         const p = PLANTS[e.k];
         this.libDetailZh.setText(e.zh + '　我們用到的部位：' + p.part + '（' + p.partZh + '）\n' + p.fact);
       } else {
-        this.libDetailZh.setText(e.zh + '\n' + e.fact);
+        this.libDetailZh.setText(e.zh + '\n' + (e.fact || ''));
       }
     }
 
@@ -5251,6 +5347,7 @@
         const r = Math.random(); let acc = 0;
         for (const [k, w] of WEATHER_PICK) { acc += w; if (r <= acc) { pick = k; break; } }
       }
+      s.prevWeather = s.weather;
       s.weather = pick;
       this.applyWeatherLook();
       if (this.needWeatherQ()) this.openWeatherQ(); else this.showBanner();
@@ -5259,7 +5356,7 @@
 
     showBanner() {
       const s = this.s, w = WEATHER[s.weather];
-      s.lib[s.weather] = true;
+      this.discover(s.weather);
       L.seen(s.words, s.weather, s.day);
       this.bannerDay.setText('Day ' + s.day + '  ' + weekday(s.day));
       this.bannerEn.setText(w.phrase);
@@ -5457,6 +5554,7 @@
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
       FAC_KEYS.filter((k) => FAC[k].zone === this.zone).forEach((k) => acts.push(() => this.openFix(k)));
+      if (this.zone === 'meadow' && this.critter) acts.push(() => this.tapCritter());
       if (this.zone === 'research') {
         RLABS.forEach((b) => acts.push(() => this.openLab(b.k)));
         acts.push(() => this.goZone('forest'));
@@ -5654,6 +5752,9 @@
         }
       }
 
+      // 草地：小生物（時間有在走時才倒數；小生物也會輕輕飄動）
+      if (running) this.tickCritter(dt);
+      if (this.critter) this.critG.setY(this.critter.y + Math.sin(tSec * 4) * 4);
       // 池塘森林：草叢倒數（只在森林裡、時間有在走時倒數），以及安排下一位訪客
       if (running && this.zone === 'forest') this.tickBush(dt);
       this.bushG.rotation = this.bushReady ? Math.sin(tSec * 14) * 0.09 : 0;

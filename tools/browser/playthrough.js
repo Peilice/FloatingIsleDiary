@@ -166,6 +166,7 @@
       if (sc.groupOpen('weather')) mark('氣象站', s);
       if (sc.groupOpen('geo')) mark('地質洞窟', s);
       if (sc.groupOpen('eco')) mark('生態研究所', s);
+      ['butterfly', 'bee', 'ant', 'rainbow'].forEach((k) => { if (s.lib[k]) mark('發現 ' + k, s); });
       if (s.drillDay) mark('第一次演練', s);
       if (Object.keys(s.fixed || {}).length >= 3) mark('修好 3 個設施', s);
       if (sc.modal) {
@@ -179,6 +180,7 @@
       }
       A.lastModal = null; A.modalFrames = 0;
       if (A.today !== s.day) { (A.dust = A.dust || []).push(s.stardust); planDay(sc, s); }
+      if (sc.critter) sc.tapCritter();
       farm(sc, s);
       wishes(sc, s);
       buySeeds(sc, s);
