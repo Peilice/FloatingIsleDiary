@@ -1,6 +1,6 @@
 // 網路優先、失敗時改用快取，開發時改檔不會被舊快取卡住，離線也能玩
 const CACHE = 'cloudisland-v1';
-const FILES = ['./', './index.html', './game.js', './words.js', './lib/phaser.min.js', './manifest.webmanifest', './icon.svg'];
+const FILES = ['./', './index.html', './game.js', './words.js', './logic.js', './lib/phaser.min.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
