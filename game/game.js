@@ -231,6 +231,7 @@
     { name: '音調', codes: 'INe-Ⅲ-6', keys: ['pitch'] },
     { name: '化石與地層', codes: 'INc-Ⅲ-11、INd-Ⅲ-8～10', keys: ['fossil'] },
     { name: '英語：生活對話（市集、日曆）', codes: '英語 B-Ⅱ-1、C-Ⅱ-2、D-Ⅱ-1', keys: ['market', 'calendar'] },
+    { name: '英語：家人、地點、節慶', codes: '英語 B-Ⅱ-1、C-Ⅱ-2', keys: ['family', 'way', 'festival'] },
     { name: '英語：句子回顧（日記）', codes: '英語 Ae-Ⅲ-12、B-Ⅲ-1、Ad-Ⅲ-11', keys: ['diary'] },
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
@@ -254,6 +255,14 @@
     { k: 'flag',      zh: '旗子',   en: 'flag',     lib: 20, price: 55, x: 870,  y: 430 },
     { k: 'fountain',  zh: '噴水池', en: 'fountain', lib: 23, price: 80, x: 175,  y: 605 },
   ];
+
+  // 指路（§4.17）：市集的第三種訂單 Where is the zoo?，十字路口四個方向各有一個地點
+  const PLACES = ['zoo', 'park', 'library', 'hospital', 'school', 'store'];
+  // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
+  const FAMILY = ['grandfather', 'grandmother', 'father', 'mother', 'brother', 'sister', 'baby'];
+  // 節慶（§4.17）：每 30 天一輪，第 10 天萬聖節、第 20 天兔子生日、第 30 天聖誕節
+  const FESTIVALS = { 10: { k: 'Halloween', zh: '萬聖節', pic: 'pumpkin' }, 20: { k: 'birthday', zh: '生日', pic: 'cake' }, 0: { k: 'Christmas', zh: '聖誕節', pic: 'xtree' } };
+  const festivalOf = (d) => FESTIVALS[d % 30] || null;
 
   // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
   const MAP = [
@@ -341,7 +350,7 @@
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
       harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
-      bagReady: false, drillDay: 0, lightDone: 0, fixed: {}, crack: null, decor: {},
+      bagReady: false, drillDay: 0, lightDone: 0, fixed: {}, crack: null, decor: {}, famDay: 0, festDay: 0,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -857,6 +866,44 @@
     else { g.lineStyle(6, 0x558b2f, 1); g.lineBetween(0, 24, 0, -22); g.fillStyle(0x7cb342, 1); g.fillEllipse(-9, -4, 14, 6); g.fillEllipse(9, -14, 14, 6); }
   }
 
+  // 地點（指路用）：只有圖，靠英文判斷是哪裡
+  function drawPlace(g, k) {
+    g.clear();
+    const house = (c, roof) => { g.fillStyle(c, 1); g.fillRect(-26, -10, 52, 34); g.fillStyle(roof, 1); g.fillTriangle(-32, -10, 32, -10, 0, -32); g.fillStyle(0x6d4c41, 1); g.fillRect(-6, 8, 12, 16); };
+    if (k === 'zoo') { g.lineStyle(3, 0x8d6e63, 1); for (let x = -28; x <= 28; x += 8) g.lineBetween(x, -8, x, 22); g.lineBetween(-30, -6, 30, -6); g.fillStyle(0xfdd835, 1); g.fillCircle(-8, 6, 9); g.fillStyle(0x8d6e63, 1); g.fillCircle(-12, 0, 3); g.fillCircle(-4, 0, 3); g.fillStyle(0x9e9e9e, 1); g.fillEllipse(14, 10, 18, 14); g.fillRect(20, 2, 4, 14); }
+    else if (k === 'park') { g.fillStyle(0x7cb342, 1); g.fillEllipse(0, 16, 64, 16); g.fillStyle(0x6d4c41, 1); g.fillRect(-18, -4, 6, 20); g.fillStyle(0x2e8b3a, 1); g.fillCircle(-15, -14, 14); g.fillStyle(0x8d6e63, 1); g.fillRect(4, 6, 26, 5); g.fillRect(6, 10, 3, 8); g.fillRect(25, 10, 3, 8); }
+    else if (k === 'library') { house(0xbcaaa4, 0x5d4037); [0xe53935, 0x1e88e5, 0x43a047, 0xfdd835].forEach((c, i) => { g.fillStyle(c, 1); g.fillRect(-22 + i * 6, -4, 5, 12); }); }
+    else if (k === 'hospital') { house(0xffffff, 0x90a4ae); g.fillStyle(0xe53935, 1); g.fillRect(-4, -26, 8, 16); g.fillRect(-10, -21, 20, 6); }
+    else if (k === 'school') { house(0xffcc80, 0xe65100); g.fillStyle(0x6d4c41, 1); g.fillRect(-1, -46, 2, 16); g.fillStyle(0xfdd835, 1); g.fillCircle(0, -24, 5); g.fillStyle(0x1e88e5, 1); g.fillTriangle(1, -46, 1, -38, 12, -42); }
+    else { house(0xe0f7fa, 0x00897b); g.fillStyle(0xef5350, 1); for (let i = 0; i < 4; i++) g.fillRect(-26 + i * 13, -12, 7, 6); g.fillStyle(0xffffff, 1); for (let i = 0; i < 4; i++) g.fillRect(-19 + i * 13, -12, 6, 6); }
+  }
+  // 家人：兔子造型，靠配件分辨（祖父母灰毛戴眼鏡、爸爸領帶、媽媽蝴蝶結、哥哥帽子、妹妹髮帶、寶寶奶嘴）
+  function drawFamily(g, k) {
+    g.clear();
+    const old = k === 'grandfather' || k === 'grandmother';
+    const size = k === 'baby' ? 0.55 : (k === 'brother' || k === 'sister' ? 0.8 : 1);
+    const fur = old ? 0xbdbdbd : 0xf3efe9;
+    const sz = (v) => v * size;
+    g.fillStyle(fur, 1); g.fillEllipse(sz(-8), sz(-44), sz(10), sz(30)); g.fillEllipse(sz(8), sz(-44), sz(10), sz(30));
+    g.fillEllipse(0, sz(18), sz(40), sz(40)); g.fillCircle(0, sz(-14), sz(18));
+    g.fillStyle(0x333333, 1); g.fillCircle(sz(-6), sz(-16), 2); g.fillCircle(sz(6), sz(-16), 2);
+    if (old) { g.lineStyle(2, 0x5d4037, 1); g.strokeCircle(sz(-6), sz(-16), 5); g.strokeCircle(sz(6), sz(-16), 5); g.lineBetween(sz(-1), sz(-16), sz(1), sz(-16)); }
+    if (k === 'grandfather') { g.fillStyle(0xeeeeee, 1); g.fillEllipse(0, sz(-6), sz(18), sz(6)); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(sz(22), sz(4), sz(22), sz(38)); }
+    if (k === 'grandmother') { g.fillStyle(0x9e9e9e, 1); g.fillCircle(0, sz(-32), sz(7)); g.fillStyle(0xce93d8, 1); g.fillTriangle(sz(-20), sz(4), sz(20), sz(4), 0, sz(26)); }
+    if (k === 'father') { g.fillStyle(0x1e88e5, 1); g.fillTriangle(sz(-4), sz(2), sz(4), sz(2), 0, sz(26)); }
+    if (k === 'mother') { g.fillStyle(0xe91e63, 1); g.fillTriangle(sz(-14), sz(-34), sz(-2), sz(-28), sz(-14), sz(-22)); g.fillTriangle(sz(10), sz(-34), sz(-2), sz(-28), sz(10), sz(-22)); }
+    if (k === 'brother') { g.fillStyle(0x43a047, 1); g.fillRoundedRect(sz(-18), sz(-36), sz(36), sz(10), 3); g.fillRect(sz(4), sz(-30), sz(20), sz(5)); }
+    if (k === 'sister') { g.fillStyle(0xffca28, 1); g.fillRect(sz(-18), sz(-32), sz(36), sz(5)); g.fillStyle(0xf48fb1, 1); g.fillTriangle(sz(-18), sz(30), sz(18), sz(30), 0, sz(8)); }
+    if (k === 'baby') { g.fillStyle(0x4fc3f7, 1); g.fillCircle(0, sz(-6), 5); g.fillRect(-1, sz(-10), 2, 4); }
+  }
+  // 節慶的圖
+  function drawFestival(g, pic) {
+    g.clear();
+    if (pic === 'pumpkin') { g.fillStyle(0xfb8c00, 1); g.fillEllipse(-10, 6, 26, 30); g.fillEllipse(10, 6, 26, 30); g.fillEllipse(0, 6, 26, 32); g.fillStyle(0x43a047, 1); g.fillRect(-2, -16, 5, 9); g.fillStyle(0x3e2723, 1); g.fillTriangle(-12, 0, -4, 0, -8, -6); g.fillTriangle(4, 0, 12, 0, 8, -6); g.fillTriangle(-10, 12, 10, 12, 0, 18); }
+    else if (pic === 'cake') { g.fillStyle(0xf8bbd0, 1); g.fillRect(-24, 0, 48, 22); g.fillStyle(0xffffff, 1); g.fillRect(-24, -2, 48, 6); g.fillStyle(0x4fc3f7, 1); [-12, 0, 12].forEach((x) => g.fillRect(x - 2, -16, 4, 14)); g.fillStyle(0xffca28, 1); [-12, 0, 12].forEach((x) => g.fillCircle(x, -18, 3)); }
+    else { g.fillStyle(0x2e7d32, 1); g.fillTriangle(-22, 16, 22, 16, 0, -4); g.fillTriangle(-18, 2, 18, 2, 0, -18); g.fillTriangle(-12, -10, 12, -10, 0, -30); g.fillStyle(0x6d4c41, 1); g.fillRect(-4, 16, 8, 8); g.fillStyle(0xffd54a, 1); g.fillCircle(0, -32, 4); g.fillStyle(0xe53935, 1); g.fillCircle(-8, 6, 3); g.fillCircle(9, -6, 3); }
+  }
+
   // 裝飾
   function drawDecor(g, k) {
     g.clear();
@@ -1071,7 +1118,7 @@
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
       this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, bag: { q: 0, first: 0 }, drill: { q: 0, first: 0 }, recycle: { q: 0, first: 0 }, pond: { q: 0, first: 0 },
-        water: { q: 0, first: 0 }, typhoon: { q: 0, first: 0 }, fix: { q: 0, first: 0 }, prep: { q: 0, first: 0 }, food: { q: 0, first: 0 }, photo: { q: 0, first: 0 }, spell: { q: 0, first: 0 }, pitch: { q: 0, first: 0 }, fossil: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+        water: { q: 0, first: 0 }, typhoon: { q: 0, first: 0 }, fix: { q: 0, first: 0 }, way: { q: 0, first: 0 }, family: { q: 0, first: 0 }, festival: { q: 0, first: 0 }, prep: { q: 0, first: 0 }, food: { q: 0, first: 0 }, photo: { q: 0, first: 0 }, spell: { q: 0, first: 0 }, pitch: { q: 0, first: 0 }, fossil: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -1122,6 +1169,7 @@
       this.buildSeeds();
       this.buildFix();
       this.buildDecorShop();
+      this.buildPick();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1661,7 +1709,7 @@
     closeModal() {
       if (this.modal === 'map') return;
       if (this.sdBox) this.sdBox.setVisible(false);
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox, this.fxBox, this.dcBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox, this.fxBox, this.dcBox, this.pkBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -2667,6 +2715,22 @@
         c.add(card);
         return { card, icon, en, zh, x: card.x };
       });
+      // 指路：十字路口＋四個方向的地點卡片（上、左、右、下）
+      this.mkRoad = this.add.graphics();
+      this.mkRoad.fillStyle(0xbdbdbd, 1); this.mkRoad.fillRect(610, 290, 60, 300); this.mkRoad.fillRect(420, 410, 440, 60);
+      this.mkRoad.fillStyle(0xffffff, 1); for (let y = 300; y < 580; y += 30) this.mkRoad.fillRect(637, y, 6, 14); for (let x = 430; x < 850; x += 30) this.mkRoad.fillRect(x, 437, 14, 6);
+      c.add(this.mkRoad);
+      this.mkWay = [[640, 320], [450, 440], [830, 440], [640, 560]].map(([x, y], i) => {
+        const card = this.add.container(x, y);
+        const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-62, -48, 124, 96, 14); bg.lineStyle(3, 0xb0bec5, 1); bg.strokeRoundedRect(-62, -48, 124, 96, 14);
+        const pic = this.add.graphics({ y: -6 }).setScale(1.1);
+        const zh = txt(this, 0, 36, '', 16, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, pic, zh]);
+        card.setSize(124, 96).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickWay(i));
+        c.add(card);
+        return { card, pic, zh, x };
+      });
       this.mkHint = this.add.graphics({ x: 330, y: 615 });
       this.mkHintT = txt(this, 360, 615, '', 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0, 0.5);
       c.add([this.mkHint, this.mkHintT]);
@@ -2686,7 +2750,13 @@
       const s = this.s;
       const who = L.shuffle(['rabbit'].concat(this.residents()))[0];
       let o;
-      if (Math.random() < 0.5) {
+      const r = Math.random();
+      if (r < 0.25) {
+        // 指路：Where is the zoo? 十字路口四個方向各一個地點
+        const spots = L.shuffle(PLACES).slice(0, 4);
+        const answer = spots[Math.floor(Math.random() * 4)];
+        o = { type: 'way', who, spots, answer, words: [answer], text: 'Where is the ' + answer + '?', zh: zhOf(answer) + '在哪裡？', wrong: {} };
+      } else if (r < 0.6) {
         const bin = Math.floor(Math.random() * BINS.length), n = 1 + Math.floor(Math.random() * NUMS.length);
         const [item, color] = BINS[bin];
         const num = NUMS[n - 1];
@@ -2715,12 +2785,20 @@
       const st = Math.min.apply(null, o.words.map((w) => L.stage(this.s.words, w)));
       this.mkSay.setText(o.text);
       this.mkZh.setText(this.subs() && (st === 0 || o.reveal) ? o.zh : '');
-      const fruit = o.type === 'fruit';
+      const fruit = o.type === 'fruit', way = o.type === 'way';
       this.mkBins.forEach((b) => b.setVisible(fruit));
       [this.mkBasket, this.mkClear, this.mkGive].forEach((x) => x.setVisible(fruit));
+      this.mkRoad.setVisible(way);
+      this.mkWay.forEach((c, i) => {
+        c.card.setVisible(way);
+        if (!way) return;
+        drawPlace(c.pic, o.spots[i]);
+        c.zh.setText(this.subs() && st === 0 ? zhOf(o.spots[i]) : '');
+        c.card.setAlpha(o.wrong[o.spots[i]] ? 0.35 : 1);
+      });
       this.mkClothes.forEach((c, i) => {
-        c.card.setVisible(!fruit);
-        if (fruit) return;
+        c.card.setVisible(!fruit && !way);
+        if (fruit || way) return;
         const k = o.rack[i];
         drawIcon(c.icon, k);
         c.en.setText(k);
@@ -2740,7 +2818,7 @@
       this.mkHint.clear(); this.mkHintT.setText('');
       if (o.reveal && !o.done) {
         if (fruit) { drawFruit(this.mkHint, BINS[o.bin][0], BINS[o.bin][1]); this.mkHintT.setText('x ' + o.n); }
-        else { drawIcon(this.mkHint, o.need.word === 'cold' ? 'coat' : (o.need.ok === 'rain' ? 'rainy' : 'sunny')); }
+        else if (o.type === 'clothes') { drawIcon(this.mkHint, o.need.word === 'cold' ? 'coat' : (o.need.ok === 'rain' ? 'rainy' : 'sunny')); }
       }
     }
 
@@ -2780,6 +2858,22 @@
       o.basket = { bin: null, n: 0 };
       this.tweens.add({ targets: this.mkWho, angle: 10, yoyo: true, repeat: 2, duration: 90, onComplete: () => this.mkWho.setAngle(0) });
       speak('No, thank you. ' + o.text);
+      this.renderMarket();
+    }
+
+    pickWay(i) {
+      const s = this.s, o = this.mo;
+      if (this.modal !== 'market' || !o || o.done || o.type !== 'way') return;
+      const k = o.spots[i], c = this.mkWay[i];
+      if (o.wrong[k]) return;
+      const right = k === o.answer;
+      if (o.tries === 0) { this.stats.way.q += 1; if (right) this.stats.way.first += 1; }
+      if (!o.recorded) { L.answer(s.words, o.answer, { day: s.day, options: 4, firstTry: right, peeked: false }); o.recorded = true; }
+      speak(k);
+      if (right) { this.touch('way'); speak('This is the ' + k + '. Thank you!'); this.orderDone(); return; }
+      o.tries += 1; o.reveal = true; o.wrong[k] = true;
+      this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+      speak('No. ' + o.text);
       this.renderMarket();
     }
 
@@ -2874,6 +2968,10 @@
         }
         s.party = null;
       }
+      // 節慶與家人日（§4.17）：節慶優先；週六是家人日
+      const fest = festivalOf(s.day);
+      if (fest && s.festDay !== s.day) this.whenFree(BOT ? 20 : 3600, () => { if (s.festDay !== s.day) this.openFestival(fest); });
+      else if (s.day % 7 === 6 && s.town && s.famDay !== s.day) this.whenFree(BOT ? 20 : 3600, () => { if (s.famDay !== s.day) this.openFamily(); });
       // 演練日：早上播報後開始演練（同一天不再發派對邀請）
       const drill = this.isDrillDay() && s.drillDay !== s.day;
       if (drill) this.whenFree(BOT ? 20 : 3800, () => { if (s.drillDay !== s.day) this.openDrill(); });
@@ -4997,6 +5095,118 @@
       return b;
     }
 
+    // ---------- 家人日與節慶：共用一個選圖視窗（題目＋最多 4 張圖卡） ----------
+    buildPick() {
+      const c = this.modalBase(80, 200, 100, 880, 520, 0xfffaf0);
+      this.pkTitle = txt(this, 640, 140, '', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pkSay = txt(this, 640, 190, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pkZh = txt(this, 640, 228, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.pkMsg = txt(this, 640, 585, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pkProg = txt(this, 1000, 140, '', 20, '#6b7c8c').setOrigin(0.5);
+      c.add([this.pkTitle, this.pkSay, this.pkZh, this.pkMsg, this.pkProg]);
+      this.pkCards = [0, 1, 2, 3].map((i) => {
+        const card = this.add.container(640 + (i - 1.5) * 190, 400);
+        const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-82, -110, 164, 220, 20); bg.lineStyle(4, 0xce93d8, 1); bg.strokeRoundedRect(-82, -110, 164, 220, 20);
+        const pic = this.add.graphics({ y: -10 }).setScale(1.6);
+        const zh = txt(this, 0, 90, '', 18, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, pic, zh]);
+        card.setSize(164, 220).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickPick(i));
+        c.add(card);
+        return { card, pic, zh, x: card.x };
+      });
+      this.closeButton(c, 1055, 135, () => this.closeModal());
+      this.pkBox = c;
+    }
+
+    // 家人日：一位居民帶家人來，問 3 題 Where is my grandmother?
+    openFamily() {
+      const s = this.s;
+      const who = L.shuffle(['rabbit'].concat(this.residents()))[0];
+      this.modal = 'pick';
+      this.pk = { kind: 'family', who, round: 0, n: 3, done: false };
+      this.pkBox.setVisible(true);
+      this.nextFamily();
+    }
+
+    nextFamily() {
+      const q = this.pk;
+      q.opts = L.shuffle(FAMILY).slice(0, 4);
+      q.answer = q.opts[Math.floor(Math.random() * 4)];
+      q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.itemDone = false;
+      q.say = 'Where is my ' + q.answer + '?';
+      q.zh = '我的' + zhOf(q.answer) + '在哪裡？';
+      this.renderPick();
+      this.time.delayedCall(200, () => speak(q.say));
+    }
+
+    // 節慶：Which one is for Christmas?
+    openFestival(fest) {
+      this.modal = 'pick';
+      const pics = L.shuffle(Object.values(FESTIVALS));
+      this.pk = { kind: 'festival', fest, round: 0, n: 1, done: false, opts: pics.map((f) => f.k), pics };
+      const q = this.pk;
+      q.answer = fest.k; q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.itemDone = false;
+      q.say = 'Today is ' + (fest.k === 'birthday' ? "Rabbit's birthday" : fest.k) + '! Which one is for ' + (fest.k === 'birthday' ? 'a birthday' : fest.k) + '?';
+      q.zh = '今天是' + (fest.k === 'birthday' ? '兔子的生日' : fest.zh) + '！哪一個是' + fest.zh + '用的？';
+      this.pkBox.setVisible(true);
+      this.renderPick();
+      this.time.delayedCall(200, () => speak(q.say));
+    }
+
+    renderPick() {
+      const q = this.pk, zh = this.subs(), st = L.stage(this.s.words, q.answer);
+      this.pkTitle.setText(q.kind === 'family' ? 'Family Day 家人日' : (q.fest.zh + ' ' + (q.fest.k === 'birthday' ? 'Birthday' : q.fest.k)));
+      this.pkSay.setText(q.say);
+      this.pkZh.setText(zh && (st === 0 || q.reveal) ? q.zh : '');
+      this.pkProg.setText(q.n > 1 ? Math.min(q.round + 1, q.n) + ' / ' + q.n : '');
+      this.pkCards.forEach((c, i) => {
+        const k = q.opts[i];
+        c.card.setVisible(!!k);
+        if (!k) return;
+        if (q.kind === 'family') drawFamily(c.pic, k); else drawFestival(c.pic, q.pics[i].pic);
+        c.zh.setText(zh && st === 0 && q.kind === 'family' ? zhOf(k) : '');
+        c.card.setAlpha(q.wrong[k] ? 0.35 : 1);
+      });
+      // 節慶只有 3 張：置中
+      const n = q.opts.length;
+      this.pkCards.forEach((c, i) => { c.x = 640 + (i - (n - 1) / 2) * 190; c.card.setX(c.x); });
+    }
+
+    pickPick(i) {
+      const s = this.s, q = this.pk;
+      if (this.modal !== 'pick' || !q || q.done || q.itemDone) return;
+      const k = q.opts[i], c = this.pkCards[i];
+      if (!k || q.wrong[k]) return;
+      const right = k === q.answer, stat = this.stats[q.kind];
+      if (q.tries === 0) { stat.q += 1; if (right) stat.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.answer, { day: s.day, options: q.opts.length, firstTry: right, peeked: false }); q.recorded = true; }
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[k] = true;
+        this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+        speak('No. ' + q.say);
+        this.renderPick();
+        return;
+      }
+      q.itemDone = true;
+      this.tweens.add({ targets: c.card, scale: 1.08, yoyo: true, duration: 150 });
+      q.round += 1;
+      if (q.kind === 'family' && q.round < q.n) {
+        speak('Yes! This is my ' + k + '.');
+        this.pkMsg.setText('Yes! 對了');
+        const cur = q;
+        this.time.delayedCall(BOT ? 20 : 900, () => { if (this.pk === cur && this.modal === 'pick') { this.pkMsg.setText(''); this.nextFamily(); } });
+        return;
+      }
+      q.done = true;
+      this.touch(q.kind);
+      if (q.kind === 'family') { s.famDay = s.day; speak('Thank you! Nice to meet my family.'); this.pkMsg.setText('謝謝你認識我的家人！ +3 ★'); s.stardust += 3; }
+      else { s.festDay = s.day; L.seen(s.words, 'gift', s.day); speak('Happy ' + (q.fest.k === 'birthday' ? 'birthday' : q.fest.k) + '! Here is a gift.'); this.pkMsg.setText('收到一份禮物！ +5 ★'); s.stardust += 5; }
+      this.refreshAll();
+      const cur = q;
+      this.time.delayedCall(BOT ? 20 : 1600, () => { if (this.pk === cur && this.modal === 'pick') this.closeModal(); });
+    }
+
     // ---------- 裝飾：圖鑑達到項數後用星砂買，擺在草地上 ----------
     buildDecorObjs() {
       this.decorObjs = {};
@@ -5583,6 +5793,7 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'pick') { if (this.pk.done || Math.random() < 0.03) this.closeModal(); else this.pickPick(Math.floor(Math.random() * this.pk.opts.length)); return; }
       if (this.modal === 'decor') { if (Math.random() < 0.2) this.closeModal(); else this.buyDecor(DECOR[Math.floor(Math.random() * DECOR.length)].k); return; }
       if (this.modal === 'fix') { if (Math.random() < 0.1) this.closeModal(); else this.pickMaterial(Math.floor(Math.random() * MATERIALS.length)); return; }
       if (this.modal === 'seeds') {
@@ -5645,6 +5856,7 @@
         if (!o || o.done) { if (Math.random() < 0.05) this.closeModal(); return; }
         if (Math.random() < 0.03) { this.closeModal(); return; }
         if (o.type === 'fruit') { if (Math.random() < 0.7) this.addFruit(Math.floor(Math.random() * BINS.length)); else this.giveFruit(); }
+        else if (o.type === 'way') this.pickWay(Math.floor(Math.random() * 4));
         else this.pickCloth(Math.floor(Math.random() * 4));
         return;
       }
@@ -5780,7 +5992,8 @@
       this.dayBar.fillStyle(0xffffff, 0.75); this.dayBar.fillRoundedRect(490, 62, 300, 16, 8);
       this.dayBar.fillStyle(0xffc107, 1); this.dayBar.fillRoundedRect(490, 62, Math.max(16, 300 * frac), 16, 8);
       this.dayIcon.setX(490 + 300 * frac);
-      this.dayText.setText('Day ' + s.day + '  ' + weekday(s.day) + (this.isDrillDay() ? '  Drill Day' : ''));
+      const fest = festivalOf(s.day);
+      this.dayText.setText('Day ' + s.day + '  ' + weekday(s.day) + (fest ? '  ' + fest.k.charAt(0).toUpperCase() + fest.k.slice(1) : (this.isDrillDay() ? '  Drill Day' : (s.day % 7 === 6 && s.town ? '  Family Day' : ''))));
 
       // 雲飄動
       this.clouds.forEach((c) => { c.g.x += c.v * dt * (s.weather === 'windy' ? 6 : 1); if (c.g.x > W + 200) c.g.x = -300; });

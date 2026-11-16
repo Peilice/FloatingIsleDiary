@@ -26,6 +26,7 @@
       if (q.part === 'bag') { [0, 2, 3, 5, 6].forEach((i) => { if (!q.sel[i]) sc.toggleBag(i); }); sc.packBag(); return; }
       sc.pickDrill(q.order.indexOf(q.step)); return;
     }
+    if (m === 'pick') { const q = sc.pk; if (q.done) { sc.closeModal(); return; } if (!q.itemDone) sc.pickPick(q.opts.indexOf(q.answer)); return; }
     if (m === 'invite') { if (!sc.iq.done) sc.pickDay(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].indexOf(sc.iq.wd)); return; }
     if (m === 'sound') { if (!sc.sq.done) sc.pickSound(sc.sq.order.indexOf(sc.sq.answer)); return; }
     if (m === 'build') { sc.pickBuild(sc.bmOrder.indexOf(HOME[s.visitor])); return; }
@@ -33,6 +34,7 @@
       const o = sc.mo;
       if (!o || o.done) { if ((A.orders = (A.orders || 0) + 1) > 2) { sc.closeModal(); A.orders = 0; } return; }
       if (o.type === 'fruit') { sc.clearFruit(); for (let i = 0; i < o.n; i++) sc.addFruit(o.bin); sc.giveFruit(); }
+      else if (o.type === 'way') sc.pickWay(o.spots.indexOf(o.answer));
       else sc.pickCloth(o.rack.indexOf(o.answer));
       return;
     }
@@ -177,6 +179,8 @@
       if (sc.groupOpen('eco')) mark('生態研究所', s);
       ['butterfly', 'bee', 'ant', 'rainbow'].forEach((k) => { if (s.lib[k]) mark('發現 ' + k, s); });
       if (s.drillDay) mark('第一次演練', s);
+      if (s.famDay) mark('第一次家人日', s);
+      if (s.festDay) mark('第一次節慶', s);
       if (Object.keys(s.fixed || {}).length >= 3) mark('修好 3 個設施', s);
       if (sc.modal) {
         // 卡在同一個視窗太久就記下來（可能是死局）
