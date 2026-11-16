@@ -98,6 +98,18 @@
   // 答錯後的提示只描述特徵、不說出答案
   const SOIL_HINT = { rock: 'It is hard and big. 它硬硬的、一大塊', sand: 'It is small and dry. 它一粒一粒、乾乾的', mud: 'It is wet and soft. 它濕濕軟軟的' };
 
+  // 洞穴（M4）：在海灘左邊。§5 原定「圖鑑 20 項」解鎖，但目前圖鑑只有 14 項，先暫定 12 項，圖鑑擴充後改回
+  const COFF = -2560;
+  const CAVE_LIB = 12;
+  const CAVE = [
+    { k: 'light', x: 330, en: 'Light', zh: '找植物', color: 0xf9a825 },
+    { k: 'moon',  x: 640, en: 'Moon',  zh: '月亮',   color: 0x3949ab },
+    { k: 'push',  x: 950, en: 'Push',  zh: '推與拉', color: 0x6d4c41 },
+  ];
+  const LIGHT_DIRS = ['left', 'right', 'far', 'near'];
+  const LIGHT_ZH = { left: '左', right: '右', far: '遠處', near: '近處' };
+  const PUSH_CARDS = [{ verb: 'push', dir: 'left' }, { verb: 'push', dir: 'right' }, { verb: 'pull', dir: 'left' }, { verb: 'pull', dir: 'right' }];
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -147,7 +159,7 @@
       wishes: {}, fwho: null, lastWish: null, sched: { n: 0 }, gaveTotal: 0,
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
-      harvested: 0, beachOpen: false,
+      harvested: 0, beachOpen: false, caveOpen: false,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -189,7 +201,7 @@
       s.harvestedV = 1;
     }
     while (s.lots.length < LOT_X.length) s.lots.push({ hab: null, animal: null }); // 森林擴建前的存檔
-    if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; } // 偵錯：直接開放池塘森林與海灘
+    if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; s.caveOpen = true; } // 偵錯：直接開放所有區域
     return s;
   }
   function saveState(s) {
@@ -392,6 +404,16 @@
         g.lineBetween(-16, -4, -16, 14); g.lineBetween(16, -4, 16, 14);
         g.fillStyle(0xeceff1, 1); g.fillRect(-22, 10, 12, 10); g.fillRect(10, 10, 12, 10);
         break;
+      case 'lamp':
+        g.fillStyle(0xfff59d, 0.5); g.fillCircle(0, -8, 20);
+        g.fillStyle(0xffd54a, 1); g.fillCircle(0, -8, 11);
+        g.fillStyle(0x795548, 1); g.fillRect(-3, 2, 6, 18); g.fillRoundedRect(-14, 18, 28, 6, 3);
+        g.fillStyle(0x8d6e63, 1); g.fillTriangle(-14, -14, 14, -14, 0, -26);
+        break;
+      case 'box':
+        g.fillStyle(0xa1887f, 1); g.fillRect(-20, -20, 40, 40);
+        g.lineStyle(3, 0x6d4c41, 1); g.strokeRect(-20, -20, 40, 40); g.lineBetween(-20, -20, 20, 20); g.lineBetween(20, -20, -20, 20);
+        break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
       case 'banana': drawFruit(g, 'banana', 'yellow'); break;
@@ -415,6 +437,42 @@
       g.lineStyle(11, c, 1); g.beginPath(); g.arc(0, -20, 26, 0.3 * Math.PI, 0.8 * Math.PI, false); g.strokePath();
       g.fillStyle(0x6d4c2f, 1); g.fillCircle(Math.cos(0.3 * Math.PI) * 26, -20 + Math.sin(0.3 * Math.PI) * 26, 3);
     }
+  }
+
+  // 月相：ph 0 新月 … 4 滿月（右邊先亮，北半球漸盈的樣子）。用「右半圓＋明暗交界線」畫亮的部分
+  function drawMoon(g, ph) {
+    g.clear();
+    const r = 26, k = ph / 4;
+    g.fillStyle(0x37474f, 1); g.fillCircle(0, 0, r);
+    g.lineStyle(2, 0x90a4ae, 1); g.strokeCircle(0, 0, r);
+    if (ph === 0) return;
+    const pts = [];
+    for (let a = -90; a <= 90; a += 10) { const t = a * Math.PI / 180; pts.push(new Phaser.Geom.Point(r * Math.cos(t), r * Math.sin(t))); }
+    for (let a = 90; a >= -90; a -= 10) { const t = a * Math.PI / 180; pts.push(new Phaser.Geom.Point(r * Math.cos(t) * (1 - 2 * k), r * Math.sin(t))); }
+    g.fillStyle(0xfff59d, 1); g.fillPoints(pts, true);
+  }
+
+  // 推與拉的卡片：推＝人在箱子後面用手推；拉＝人在前面用繩子拖。只有圖，沒有字
+  function drawPushCard(g, verb, dir) {
+    g.clear();
+    const s = dir === 'left' ? -1 : 1;           // 箱子要移動的方向
+    const behind = verb === 'push';              // 推：人在箱子後面（和移動方向相反那側）
+    const boxX = behind ? s * 22 : -s * 26, manX = behind ? -s * 30 : s * 40;
+    g.fillStyle(0xa1887f, 1); g.fillRect(boxX - 22, -18, 44, 44);
+    g.lineStyle(3, 0x6d4c41, 1); g.strokeRect(boxX - 22, -18, 44, 44);
+    // 人
+    g.fillStyle(0xf2994a, 1); g.fillCircle(manX, -24, 10);
+    g.lineStyle(5, 0x5c6bc0, 1); g.lineBetween(manX, -14, manX - s * 4, 12);
+    g.lineBetween(manX - s * 4, 12, manX - s * 12, 28); g.lineBetween(manX - s * 4, 12, manX + s * 6, 28);
+    if (behind) { g.lineStyle(4, 0xf2994a, 1); g.lineBetween(manX, -8, boxX - s * 22, -4); }
+    else {
+      // 拉：深咖啡色的粗繩子，人往前傾
+      g.lineStyle(5, 0x4e342e, 1); g.lineBetween(manX - s * 6, -4, boxX + s * 22, 2);
+      g.fillStyle(0x4e342e, 1); g.fillCircle(boxX + s * 22, 2, 4);
+      g.lineStyle(4, 0xf2994a, 1); g.lineBetween(manX, -8, manX - s * 6, -4);
+    }
+    // 箭頭：箱子移動的方向
+    g.fillStyle(0x43a047, 1); g.fillRect(-26, 46, 52, 8); g.fillTriangle(s * 26, 38, s * 26, 62, s * 42, 50);
   }
 
   // 磁鐵站的東西
@@ -565,7 +623,7 @@
       this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -582,6 +640,7 @@
       grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); });
       grab('forest', () => this.buildForest());
       grab('beach', () => this.buildBeach());
+      grab('cave', () => this.buildCave());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
       this.buildHud();
@@ -599,6 +658,9 @@
       this.buildAcid();
       this.buildMagnet();
       this.buildDig();
+      this.buildLight();
+      this.buildMoon();
+      this.buildPush();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -621,6 +683,7 @@
       this.ensureForestWish(1500);
       this.checkTown();
       this.checkBeach();
+      this.checkCave();
       this.renderForest();
       this.renderNav();
 
@@ -1118,7 +1181,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1360,6 +1423,22 @@
       this.navMB = makeButton(this, 1226, 400, 92, 92, 0x6bbf59, '', 0, () => this.goZone('meadow')).setDepth(40);
       this.navMB.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
       this.navMB.add(txt(this, 0, 22, '草地', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      // 海灘 ← 洞穴；洞穴 → 海灘
+      this.navC = makeButton(this, 54, 400, 92, 92, 0x6d6475, '', 0, () => this.goZone('cave')).setDepth(40);
+      this.navC.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navCLabel = txt(this, 0, 22, '', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.navC.add(this.navCLabel);
+      this.navBC = makeButton(this, 1226, 400, 92, 92, 0xf2b84b, '', 0, () => this.goZone('beach')).setDepth(40);
+      this.navBC.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navBC.add(txt(this, 0, 22, '海灘', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+    }
+
+    checkCave() {
+      const s = this.s;
+      if (s.caveOpen || !s.beachOpen || this.libCount() < CAVE_LIB) return;
+      s.caveOpen = true;
+      if (this.zone === 'beach') this.floatText(180, 320, 'New place!', '#5e35b1', true);
+      this.renderNav();
     }
 
     libCount() { return Object.keys(this.s.lib).filter((k) => this.s.lib[k]).length; }
@@ -1383,6 +1462,10 @@
       this.navB.setAlpha(s.beachOpen ? 1 : 0.55);
       this.navBLabel.setText(s.beachOpen ? '海灘' : '收成 ' + Math.min(s.harvested || 0, BEACH_HARVEST) + '/' + BEACH_HARVEST);
       this.navMB.setVisible(this.zone === 'beach');
+      this.navC.setVisible(this.zone === 'beach');
+      this.navC.setAlpha(s.caveOpen ? 1 : 0.55);
+      this.navCLabel.setText(s.caveOpen ? '洞穴' : '圖鑑 ' + Math.min(this.libCount(), CAVE_LIB) + '/' + CAVE_LIB);
+      this.navBC.setVisible(this.zone === 'cave');
       if (this.mkBtn) this.mkBtn.setVisible(!!s.town);
     }
 
@@ -1399,11 +1482,15 @@
         this.floatText(260, 330, '再' + need.join('、'), '#e65100', true);
         return;
       }
+      if (z === 'cave' && !this.s.caveOpen) {
+        this.floatText(260, 330, '圖鑑再 ' + (CAVE_LIB - this.libCount()) + ' 項', '#5e35b1', true);
+        return;
+      }
       const from = this.zone;
       this.zone = z;
       // 平移時兩個區域都要畫，結束後只留目前的區域
       this.showZones([from, z]);
-      this.tweens.add({ targets: this.cameras.main, scrollX: z === 'forest' ? OFF : (z === 'beach' ? BOFF : 0), duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
+      this.tweens.add({ targets: this.cameras.main, scrollX: { forest: OFF, beach: BOFF, cave: COFF }[z] || 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
         onComplete: () => { if (this.zone === z) this.showZones([z]); } });
       this.renderNav();
       if (z === 'forest' && this.s.visitor) this.time.delayedCall(700, () => this.sayVisitor());
@@ -2548,6 +2635,357 @@
       }
     }
 
+    // ---------- 洞穴（M4：§4.9 光、§4.10 月亮、§4.14 力） ----------
+    buildCave() {
+      const X = COFF + 640;
+      const g = this.add.graphics().setDepth(3);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
+      g.fillStyle(0x8d8796, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x9e98a8, 1); g.fillEllipse(X, 545, 940, 250);
+      // 後方的岩壁和洞口
+      g.fillStyle(0x6d6475, 1); g.fillEllipse(X, 430, 860, 230);
+      g.fillStyle(0x2b2633, 1); g.fillEllipse(X, 460, 300, 170);
+      g.fillStyle(0x6d6475, 1); [[-120, 360], [-40, 352], [40, 356], [120, 362]].forEach(([dx, y]) => g.fillTriangle(X + dx - 18, y, X + dx + 18, y, X + dx, y + 46));
+      this.caveStations = CAVE.map((st) => {
+        const x = COFF + st.x, y = 500;
+        const c = this.add.container(x, y).setDepth(9);
+        const sg = this.add.graphics();
+        sg.fillStyle(0x000000, 0.15); sg.fillEllipse(0, 52, 150, 30);
+        sg.fillStyle(0x5d4037, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        const icon = this.add.graphics({ y: -40 }).setScale(1.5);
+        if (st.k === 'moon') drawMoon(icon, 2); else if (st.k === 'push') drawIcon(icon, 'box'); else drawIcon(icon, 'lamp');
+        c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4a4458', strokeThickness: 4 }).setOrigin(0.5)]);
+        const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
+        zone.on('pointerdown', () => this.openCave(st.k));
+        return c;
+      });
+    }
+
+    openCave(k) {
+      if (this.paused()) return;
+      this.held = null; this.tool = null; this.redrawTools();
+      if (k === 'light') this.openLight(); else if (k === 'moon') this.openMoon(); else this.openPush();
+    }
+
+    // --- 光（§4.9）：洞裡很暗，看不到植物；照指令 Move the lamp to the left. 移動燈，照到植物才會出現 ---
+    buildLight() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0x1f2633);
+      c.add(txt(this, 640, 98, 'Light 光', 28, '#ffd54a', { fontStyle: 'bold' }).setOrigin(0.5));
+      const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
+      this.ltSay = txt(this, 352, 140, '', 30, '#27384a', { fontStyle: 'bold' });
+      this.ltZh = txt(this, 352, 182, '', 20, '#6b7c8c');
+      c.add([bub, this.ltSay, this.ltZh, makeIcon(this, 'lamp', 260, 172, 1.4)]);
+      const lis = this.add.container(1010, 172);
+      const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
+      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 0.9)]);
+      lis.setSize(66, 66).setInteractive({ useHandCursor: true });
+      lis.on('pointerdown', () => { if (this.lq) speak(this.lq.text); });
+      c.add(lis);
+      this.ltField = this.add.graphics();
+      this.ltPlant = this.add.graphics().setScale(1.2);
+      this.ltLamp = makeIcon(this, 'lamp', 0, 0, 0.85);
+      c.add([this.ltField, this.ltPlant, this.ltLamp]);
+      // 四個方向鍵：只有箭頭，沒有字（要讀懂指令才知道往哪）
+      this.ltKeys = LIGHT_DIRS.map((d, i) => {
+        const pos = { left: [820, 560], right: [980, 560], far: [900, 490], near: [900, 600] }[d];
+        const b = makeButton(this, pos[0], pos[1], 76, 60, 0x5c6bc0, { left: '←', right: '→', far: '↑', near: '↓' }[d], 30, () => this.moveLamp(d));
+        c.add(b);
+        return b;
+      });
+      this.ltMsg = txt(this, 470, 615, '', 22, '#ffd54a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.ltProg = txt(this, 985, 98, '', 22, '#cfd8dc').setOrigin(0.5);
+      c.add([this.ltMsg, this.ltProg]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.ltBox = c;
+    }
+
+    // 格子：5 欄（左右）× 2 排（far 在上、near 在下）
+    lightCell(col, row) { return { x: 300 + col * 110, y: row === 0 ? 300 : 440 }; }
+
+    openLight() {
+      this.modal = 'light';
+      this.lq = { round: 0, n: 2 };
+      this.ltBox.setVisible(true);
+      this.newLightRound();
+    }
+
+    newLightRound() {
+      const q = this.lq;
+      let lamp, plant;
+      do {
+        lamp = { col: Math.floor(Math.random() * 5), row: Math.floor(Math.random() * 2) };
+        plant = { col: Math.floor(Math.random() * 5), row: Math.floor(Math.random() * 2) };
+      } while (Math.abs(lamp.col - plant.col) + Math.abs(lamp.row - plant.row) < 2);
+      Object.assign(q, { lamp, plant, found: false });
+      L.seen(this.s.words, 'lamp', this.s.day);
+      this.nextLightStep();
+    }
+
+    // 下一個指令：從還需要走的方向裡挑一個
+    nextLightStep() {
+      const q = this.lq, need = [];
+      if (q.plant.col < q.lamp.col) need.push('left');
+      if (q.plant.col > q.lamp.col) need.push('right');
+      if (q.plant.row < q.lamp.row) need.push('far');
+      if (q.plant.row > q.lamp.row) need.push('near');
+      q.dir = need[Math.floor(Math.random() * need.length)];
+      q.text = q.dir === 'left' || q.dir === 'right' ? 'Move the lamp to the ' + q.dir + '.' : 'Move the lamp ' + q.dir + (q.dir === 'near' ? 'er' : 'ther') + '.';
+      q.tries = 0; q.recorded = false; q.reveal = false;
+      this.renderLight();
+      this.time.delayedCall(200, () => speak(q.text));
+    }
+
+    renderLight() {
+      const q = this.lq, st = L.stage(this.s.words, q.dir || 'left');
+      this.ltSay.setText(q.found ? 'You found the plant!' : q.text);
+      this.ltZh.setText(this.subs() && (q.found || st === 0 || q.reveal) ? (q.found ? '找到植物了！' : '把燈往' + LIGHT_ZH[q.dir] + '移。') : '');
+      const g = this.ltField; g.clear();
+      for (let r = 0; r < 2; r++) for (let col = 0; col < 5; col++) {
+        const p = this.lightCell(col, r);
+        g.fillStyle(0x2b3445, 1); g.fillRoundedRect(p.x - 50, p.y - 55, 100, 110, 14);
+      }
+      // 燈照到的那一格是亮的
+      const lp = this.lightCell(q.lamp.col, q.lamp.row);
+      g.fillStyle(0xfff59d, 0.85); g.fillRoundedRect(lp.x - 50, lp.y - 55, 100, 110, 14);
+      this.ltLamp.setPosition(lp.x - 30, lp.y - 30);
+      const pp = this.lightCell(q.plant.col, q.plant.row);
+      const lit = q.lamp.col === q.plant.col && q.lamp.row === q.plant.row;
+      this.ltPlant.setPosition(pp.x, pp.y + 34).setVisible(lit);
+      if (lit) drawPlant(this.ltPlant, 'rose', 1, false);
+      this.ltProg.setText(Math.min(q.round + 1, q.n) + ' / ' + q.n);
+      this.ltMsg.setText(q.found ? '' : 'Where is the plant? It is too dark. 太暗了，聽指令移動燈');
+    }
+
+    moveLamp(d) {
+      const s = this.s, q = this.lq;
+      if (this.modal !== 'light' || q.found) return;
+      const right = d === q.dir;
+      if (q.tries === 0) { this.stats.light.q += 1; if (right) this.stats.light.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.dir, { day: s.day, options: LIGHT_DIRS.length, firstTry: right, peeked: false }); q.recorded = true; }
+      const nl = { col: q.lamp.col + (d === 'left' ? -1 : d === 'right' ? 1 : 0), row: q.lamp.row + (d === 'far' ? -1 : d === 'near' ? 1 : 0) };
+      if (nl.col < 0 || nl.col > 4 || nl.row < 0 || nl.row > 1) {
+        // 走到邊了：燈晃一下，不會卡住
+        this.tweens.add({ targets: this.ltLamp, angle: 12, yoyo: true, repeat: 2, duration: 70, onComplete: () => this.ltLamp.setAngle(0) });
+      } else {
+        q.lamp = nl;
+      }
+      if (q.lamp.col === q.plant.col && q.lamp.row === q.plant.row) {
+        q.found = true;
+        this.renderLight();
+        speak('You found the plant!');
+        q.round += 1;
+        const cur = q;
+        if (q.round >= q.n) {
+          this.stationDone('light', 3, 'Bright!');
+          this.time.delayedCall(BOT ? 30 : 1500, () => { if (this.modal === 'light' && this.lq === cur) this.openLight(); });
+        } else {
+          this.time.delayedCall(BOT ? 30 : 1300, () => { if (this.modal === 'light' && this.lq === cur && cur.found) this.newLightRound(); });
+        }
+        return;
+      }
+      if (right) { this.nextLightStep(); return; }
+      // 走錯：重新規劃下一步，並露出中文
+      q.tries += 1;
+      this.nextLightStep();
+      q.tries = 1; q.recorded = true; q.reveal = true;
+      this.renderLight();
+    }
+
+    // --- 月亮（§4.10）：第一張固定新月，把其餘排成盈虧順序到滿月 ---
+    buildMoon() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0x1a237e);
+      c.add(txt(this, 640, 98, 'Moon 月亮', 28, '#fff59d', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.mnTitle = txt(this, 640, 150, 'Put the moons in order.', 32, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.mnZh = txt(this, 640, 190, '', 20, '#c5cae9').setOrigin(0.5);
+      this.mnMsg = txt(this, 640, 600, '', 22, '#fff59d', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.mnTitle, this.mnZh, this.mnMsg]);
+      // 上排：5 個排好的位置；下排：4 張打散的卡片
+      this.mnSlots = [0, 1, 2, 3, 4].map((i) => {
+        const x = 640 + (i - 2) * 150, y = 300;
+        const bg = this.add.graphics({ x, y });
+        const m = this.add.graphics({ x, y }).setScale(1.4);
+        c.add([bg, m]);
+        const z = this.add.container(x, y); z.setSize(130, 130).setInteractive({ useHandCursor: true });
+        z.on('pointerdown', () => this.unplaceMoon(i));
+        c.add(z);
+        return { bg, m, x, y };
+      });
+      this.mnCards = [0, 1, 2, 3].map((i) => {
+        const card = this.add.container(640 + (i - 1.5) * 150, 460);
+        const bg = this.add.graphics();
+        bg.fillStyle(0x283593, 1); bg.fillRoundedRect(-62, -62, 124, 124, 16);
+        const m = this.add.graphics().setScale(1.4);
+        card.add([bg, m]);
+        card.setSize(124, 124).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.placeMoon(i));
+        c.add(card);
+        return { card, m };
+      });
+      this.mnCheck = makeButton(this, 960, 600, 170, 64, 0xffb300, 'Check 檢查', 22, () => this.checkMoon());
+      c.add(this.mnCheck);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.mnBox = c;
+    }
+
+    openMoon() {
+      this.modal = 'moon';
+      // 相位 0 新月 → 4 滿月；卡片是 1～4 打散
+      this.nq = { order: L.shuffle([1, 2, 3, 4]), slots: [0, null, null, null, null], used: {}, checks: 0, done: false, bad: {} };
+      ['moon', 'night'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.mnBox.setVisible(true);
+      this.renderMoon();
+      this.time.delayedCall(200, () => speak('Put the moons in order.'));
+    }
+
+    renderMoon() {
+      const q = this.nq;
+      this.mnZh.setText(this.subs() ? '照月亮的變化排好：從看不見的新月，到圓圓的滿月' : '');
+      this.mnSlots.forEach((sl, i) => {
+        sl.bg.clear();
+        sl.bg.lineStyle(4, q.bad[i] ? 0xef5350 : (i === 0 ? 0xfff59d : 0x7986cb), 1); sl.bg.strokeRoundedRect(-62, -62, 124, 124, 16);
+        sl.m.clear(); if (q.slots[i] != null) drawMoon(sl.m, q.slots[i]);
+      });
+      this.mnCards.forEach((c, i) => {
+        const ph = q.order[i];
+        c.card.setVisible(!q.used[ph]);
+        drawMoon(c.m, ph);
+      });
+      const full = q.slots.every((x) => x != null);
+      this.mnCheck.setAlpha(full ? 1 : 0.45);
+      if (!q.done) this.mnMsg.setText(full ? 'Check it! 檢查看看' : 'Tap the cards in order. 依序點卡片排上去；點上面的可以拿回來');
+    }
+
+    placeMoon(i) {
+      const q = this.nq;
+      if (this.modal !== 'moon' || q.done) return;
+      const ph = q.order[i], slot = q.slots.indexOf(null);
+      if (slot < 0 || q.used[ph]) return;
+      q.slots[slot] = ph; q.used[ph] = true; q.bad = {};
+      this.renderMoon();
+    }
+
+    unplaceMoon(i) {
+      const q = this.nq;
+      if (this.modal !== 'moon' || q.done || i === 0 || q.slots[i] == null) return;
+      q.used[q.slots[i]] = false; q.slots[i] = null; q.bad = {};
+      this.renderMoon();
+    }
+
+    checkMoon() {
+      const q = this.nq;
+      if (this.modal !== 'moon' || q.done || !q.slots.every((x) => x != null)) return;
+      const right = q.slots.every((ph, i) => ph === i);
+      if (q.checks === 0) { this.stats.moon.q += 1; if (right) this.stats.moon.first += 1; }
+      q.checks += 1;
+      if (right) {
+        q.done = true;
+        speak('Great! The moon gets bigger and bigger.');
+        this.mnMsg.setText('The moon gets bigger. 月亮一天天變圓了！');
+        this.renderMoon();
+        this.stationDone('moon', 3, 'Great!');
+        const cur = q;
+        this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'moon' && this.nq === cur) this.openMoon(); });
+        return;
+      }
+      // 排錯的不收：標紅框並放回下排，可以重排
+      q.slots.forEach((ph, i) => { if (i > 0 && ph !== i) { q.bad[i] = true; q.used[ph] = false; q.slots[i] = null; } });
+      speak('Try again.');
+      this.renderMoon();
+      this.mnMsg.setText('Red ones are not right. 紅框的位置不對，再排排看');
+    }
+
+    // --- 推與拉（§4.14）：Push the box to the left. 從 4 張只有圖的卡片選 ---
+    buildPush() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Push and Pull 推與拉', 28, '#5d4037', { fontStyle: 'bold' }).setOrigin(0.5));
+      const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
+      this.puSay = txt(this, 352, 140, '', 30, '#27384a', { fontStyle: 'bold' });
+      this.puZh = txt(this, 352, 182, '', 20, '#6b7c8c');
+      c.add([bub, this.puSay, this.puZh, makeIcon(this, 'box', 260, 172, 1.4)]);
+      const lis = this.add.container(1010, 172);
+      const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
+      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 0.9)]);
+      lis.setSize(66, 66).setInteractive({ useHandCursor: true });
+      lis.on('pointerdown', () => { if (this.pq) speak(this.pq.text); });
+      c.add(lis);
+      // 地面上的箱子（選完後會往選的方向移動）
+      this.puGround = this.add.graphics(); this.puGround.fillStyle(0xbcaaa4, 1); this.puGround.fillRect(260, 330, 760, 8);
+      this.puBox = makeIcon(this, 'box', 640, 296, 1.6);
+      c.add([this.puGround, this.puBox]);
+      this.puCards = PUSH_CARDS.map((pc, i) => {
+        const card = this.add.container(640 + (i - 1.5) * 190, 470);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-85, -85, 170, 170, 20);
+        bg.lineStyle(4, 0xbcaaa4, 1); bg.strokeRoundedRect(-85, -85, 170, 170, 20);
+        const pic = this.add.graphics().setScale(1.3); drawPushCard(pic, pc.verb, pc.dir);
+        card.add([bg, pic]);
+        card.setSize(170, 170).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickPush(i));
+        c.add(card);
+        return { card, x: card.x };
+      });
+      this.puMsg = txt(this, 640, 600, '', 22, '#5d4037', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.puProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      c.add([this.puMsg, this.puProg]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.puBoxBox = c;
+    }
+
+    openPush() {
+      this.modal = 'push';
+      this.pq = { round: 0, n: 4 };
+      this.puBoxBox.setVisible(true);
+      this.nextPush();
+    }
+
+    nextPush() {
+      const q = this.pq;
+      const pc = PUSH_CARDS[Math.floor(Math.random() * PUSH_CARDS.length)];
+      Object.assign(q, { verb: pc.verb, dir: pc.dir, text: (pc.verb === 'push' ? 'Push' : 'Pull') + ' the box to the ' + pc.dir + '.', tries: 0, recorded: false, reveal: false, wrong: {}, done: false });
+      this.puBox.setX(640);
+      this.renderPush();
+      this.time.delayedCall(200, () => speak(q.text));
+    }
+
+    renderPush() {
+      const q = this.pq, st = L.stage(this.s.words, q.verb);
+      this.puSay.setText(q.text);
+      this.puZh.setText(this.subs() && (st === 0 || q.reveal) ? (q.verb === 'push' ? '把箱子往' : '把箱子往') + (q.dir === 'left' ? '左' : '右') + (q.verb === 'push' ? '推。' : '拉。') : '');
+      this.puCards.forEach((c, i) => c.card.setAlpha(q.wrong[i] ? 0.35 : 1));
+      this.puProg.setText(Math.min(q.round + 1, q.n) + ' / ' + q.n);
+      this.puMsg.setText(q.done ? '' : 'Which picture? 哪一張圖才對？');
+    }
+
+    pickPush(i) {
+      const s = this.s, q = this.pq, pc = PUSH_CARDS[i], c = this.puCards[i];
+      if (this.modal !== 'push' || q.done || q.wrong[i]) return;
+      const right = pc.verb === q.verb && pc.dir === q.dir;
+      if (q.tries === 0) { this.stats.push.q += 1; if (right) this.stats.push.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.verb, { day: s.day, options: PUSH_CARDS.length, firstTry: right, peeked: false }); q.recorded = true; }
+      // 箱子照選的那張移動（選錯也看得到結果）
+      const dx = pc.dir === 'left' ? -160 : 160;
+      this.tweens.add({ targets: this.puBox, x: 640 + dx, duration: BOT ? 1 : 500, yoyo: !right, hold: 200 });
+      speak(pc.verb + '!');
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[i] = true;
+        this.renderPush();
+        this.puMsg.setText(pc.dir !== q.dir ? 'The box went the other way. 箱子跑錯方向了' : (q.verb === 'push' ? 'That is pull. 那是拉喔' : 'That is push. 那是推喔'));
+        return;
+      }
+      q.done = true;
+      q.round += 1;
+      this.renderPush();
+      const cur = q;
+      if (q.round >= q.n) {
+        this.stationDone('push', 3, 'Strong!');
+        this.time.delayedCall(BOT ? 30 : 1400, () => { if (this.modal === 'push' && this.pq === cur) this.openPush(); });
+      } else {
+        this.time.delayedCall(BOT ? 30 : 900, () => { if (this.modal === 'push' && this.pq === cur && cur.done) this.nextPush(); });
+      }
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -2876,6 +3314,7 @@
     }
 
     refreshLibrary() {
+      if (this.navC) this.checkCave();
       const pages = Math.ceil(LIB.length / LIB_PER_PAGE);
       this.libPageText.setText((this.libPage + 1) + ' / ' + pages);
       this.libCards.forEach((slot, i) => {
@@ -2920,6 +3359,13 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (['light', 'moon', 'push'].includes(this.modal)) {
+        if (Math.random() < 0.03) { this.closeModal(); return; }
+        if (this.modal === 'light') this.moveLamp(LIGHT_DIRS[Math.floor(Math.random() * 4)]);
+        else if (this.modal === 'moon') { if (Math.random() < 0.7) this.placeMoon(Math.floor(Math.random() * 4)); else if (Math.random() < 0.5) this.unplaceMoon(1 + Math.floor(Math.random() * 4)); else this.checkMoon(); }
+        else this.pickPush(Math.floor(Math.random() * 4));
+        return;
+      }
       if (['tea', 'acid', 'magnet', 'dig'].includes(this.modal)) {
         if (Math.random() < 0.03) { this.closeModal(); return; }
         const r = Math.random();
@@ -2943,9 +3389,13 @@
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
-      if (this.zone === 'beach') {
+      if (this.zone === 'cave') {
+        CAVE.forEach((b) => acts.push(() => this.openCave(b.k)));
+        acts.push(() => this.goZone('beach'));
+      } else if (this.zone === 'beach') {
         BEACH.forEach((b) => acts.push(() => this.openStation(b.k)));
         acts.push(() => this.goZone('meadow'));
+        acts.push(() => this.goZone('cave'));
       } else if (this.zone === 'meadow') {
         acts.push(() => this.goZone('beach'));
         for (let i = 0; i < 6; i++) acts.push(() => this.onPlot(i));
@@ -2983,6 +3433,9 @@
         酸甜苦第一次就對: pct(this.stats.acid),
         磁鐵猜對的件數: pct(this.stats.magnet),
         土石第一次就對: pct(this.stats.dig),
+        燈的方向第一次就對: pct(this.stats.light),
+        月相第一次排對: pct(this.stats.moon),
+        推拉第一次就對: pct(this.stats.push),
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
