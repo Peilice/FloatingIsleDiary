@@ -10,7 +10,8 @@
   const SPEED = FAST > 1 ? FAST : (FAST ? 4 : 1);
   const BOT = !!params.get('bot');
   // 內部 key 是舊暫定名，刻意不改，避免玩家存檔消失；機器人用另一個存檔，不會蓋掉真的進度
-  const SAVE_KEY = BOT ? 'cloudisland-bot' : 'cloudisland-v1';
+  // ?save=名稱 使用另一個存檔（測試用，不會動到正式進度）
+  const SAVE_KEY = BOT ? 'cloudisland-bot' : (params.get('save') ? 'cloudisland-' + params.get('save').replace(/\W/g, '') : 'cloudisland-v1');
   const DAY_LEN = 60; // 一天幾秒
   // ?reset=1 先清存檔再開始。要在舊頁面 pagehide 存檔之後才清，所以放在新頁面載入時執行
   if (params.get('reset') || BOT) {
@@ -43,6 +44,32 @@
   };
   const PLANT_KEYS = Object.keys(PLANTS);
 
+  // 池塘森林的動物（§4.5、§4.6）：home 要蓋的棲地、clue 句子裡決定棲地的關鍵字（記在這個字的 ok/miss）、
+  // sound 叫聲（畫面上同時顯示文字，靜音也能玩）、hint 聽錯時的提示、likes 住下來後會想要的東西
+  const ANIMALS = {
+    frog:   { zh: '青蛙', home: 'pond',  clue: 'water', say: 'I like water.',     sayZh: '我喜歡水。',   sound: 'Ribbit!',  hint: 'It lives in a pond.', likes: ['rose'],           fact: '青蛙小時候是住在水裡的蝌蚪，長大後住在池塘邊。' },
+    duck:   { zh: '鴨子', home: 'pond',  clue: 'swim',  say: 'I can swim.',       sayZh: '我會游泳。',   sound: 'Quack!',   hint: 'It lives in a pond.', likes: ['bean', 'rose'],   fact: '鴨子的腳有蹼，像槳一樣幫牠划水。' },
+    fish:   { zh: '魚',   home: 'pond',  clue: 'water', say: 'I live in water.',  sayZh: '我住在水裡。', sound: null,       hint: '',                    likes: [],                 fact: '魚用鰓呼吸水裡的氧氣，離開水就不能活。' },
+    bird:   { zh: '鳥',   home: 'tree',  clue: 'tree',  say: 'I live in a tree.', sayZh: '我住在樹上。', sound: 'Tweet!',   hint: 'It lives in a tree.', likes: ['bean'],           fact: '鳥有翅膀和羽毛，常在樹上用樹枝築巢。' },
+    monkey: { zh: '猴子', home: 'tree',  clue: 'climb', say: 'I can climb.',      sayZh: '我會爬樹。',   sound: 'Ooh ooh ah ah!', hint: 'It lives in a tree.', likes: ['bean', 'carrot'], fact: '猴子的手腳都能抓握，很適合在樹上爬來爬去。' },
+    cow:    { zh: '牛',   home: 'grass', clue: 'grass', say: 'I eat grass.',      sayZh: '我吃草。',     sound: 'Moo!',     hint: 'It eats grass.',      likes: ['carrot', 'bean'], fact: '牛吃草，會把吞下去的草再吐回嘴裡慢慢嚼。' },
+    horse:  { zh: '馬',   home: 'grass', clue: 'grass', say: 'I like grass.',     sayZh: '我喜歡草。',   sound: 'Neigh!',   hint: 'It eats grass.',      likes: ['carrot'],         fact: '馬吃草，腿又長又有力，可以跑得很快。' },
+  };
+  const ANIMAL_KEYS = Object.keys(ANIMALS);
+  const SOUND_KEYS = ANIMAL_KEYS.filter((k) => ANIMALS[k].sound);
+  const HABITATS = { pond: { zh: '池塘' }, tree: { zh: '樹' }, grass: { zh: '草地' } };
+  const HAB_KEYS = Object.keys(HABITATS);
+  const OFF = 1280;             // 池塘森林在草地右邊一個畫面寬的位置，切換區域時相機平移
+  // 森林空地排成一排；前 LOTS_START 塊一開始就能用，之後依序用星砂擴建（§3.4），價格見 LOT_PRICE
+  const LOT_X = [270, 390, 510, 630, 750, 870, 990];
+  const LOTS_START = 4;
+  const LOT_PRICE = [0, 0, 0, 0, 8, 10, 12];
+  const LOT_Y = 540;
+  const VISITOR = { x: 1130, y: 470 };
+  const HAB_COST = 4;           // 蓋棲地花的星砂；用鏟子拆掉退一半
+  const FOREST_NEED = 5;        // 完成幾個願望後解鎖池塘森林（§5）
+  const art = (w) => (/^[aeiou]/.test(w) ? 'an ' : 'a ') + w;
+
   const LIB = [
     { k: 'carrot', en: 'carrot', zh: '紅蘿蔔', kind: 'plant' },
     { k: 'bean',   en: 'bean',   zh: '豆子',   kind: 'plant' },
@@ -52,6 +79,8 @@
     { k: 'rainy',  en: 'rainy',  zh: '下雨',   kind: 'weather', fact: '下雨時植物會得到水，不用自己澆，但陽光很少。' },
     { k: 'windy',  en: 'windy',  zh: '有風',   kind: 'weather', fact: '空氣流動就會產生風，風會讓土壤的水分乾得更快。' },
   ];
+  ANIMAL_KEYS.forEach((k) => LIB.push({ k, en: k, zh: ANIMALS[k].zh, kind: 'animal', fact: ANIMALS[k].fact }));
+  const LIB_PER_PAGE = 8;
 
   const TOOL_KEYS = ['carrot', 'bean', 'rose', 'water', 'shovel'];
   const TOOL_X = { carrot: 100, bean: 206, rose: 312, water: 418, shovel: 524 };
@@ -64,13 +93,15 @@
   const wishSentence = (k) => 'I want ' + PLANTS[k].art + '.';
 
   // ---------- 存檔 ----------
-  function emptyEvents() { return { planted: [], picked: [], gave: [] }; }
+  function emptyEvents() { return { planted: [], picked: [], gave: [], came: [] }; }
   function defaultState() {
     return {
       v: 2, day: 1, t: 0, weather: 'sunny', stardust: 0,
       inv: { carrot: 0, bean: 0, rose: 0 },
       plots: Array.from({ length: 6 }, () => ({ plant: null, progress: 0, water: 0.3 })),
-      words: {}, lib: { sunny: true }, tut: 0, done: {}, wish: null, lastWish: null, muted: false,
+      words: {}, lib: { sunny: true }, tut: 0, done: {}, muted: false,
+      wishes: {}, fwho: null, lastWish: null, sched: { n: 0 }, gaveTotal: 0,
+      forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -94,10 +125,18 @@
       const raw = localStorage.getItem(SAVE_KEY);
       if (raw) {
         const s = migrate(JSON.parse(raw));
-        if (s && s.v === 2) return Object.assign(defaultState(), s);
+        if (s && s.v === 2) return upgrade(Object.assign(defaultState(), s));
       }
     } catch (e) { /* 無法讀取就用新存檔 */ }
-    return defaultState();
+    return upgrade(defaultState());
+  }
+  // M2 → M3：兔子的願望搬進 wishes；舊事件補上 came
+  function upgrade(s) {
+    if ('wish' in s) { if (s.wish) s.wishes.rabbit = s.wish; delete s.wish; }
+    if (!s.ev.came) s.ev.came = [];
+    while (s.lots.length < LOT_X.length) s.lots.push({ hab: null, animal: null }); // 森林擴建前的存檔
+    if (params.get('unlock')) s.forestOpen = true; // 偵錯：直接開放池塘森林
+    return s;
   }
   function saveState(s) {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) { /* 忽略 */ }
@@ -186,6 +225,72 @@
       case 'moon':
         g.fillStyle(0xffd54a, 1); g.fillCircle(0, 0, 16);
         g.fillStyle(0x3d5a80, 1); g.fillCircle(8, -6, 14);
+        break;
+      case 'frog':
+        g.fillStyle(0x4caf50, 1); g.fillEllipse(0, 8, 46, 30); g.fillCircle(-11, -8, 9); g.fillCircle(11, -8, 9);
+        g.fillStyle(0xffffff, 1); g.fillCircle(-11, -9, 6); g.fillCircle(11, -9, 6);
+        g.fillStyle(0x222222, 1); g.fillCircle(-11, -9, 3); g.fillCircle(11, -9, 3);
+        g.lineStyle(2, 0x2e7d32, 1); g.beginPath(); g.arc(0, 6, 10, 0.3, Math.PI - 0.3, false); g.strokePath();
+        g.fillStyle(0x388e3c, 1); g.fillEllipse(-20, 20, 14, 7); g.fillEllipse(20, 20, 14, 7);
+        break;
+      case 'duck':
+        g.fillStyle(0xffd54a, 1); g.fillEllipse(-4, 10, 44, 28); g.fillCircle(12, -10, 12);
+        g.fillStyle(0xffb300, 1); g.fillEllipse(-8, 8, 22, 12);
+        g.fillStyle(0xff8a1f, 1); g.fillTriangle(22, -12, 34, -8, 22, -5);
+        g.fillStyle(0x222222, 1); g.fillCircle(15, -13, 2.5);
+        break;
+      case 'fish':
+        g.fillStyle(0xff8a3d, 1); g.fillEllipse(-4, 0, 40, 22); g.fillTriangle(12, 0, 26, -12, 26, 12);
+        g.fillStyle(0xffb27a, 1); g.fillTriangle(-6, -10, 4, -10, 0, -17);
+        g.fillStyle(0x222222, 1); g.fillCircle(-14, -3, 2.5);
+        break;
+      case 'bird':
+        g.fillStyle(0x4fa3e0, 1); g.fillCircle(0, 4, 16); g.fillCircle(10, -10, 10);
+        g.fillStyle(0x2f7fc0, 1); g.fillEllipse(-4, 6, 20, 10);
+        g.fillStyle(0xffb300, 1); g.fillTriangle(18, -12, 28, -9, 18, -6);
+        g.fillStyle(0x222222, 1); g.fillCircle(12, -12, 2.5);
+        g.lineStyle(2, 0xff8f00, 1); g.lineBetween(-4, 18, -6, 26); g.lineBetween(4, 18, 6, 26);
+        break;
+      case 'monkey':
+        g.fillStyle(0x8d5a3b, 1); g.fillCircle(-20, -4, 8); g.fillCircle(20, -4, 8); g.fillCircle(0, 0, 20);
+        g.fillStyle(0xf3d2b3, 1); g.fillEllipse(0, 6, 26, 18); g.fillCircle(-7, -5, 6); g.fillCircle(7, -5, 6);
+        g.fillStyle(0x222222, 1); g.fillCircle(-7, -5, 2.5); g.fillCircle(7, -5, 2.5);
+        g.lineStyle(2, 0x6d4c41, 1); g.beginPath(); g.arc(0, 8, 6, 0.2, Math.PI - 0.2, false); g.strokePath();
+        break;
+      case 'cow':
+        g.fillStyle(0xd7ccc8, 1); g.fillTriangle(-16, -18, -24, -30, -10, -20); g.fillTriangle(16, -18, 24, -30, 10, -20);
+        g.fillStyle(0xeeeeee, 1); g.fillEllipse(-24, -8, 14, 8); g.fillEllipse(24, -8, 14, 8); g.fillRoundedRect(-18, -20, 36, 38, 12);
+        g.fillStyle(0x333333, 1); g.fillEllipse(8, -12, 14, 10);
+        g.fillStyle(0xf4b6c2, 1); g.fillEllipse(0, 14, 30, 16);
+        g.fillStyle(0x333333, 1); g.fillCircle(-5, 14, 2.5); g.fillCircle(5, 14, 2.5); g.fillCircle(-8, -2, 2.5); g.fillCircle(8, -2, 2.5);
+        break;
+      case 'horse':
+        g.fillStyle(0x8d6e4a, 1); g.fillEllipse(0, 2, 30, 50);
+        g.fillTriangle(-12, -18, -8, -34, -2, -20); g.fillTriangle(12, -18, 8, -34, 2, -20);
+        g.fillStyle(0x4e342e, 1); g.fillRect(-4, -28, 8, 24);
+        g.fillStyle(0xbca487, 1); g.fillEllipse(0, 18, 24, 16);
+        g.fillStyle(0x222222, 1); g.fillCircle(-8, -6, 2.5); g.fillCircle(8, -6, 2.5); g.fillCircle(-4, 20, 2); g.fillCircle(4, 20, 2);
+        break;
+      case 'pond':
+        g.fillStyle(0x6d8b4e, 1); g.fillEllipse(0, 8, 64, 30);
+        g.fillStyle(0x4a90d9, 1); g.fillEllipse(0, 7, 56, 24);
+        g.fillStyle(0x8cc4f0, 1); g.fillEllipse(-8, 4, 20, 6);
+        g.fillStyle(0x43a047, 1); g.fillCircle(14, 10, 6);
+        break;
+      case 'tree':
+        g.fillStyle(0x7b5230, 1); g.fillRect(-5, -2, 10, 22);
+        g.fillStyle(0x2e8b3a, 1); g.fillCircle(0, -14, 16); g.fillCircle(-12, -4, 11); g.fillCircle(12, -4, 11);
+        g.fillStyle(0x3aa34a, 1); g.fillCircle(-3, -18, 9);
+        break;
+      case 'grass':
+        g.fillStyle(0x7cb342, 1); g.fillEllipse(0, 16, 60, 14);
+        g.fillStyle(0x558b2f, 1);
+        for (let i = -4; i <= 4; i++) g.fillTriangle(i * 7 - 3, 16, i * 7 + 3, 16, i * 7 + (i % 2 ? 2 : -2), -4 - Math.abs(i % 3) * 4);
+        g.fillStyle(0xfff176, 1); g.fillCircle(-16, 4, 3); g.fillCircle(12, 0, 3);
+        break;
+      case 'bush':
+        g.fillStyle(0x2f7d3b, 1); g.fillCircle(-14, 4, 14); g.fillCircle(14, 4, 14); g.fillCircle(0, -6, 17);
+        g.fillStyle(0x3d9a4a, 1); g.fillCircle(-5, -10, 8);
         break;
       default:
         g.fillStyle(0x999999, 1); g.fillCircle(0, 0, 10);
@@ -299,11 +404,14 @@
       muted = BOT || !!this.s.muted;
       this.tool = null;      // 手上的工具：種子、澆水壺、鏟子
       this.held = null;      // 從背包拿出來、準備交給居民的物品
-      this.modal = null;     // 'weather' | 'diary' | 'book' | 'lib'，開著時時間暫停
-      this.wishTimer = null;
-      this.resetWishQ();
+      this.modal = null;     // 'weather' | 'diary' | 'book' | 'lib' | 'settings' | 'build' | 'sound'，開著時時間暫停
+      this.zone = 'meadow';  // 'meadow' 草地 | 'forest' 池塘森林
+      this.wishTimers = {};
+      this.wqs = {};         // 每位居民目前這個願望的作答狀態
+      this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
+      this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -311,10 +419,14 @@
       this.buildSun();
       this.buildClouds();
       this.fxG = this.add.graphics().setDepth(5);
+      // 這之間建立的是「世界」物件（跟著相機平移）；其餘都是固定在畫面上的介面
+      const before = new Set(this.children.list);
       this.buildIsland();
       this.buildPlots();
       this.buildRabbit();
       this.buildPip();
+      this.buildForest();
+      const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
       this.buildHud();
       this.buildBanner();
@@ -323,6 +435,11 @@
       this.buildDiary();
       this.buildBook();
       this.buildSettings();
+      this.buildBuildMenu();
+      this.buildSoundQ();
+      this.buildNav();
+      const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
+      this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
 
       this.applyWeatherLook();
       this.refreshAll();
@@ -330,7 +447,10 @@
       if (this.s.t >= DAY_LEN) this.openDiary();
       else if (this.needWeatherQ()) this.openWeatherQ();
       else if (this.s.t < 3) this.showBanner();
-      if (!this.s.wish) this.ensureWish(800);
+      this.ensureWish('rabbit', 800);
+      this.ensureForestWish(1500);
+      this.renderForest();
+      this.renderNav();
 
       this.time.addEvent({ delay: 5000, loop: true, callback: () => saveState(this.s) });
       window.addEventListener('pagehide', () => saveState(this.s));
@@ -414,19 +534,76 @@
       c.add(g);
       c.setSize(150, 190);
       const zone = this.add.zone(RABBIT.x, RABBIT.y - 20, 190, 230).setDepth(21).setInteractive();
-      zone.on('pointerdown', () => this.onRabbit());
+      zone.on('pointerdown', () => this.giveTo('rabbit'));
       this.rabbit = c;
       this.tweens.add({ targets: c, y: RABBIT.y - 6, yoyo: true, repeat: -1, duration: 900, ease: 'Sine.easeInOut' });
 
-      this.wish = this.add.container(RABBIT.x - 120, RABBIT.y - 290).setDepth(15);
-      this.wishG = this.add.graphics();
-      this.wishIcon = this.add.graphics({ x: 62, y: 62 });
-      this.wishEn = txt(this, 118, 26, '', 26, '#27384a', { fontStyle: 'bold' });
-      this.wishZh = txt(this, 118, 78, '', 20, '#6b7c8c');
-      this.wish.add([this.wishG, this.wishIcon, this.wishEn, this.wishZh]);
       // 點氣泡：重聽句子；在階段 1、2 會露出隱藏的圖或中文，算一次提示（peek）
-      const bz = this.add.zone(RABBIT.x + 30, RABBIT.y - 235, 340, 120).setDepth(22).setInteractive();
-      bz.on('pointerdown', () => this.onBubble());
+      this.rabbitWish = this.makeWishBubble(RABBIT.x - 120, RABBIT.y - 290, () => this.onBubble('rabbit'));
+    }
+
+    // 居民的願望氣泡：圖＋英文句＋中文，點氣泡呼叫 onTap
+    makeWishBubble(x, y, onTap) {
+      const c = this.add.container(x, y).setDepth(15);
+      const g = this.add.graphics();
+      const icon = this.add.graphics({ x: 62, y: 62 });
+      const en = txt(this, 118, 26, '', 26, '#27384a', { fontStyle: 'bold' });
+      const zh = txt(this, 118, 78, '', 20, '#6b7c8c');
+      c.add([g, icon, en, zh]);
+      const zone = this.add.zone(x + 150, y + 55, 340, 120).setDepth(22).setInteractive();
+      zone.on('pointerdown', onTap);
+      return { c, g, icon, en, zh, zone };
+    }
+
+    // ---------- 池塘森林（§4.5 棲地、§4.6 叫聲） ----------
+    buildForest() {
+      const X = OFF + 640;
+      const g = this.add.graphics().setDepth(3);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
+      g.fillStyle(0x5aa64a, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x66b556, 1); g.fillEllipse(X, 540, 940, 250);
+      const t = this.add.graphics().setDepth(4);
+      [[260, 410], [390, 392], [700, 400], [1010, 395], [1120, 410]].forEach(([x, y]) => {
+        t.fillStyle(0x6b4a2b, 1); t.fillRect(OFF + x - 8, y, 16, 34);
+        t.fillStyle(0x2f7d3b, 1); t.fillCircle(OFF + x, y - 10, 38);
+        t.fillStyle(0x3d9a4a, 1); t.fillCircle(OFF + x - 10, y - 20, 24);
+      });
+
+      this.lotObjs = LOT_X.map((lx, i) => {
+        const x = OFF + lx, y = LOT_Y;
+        const base = this.add.graphics({ x, y }).setDepth(6);
+        const hab = this.add.graphics({ x, y: y - 8 }).setDepth(7).setScale(1.6);
+        const animal = this.add.graphics({ x, y: y - 46 }).setDepth(9).setScale(1.3);
+        const price = txt(this, x, y + 2, '', 22, '#ffffff', { fontStyle: 'bold', stroke: '#6d4c2f', strokeThickness: 4, align: 'center' }).setOrigin(0.5).setDepth(8);
+        const zone = this.add.zone(x, y - 20, 112, 150).setDepth(20).setInteractive();
+        zone.on('pointerdown', () => this.onLot(i));
+        return { x, y, base, hab, animal, price, zone };
+      });
+
+      // 來訪的動物與牠說的話
+      this.visitorG = this.add.graphics({ x: OFF + VISITOR.x, y: VISITOR.y }).setDepth(10).setScale(1.8);
+      this.tweens.add({ targets: this.visitorG, y: VISITOR.y - 8, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+      this.visitorBubble = this.add.container(OFF + VISITOR.x - 400, VISITOR.y - 335).setDepth(15);
+      const vg = this.add.graphics(); drawBubble(vg, 0, 0, 420, 108, 400);
+      this.visitorEn = txt(this, 22, 16, '', 26, '#27384a', { fontStyle: 'bold' });
+      this.visitorZh = txt(this, 22, 64, '', 20, '#6b7c8c');
+      this.visitorBubble.add([vg, this.visitorEn, this.visitorZh]);
+      const vb = this.add.zone(OFF + VISITOR.x - 190, VISITOR.y - 281, 420, 108).setDepth(22).setInteractive();
+      vb.on('pointerdown', () => this.onVisitor(true));
+      const vz = this.add.zone(OFF + VISITOR.x + 10, VISITOR.y - 10, 170, 190).setDepth(21).setInteractive();
+      vz.on('pointerdown', () => this.onVisitor(false));
+
+      // 會發出叫聲的草叢
+      this.bushG = this.add.graphics({ x: OFF + 150, y: 480 }).setDepth(8).setScale(2.4);
+      drawIcon(this.bushG, 'bush');
+      this.bushNote = txt(this, OFF + 150, 390, '?', 44, '#ffffff', { fontStyle: 'bold', stroke: '#2f5d34', strokeThickness: 6 }).setOrigin(0.5).setDepth(16).setVisible(false);
+      this.tweens.add({ targets: this.bushNote, y: 375, yoyo: true, repeat: -1, duration: 500 });
+      const bz = this.add.zone(OFF + 145, 470, 130, 150).setDepth(20).setInteractive();
+      bz.on('pointerdown', () => this.onBush());
+
+      // 森林裡同時只有一位居民提出願望，氣泡跟著那位居民移動
+      this.forestWish = this.makeWishBubble(OFF + LOT_X[0] - 120, LOT_Y - 330, () => this.onBubble(this.s.fwho));
     }
 
     buildPip() {
@@ -592,22 +769,29 @@
     buildLibrary() {
       const c = this.modalBase(100, 120, 50, 1040, 620, 0xfff8ec);
       c.add(txt(this, 640, 92, '圖鑑 Book', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.libPage = 0;
       this.libCards = [];
-      LIB.forEach((e, i) => {
+      for (let i = 0; i < LIB_PER_PAGE; i++) {
         const col = i % 4, row = Math.floor(i / 4);
         const x = 260 + col * 255, y = 206 + row * 172;
         const card = this.add.container(x, y);
         const bg = this.add.graphics();
-        const icon = makeIcon(this, e.k, 0, -10, 1.5);
+        const icon = makeIcon(this, 'sunny', 0, -10, 1.5);
         const name = txt(this, 0, 62, '', 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
         card.add([bg, icon, name]);
         card.setSize(220, 168).setInteractive({ useHandCursor: true });
-        card.on('pointerdown', () => this.pickCard(e));
+        const slot = { e: null, card, bg, icon, name };
+        card.on('pointerdown', () => { if (slot.e) this.pickCard(slot.e); });
         c.add(card);
-        this.libCards.push({ e, card, bg, icon, name });
-      });
+        this.libCards.push(slot);
+      }
+      const pages = Math.ceil(LIB.length / LIB_PER_PAGE);
+      this.libPrev = makeButton(this, 860, 92, 64, 56, 0x90a4ae, '◀', 24, () => { this.libPage = (this.libPage + pages - 1) % pages; this.refreshLibrary(); });
+      this.libNext = makeButton(this, 1000, 92, 64, 56, 0x90a4ae, '▶', 24, () => { this.libPage = (this.libPage + 1) % pages; this.refreshLibrary(); });
+      this.libPageText = txt(this, 930, 92, '', 22, '#6b7c8c').setOrigin(0.5);
+      c.add([this.libPrev, this.libNext, this.libPageText]);
       this.libDetailEn = txt(this, 640, 510, '', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.libDetailZh = txt(this, 640, 552, '', 24, '#6b7c8c', { wordWrap: { width: 900 }, align: 'center' }).setOrigin(0.5, 0);
+      this.libDetailZh = txt(this, 640, 548, '', 24, '#6b7c8c', { wordWrap: { width: 860 }, align: 'center' }).setOrigin(0.5, 0);
       c.add([this.libDetailEn, this.libDetailZh]);
       this.closeButton(c, 1100, 90, () => this.closeModal());
       this.lib = c;
@@ -753,6 +937,7 @@
     // 切換字幕後，把畫面上所有中文翻譯重畫一次
     applySubs() {
       this.refreshWish();
+      this.renderForest();
       const t = this.tutShown; this.tutShown = -2; this.showPip(t);
       const s = this.s;
       this.bannerZh.setText(this.subs() && L.stage(s.words, s.weather) === 0 ? WEATHER[s.weather].zh : '');
@@ -761,7 +946,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -851,7 +1036,8 @@
         speak(k);
         this.floatText(o.x, o.y - 70, 'plant!', '#2e7d32');
         this.markDone('plant');
-        if (!this.s.wish) this.ensureWish(1500);
+        this.ensureWish('rabbit', 1500);
+        this.ensureForestWish(2500);
         this.refreshAll();
       }
     }
@@ -872,45 +1058,74 @@
       this.refreshAll();
     }
 
-    // --- 居民與願望（§3.3） ---
-    resetWishQ() { this.wq2 = { tries: 0, peeked: false, reveal: false, recorded: false }; }
+    // --- 居民與願望（§3.3）：每位居民各自有願望；森林裡同時只有一位居民提出願望 ---
+    likes(who) { return who === 'rabbit' ? PLANT_KEYS : ANIMALS[who].likes; }
+    wishQ(who) { return this.wqs[who] || (this.wqs[who] = { tries: 0, peeked: false, reveal: false, recorded: false }); }
+    residents() { return this.s.lots.filter((l) => l.animal).map((l) => l.animal); }
+    zoneOf(who) { return who === 'rabbit' ? 'meadow' : 'forest'; }
+    posOf(who) {
+      if (who === 'rabbit') return { x: RABBIT.x, y: RABBIT.y };
+      const i = this.s.lots.findIndex((l) => l.animal === who);
+      return { x: OFF + LOT_X[Math.max(0, i)], y: LOT_Y - 40 };
+    }
+    bodyOf(who) {
+      if (who === 'rabbit') return this.rabbit;
+      const i = this.s.lots.findIndex((l) => l.animal === who);
+      return i >= 0 ? this.lotObjs[i].animal : null;
+    }
 
     // 排一個新願望；正在開視窗時延後
-    ensureWish(delay) {
-      if (this.s.wish || this.wishTimer) return;
-      this.wishTimer = this.time.delayedCall(delay, () => {
-        this.wishTimer = null;
-        if (this.paused()) { this.ensureWish(1000); return; }
-        this.newWish();
+    ensureWish(who, delay) {
+      if (!who || this.s.wishes[who] || this.wishTimers[who]) return;
+      this.wishTimers[who] = this.time.delayedCall(delay, () => {
+        this.wishTimers[who] = null;
+        if (this.paused()) { this.ensureWish(who, 1000); return; }
+        this.newWish(who);
       });
     }
 
-    newWish() {
+    newWish(who) {
       const s = this.s;
-      // 候選只放「做得到的」：種過的作物
-      const cands = PLANT_KEYS.filter((k) => s.lib[k]);
-      if (!cands.length) return;
-      const w = L.pick(s.words, cands, s.day, s.lastWish);
-      s.wish = w; s.lastWish = w;
-      L.asked(s.words, w, s.day);
-      this.resetWishQ();
+      // 候選只放「做得到的」：種過的作物，而且是這位居民會想要的
+      const cands = this.likes(who).filter((k) => s.lib[k]);
+      if (!cands.length) return false;
+      const w = L.pick(s.words, cands, s.day, s.lastWish, Math.random, s.sched);
+      s.wishes[who] = w; s.lastWish = w;
+      L.asked(s.words, w, s.day, s.sched);
+      this.wqs[who] = null;
       this.refreshWish();
-      speak(wishSentence(w));
+      if (this.zoneOf(who) === this.zone) speak(wishSentence(w));
+      return true;
     }
 
-    onBubble() {
-      if (this.paused() || !this.s.wish) return;
-      speak(wishSentence(this.s.wish));
-      if (L.stage(this.s.words, this.s.wish) >= 1 && !this.wq2.reveal) {
-        this.wq2.reveal = true; this.wq2.peeked = true;
-        this.refreshWish();
-      }
+    // 森林：從住下來、而且有想要的東西的居民裡挑一位
+    ensureForestWish(delay) {
+      const s = this.s;
+      if ((s.fwho && s.wishes[s.fwho]) || this.forestTimer) return;
+      this.forestTimer = this.time.delayedCall(delay, () => {
+        this.forestTimer = null;
+        if (this.paused()) { this.ensureForestWish(1000); return; }
+        const res = this.residents().filter((a) => ANIMALS[a].likes.some((k) => s.lib[k]));
+        if (!res.length) return;
+        const pool = res.length > 1 ? res.filter((a) => a !== s.fwho) : res;
+        s.fwho = pool[Math.floor(Math.random() * pool.length)];
+        this.newWish(s.fwho);
+      });
     }
 
-    onRabbit() {
+    onBubble(who) {
+      const want = who && this.s.wishes[who];
+      if (this.paused() || !want) return;
+      speak(wishSentence(want));
+      const q = this.wishQ(who);
+      if (L.stage(this.s.words, want) >= 1 && !q.reveal) { q.reveal = true; q.peeked = true; this.refreshWish(); }
+    }
+
+    // 把手上的東西交給居民（§3.3）
+    giveTo(who) {
       if (this.paused()) return;
-      const s = this.s, want = s.wish;
-      if (!want) { speak('Hello!'); return; }
+      const s = this.s, want = s.wishes[who], p = this.posOf(who), body = this.bodyOf(who);
+      if (!want) { speak(who === 'rabbit' ? 'Hello!' : 'Hello! I am ' + art(who) + '.'); return; }
       if (!this.held) {
         // 手上沒東西：重聽願望（不算提示），背包閃一下提醒要先拿東西
         speak(wishSentence(want));
@@ -919,7 +1134,7 @@
       }
       const item = this.held;
       const kinds = PLANT_KEYS.filter((k) => (s.inv[k] || 0) > 0).length; // 玩家當下的選項數
-      const q = this.wq2;
+      const q = this.wishQ(who);
       if (q.tries === 0) {
         const st = this.stats.wish[kinds] || (this.stats.wish[kinds] = { q: 0, first: 0 });
         st.q += 1; if (item === want) st.first += 1;
@@ -930,25 +1145,398 @@
         if (!q.recorded) L.answer(s.words, want, { day: s.day, options: kinds, firstTry: q.tries === 0, peeked: q.peeked });
         L.seen(s.words, 'thank', s.day);
         s.ev.gave.push(item);
-        this.floatText(RABBIT.x, RABBIT.y - 140, 'Thank you!', '#d81b60');
-        this.hearts();
+        s.gaveTotal = (s.gaveTotal || 0) + 1;
+        this.floatText(p.x, p.y - 140, 'Thank you!', '#d81b60');
+        this.hearts(p.x, p.y);
         speak('Thank you!');
-        this.tweens.add({ targets: this.rabbit, y: RABBIT.y - 50, yoyo: true, duration: 220, repeat: 1 });
+        if (body) this.tweens.add({ targets: body, y: body.y - 40, yoyo: true, duration: 220, repeat: 1 });
         if (!s.inv[item]) this.held = null;
-        this.markDone('give');
-        s.wish = null;
-        this.refreshWish();
-        this.ensureWish(2600);
+        if (who === 'rabbit') this.markDone('give');
+        s.wishes[who] = null; this.wqs[who] = null;
+        if (who === 'rabbit') this.ensureWish('rabbit', 2600);
+        else { this.ensureForestWish(3000); }
+        this.checkUnlock();
         this.refreshAll();
       } else {
         // 選錯：搖頭、物品留在手上、句子再唸一次並露出圖。不扣任何東西
         q.tries += 1;
         if (!q.recorded) { L.answer(s.words, want, { day: s.day, options: kinds, firstTry: false, peeked: q.peeked }); q.recorded = true; }
         q.reveal = true;
-        this.tweens.add({ targets: this.rabbit, angle: 8, yoyo: true, repeat: 2, duration: 90, onComplete: () => this.rabbit.setAngle(0) });
-        this.floatText(RABBIT.x, RABBIT.y - 140, 'No, thanks.', '#5c6bc0');
+        if (body) this.tweens.add({ targets: body, angle: 8, yoyo: true, repeat: 2, duration: 90, onComplete: () => body.setAngle(0) });
+        this.floatText(p.x, p.y - 140, 'No, thanks.', '#5c6bc0');
         speak('No, thanks. ' + wishSentence(want));
         this.refreshWish();
+      }
+    }
+
+    // --- 區域切換與解鎖（§5） ---
+    buildNav() {
+      this.navF = makeButton(this, 1226, 400, 92, 92, 0x43a047, '', 0, () => this.goZone('forest')).setDepth(40);
+      this.navF.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navFLabel = txt(this, 0, 22, '', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.navF.add(this.navFLabel);
+      this.navM = makeButton(this, 54, 400, 92, 92, 0x8d6e4a, '', 0, () => this.goZone('meadow')).setDepth(40);
+      this.navM.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navM.add(txt(this, 0, 22, '草地', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+    }
+
+    renderNav() {
+      const s = this.s;
+      this.navF.setVisible(this.zone === 'meadow');
+      this.navF.setAlpha(s.forestOpen ? 1 : 0.55);
+      this.navFLabel.setText(s.forestOpen ? '森林' : Math.min(s.gaveTotal || 0, FOREST_NEED) + '/' + FOREST_NEED);
+      this.navM.setVisible(this.zone === 'forest');
+    }
+
+    goZone(z) {
+      if (this.paused() || this.zone === z) return;
+      if (z === 'forest' && !this.s.forestOpen) {
+        this.floatText(1130, 330, '再完成 ' + (FOREST_NEED - (this.s.gaveTotal || 0)) + ' 個願望', '#2f5d34', true);
+        return;
+      }
+      this.zone = z;
+      this.tweens.add({ targets: this.cameras.main, scrollX: z === 'forest' ? OFF : 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut' });
+      this.renderNav();
+      if (z === 'forest' && this.s.visitor) this.time.delayedCall(700, () => this.sayVisitor());
+    }
+
+    checkUnlock() {
+      const s = this.s;
+      if (s.forestOpen || (s.gaveTotal || 0) < FOREST_NEED) return;
+      s.forestOpen = true;
+      this.floatText(1100, 320, 'New place!', '#2e7d32', true);
+      this.tweens.add({ targets: this.navF, scale: 1.2, yoyo: true, repeat: 5, duration: 300 });
+      this.renderNav();
+    }
+
+    // --- 訪客與棲地（§4.5） ---
+    scheduleVisitor(delay) {
+      const s = this.s;
+      if (this.visitorTimer || s.visitor || !s.forestOpen) return;
+      if (!this.freeLot()) return;
+      if (!ANIMAL_KEYS.some((a) => !this.residents().includes(a))) return;
+      this.visitorTimer = this.time.delayedCall(delay, () => {
+        this.visitorTimer = null;
+        if (this.paused()) { this.scheduleVisitor(1000); return; }
+        this.nextVisitor();
+      });
+    }
+
+    nextVisitor() {
+      const s = this.s;
+      if (s.visitor || !this.freeLot()) return;
+      const left = ANIMAL_KEYS.filter((a) => !this.residents().includes(a));
+      if (!left.length) return;
+      s.visitor = left[Math.floor(Math.random() * left.length)];
+      this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
+      L.seen(s.words, s.visitor, s.day);
+      this.renderForest();
+      if (this.zone === 'forest') this.sayVisitor();
+    }
+
+    sayVisitor() {
+      const v = this.s.visitor;
+      if (v) speak('Hello! I am ' + art(v) + '. ' + ANIMALS[v].say);
+    }
+
+    // 點訪客：重聽（不算提示）；點氣泡在階段 1、2 會露出中文，算一次提示
+    onVisitor(bubble) {
+      const v = this.s.visitor;
+      if (this.paused() || !v) return;
+      this.sayVisitor();
+      if (bubble && L.stage(this.s.words, ANIMALS[v].clue) >= 1 && !this.vq.reveal) {
+        this.vq.reveal = true; this.vq.peeked = true; this.renderForest();
+      }
+    }
+
+    freeLot() { return this.s.lots.some((l, i) => i < this.s.lotsOpen && !l.animal); }
+
+    // 擴建：點下一塊可以買的地一次會顯示價格，3 秒內再點一次才買下（避免誤觸）
+    buyLot(i) {
+      const s = this.s, o = this.lotObjs[i], price = LOT_PRICE[i];
+      if (i !== s.lotsOpen) return;
+      if (this.buyArm !== i) {
+        this.buyArm = i;
+        this.time.delayedCall(3000, () => { if (this.buyArm === i) this.buyArm = null; });
+        this.floatText(o.x, o.y - 90, s.stardust >= price ? '再點一次買下 ★' + price : '需要 ★' + price, s.stardust >= price ? '#2e7d32' : '#e65100');
+        return;
+      }
+      this.buyArm = null;
+      if (s.stardust < price) { this.floatText(o.x, o.y - 90, '需要 ★' + price, '#e65100'); return; }
+      s.stardust -= price;
+      s.lotsOpen += 1;
+      this.sparkle(o.x, o.y - 20);
+      speak('A new place!');
+      this.scheduleVisitor(2500);
+      this.refreshAll();
+    }
+
+    onLot(i) {
+      if (this.paused()) return;
+      const s = this.s, lot = s.lots[i], o = this.lotObjs[i];
+      if (i >= s.lotsOpen) { this.buyLot(i); return; }
+      if (lot.animal) {
+        if (this.held || s.wishes[lot.animal]) { this.giveTo(lot.animal); return; }
+        const A = ANIMALS[lot.animal];
+        speak((A.sound ? A.sound + ' ' : '') + 'I am ' + art(lot.animal) + '.');
+        this.tweens.add({ targets: o.animal, y: o.y - 70, yoyo: true, duration: 160 });
+        return;
+      }
+      if (this.tool === 'shovel') {
+        // 拆掉沒有住人的棲地，退回一半星砂
+        if (!lot.hab) return;
+        lot.hab = null;
+        const back = Math.floor(HAB_COST / 2);
+        s.stardust += back;
+        this.floatText(o.x, o.y - 90, '+' + back + ' ★', '#e65100');
+        this.refreshAll();
+        return;
+      }
+      if (!s.visitor) {
+        if (!lot.hab) this.floatText(o.x, o.y - 90, 'Wait for a friend.', '#2f5d34');
+        return;
+      }
+      if (!lot.hab) { this.openBuild(i); return; }
+      this.offer(i);
+    }
+
+    buildBuildMenu() {
+      const c = this.modalBase(80, 250, 120, 780, 480, 0xfffdf6);
+      this.bmSay = txt(this, 640, 180, '', 34, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.bmSayZh = txt(this, 640, 222, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.bmTitle = txt(this, 640, 268, 'Build a home.　每個 ★' + HAB_COST, 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.bmSay, this.bmSayZh, this.bmTitle]);
+      this.bmCards = [0, 1, 2].map((i) => {
+        const card = this.add.container(640 + (i - 1) * 220, 430);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -110, 190, 220, 24);
+        bg.lineStyle(4, 0xa5d6a7, 1); bg.strokeRoundedRect(-95, -110, 190, 220, 24);
+        const icon = makeIcon(this, 'pond', 0, -30, 2);
+        const en = txt(this, 0, 52, '', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 86, '', 20, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, icon, en, zh]);
+        card.setSize(190, 220).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickBuild(i));
+        c.add(card);
+        return { card, icon, en, zh, x: card.x };
+      });
+      this.closeButton(c, 995, 155, () => this.closeModal());
+      this.bmBox = c;
+    }
+
+    openBuild(i) {
+      this.modal = 'build';
+      this.buildLot = i;
+      this.bmOrder = L.shuffle(HAB_KEYS);
+      this.renderBuild();
+      this.bmBox.setVisible(true);
+      this.sayVisitor();
+    }
+
+    renderBuild() {
+      const v = this.s.visitor, A = ANIMALS[v];
+      const st = L.stage(this.s.words, A.clue);
+      this.bmSay.setText(A.say);
+      this.bmSayZh.setText(this.subs() && (st === 0 || this.vq.reveal) ? A.sayZh : '');
+      this.bmCards.forEach((c, i) => {
+        const k = this.bmOrder[i];
+        drawIcon(c.icon, k);
+        c.en.setText(k);
+        c.zh.setText(this.subs() ? HABITATS[k].zh : '');
+      });
+    }
+
+    pickBuild(i) {
+      if (this.modal !== 'build') return;
+      const s = this.s, k = this.bmOrder[i], c = this.bmCards[i];
+      if (s.stardust < HAB_COST) {
+        // 星砂不夠：不會卡死，收成和完成願望都能賺星砂
+        this.tweens.add({ targets: c.card, x: c.x + 10, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+        this.floatText(c.x, 300, '需要 ★' + HAB_COST, '#e65100', true);
+        return;
+      }
+      s.stardust -= HAB_COST;
+      s.lots[this.buildLot].hab = k;
+      speak(k);
+      this.closeModal();
+      this.offer(this.buildLot);
+    }
+
+    // 把棲地給訪客：對了就住下來，錯了牠不會來（但也不會離開）
+    offer(i) {
+      const s = this.s, lot = s.lots[i], v = s.visitor, A = ANIMALS[v], q = this.vq, o = this.lotObjs[i];
+      const right = A.home === lot.hab;
+      if (q.tries === 0) { this.stats.habitat.q += 1; if (right) this.stats.habitat.first += 1; }
+      if (right) {
+        if (!q.recorded) L.answer(s.words, A.clue, { day: s.day, options: HAB_KEYS.length, firstTry: q.tries === 0, peeked: q.peeked });
+        lot.animal = v; s.visitor = null;
+        s.lib[v] = true;
+        s.ev.came.push(v);
+        s.stardust += 3;
+        this.hearts(o.x, o.y - 20);
+        this.floatText(o.x, o.y - 150, 'Thank you!', '#d81b60');
+        speak('Thank you! I love my new home.');
+        this.refreshLibrary();
+        this.scheduleVisitor(6000);
+        this.ensureForestWish(4000);
+      } else {
+        q.tries += 1;
+        if (!q.recorded) { L.answer(s.words, A.clue, { day: s.day, options: HAB_KEYS.length, firstTry: false, peeked: q.peeked }); q.recorded = true; }
+        q.reveal = true;
+        this.tweens.add({ targets: this.visitorG, angle: 10, yoyo: true, repeat: 2, duration: 90, onComplete: () => this.visitorG.setAngle(0) });
+        this.floatText(OFF + VISITOR.x, VISITOR.y - 120, 'No, thanks.', '#5c6bc0');
+        speak('No, thanks. ' + A.say);
+      }
+      this.refreshAll();
+    }
+
+    renderForest() {
+      const s = this.s;
+      this.lotObjs.forEach((o, i) => {
+        const lot = s.lots[i];
+        const open = i < s.lotsOpen, next = i === s.lotsOpen;
+        o.base.clear();
+        o.zone.input.enabled = open || next;
+        o.price.setText(next ? '+\n★' + LOT_PRICE[i] : '');
+        if (!open && !next) { o.hab.clear(); o.animal.clear(); return; }
+        o.base.fillStyle(0x000000, 0.1); o.base.fillEllipse(0, 12, 112, 44);
+        if (next) {
+          o.base.lineStyle(3, 0x8d6e4a, 0.8); o.base.strokeEllipse(0, 6, 104, 38);
+          o.base.fillStyle(0xc5b38f, 0.5); o.base.fillEllipse(0, 6, 104, 38);
+          o.hab.clear(); o.animal.clear();
+          return;
+        }
+        o.base.fillStyle(lot.hab ? 0x8bc34a : 0xa1887f, 1); o.base.fillEllipse(0, 6, 104, 38);
+        if (!lot.hab && s.visitor) { o.base.lineStyle(4, 0xffffff, 0.9); o.base.strokeEllipse(0, 6, 112, 46); }
+        if (lot.hab) drawIcon(o.hab, lot.hab); else o.hab.clear();
+        if (lot.animal) drawIcon(o.animal, lot.animal); else o.animal.clear();
+      });
+      const v = s.visitor;
+      this.visitorG.setVisible(!!v);
+      this.visitorBubble.setVisible(!!v);
+      if (v) {
+        const A = ANIMALS[v];
+        drawIcon(this.visitorG, v);
+        const st = L.stage(s.words, A.clue);
+        this.visitorEn.setText('I am ' + art(v) + '. ' + A.say);
+        this.visitorZh.setText(this.subs() && (st === 0 || this.vq.reveal) ? '我是' + A.zh + '，' + A.sayZh : '');
+      }
+    }
+
+    // --- 叫聲（§4.6）：草叢搖動時點它，聽（也看）叫聲，選出是誰 ---
+    soundCands() { return this.residents().filter((a) => ANIMALS[a].sound); }
+
+    tickBush(dt) {
+      if (this.bushReady || !this.soundCands().length) return;
+      this.bushT -= dt;
+      if (this.bushT <= 0) { this.bushReady = true; this.bushNote.setVisible(true); }
+    }
+
+    onBush() {
+      if (this.paused()) return;
+      if (!this.bushReady) { this.tweens.add({ targets: this.bushG, scale: 2.6, yoyo: true, duration: 120 }); return; }
+      this.openSound();
+    }
+
+    buildSoundQ() {
+      const c = this.modalBase(80, 230, 100, 820, 520, 0xfffdf6);
+      c.add(makeIcon(this, 'bush', 340, 200, 2.2));
+      const sb = this.add.graphics(); drawBubble(sb, 420, 140, 360, 96, 440);
+      sb.setAngle(0);
+      c.add(sb);
+      this.sqSound = txt(this, 600, 188, '', 40, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.sqTitle = txt(this, 640, 290, 'Who is it?', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.sqZh = txt(this, 640, 326, '是誰的叫聲？', 20, '#6b7c8c').setOrigin(0.5);
+      this.sqHint = txt(this, 640, 590, '', 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.sqSound, this.sqTitle, this.sqZh, this.sqHint]);
+      const lis = this.add.container(990, 190);
+      const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 32);
+      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 1)]);
+      lis.setSize(70, 70).setInteractive({ useHandCursor: true });
+      lis.on('pointerdown', () => this.playSound());
+      c.add(lis);
+      this.sqLens = this.add.container(990, 290);
+      const pg = this.add.graphics(); pg.fillStyle(0xfff3e0, 1); pg.fillCircle(0, 0, 32);
+      this.sqLens.add([pg, makeIcon(this, 'lens', 0, 0, 1)]);
+      this.sqLens.setSize(70, 70).setInteractive({ useHandCursor: true });
+      this.sqLens.on('pointerdown', () => { this.sq.peeked = true; this.sq.reveal = true; this.renderSound(); });
+      c.add(this.sqLens);
+      this.sqCards = [0, 1, 2, 3].map((i) => {
+        const card = this.add.container(640 + (i - 1.5) * 186, 455);
+        const bg = this.add.graphics();
+        const icon = makeIcon(this, 'frog', 0, -30, 1.7);
+        const en = txt(this, 0, 44, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 76, '', 20, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, icon, en, zh]);
+        card.setSize(170, 200).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickSound(i));
+        c.add(card);
+        return { card, bg, icon, en, zh, x: card.x };
+      });
+      this.sqBox = c;
+    }
+
+    openSound() {
+      const cands = this.soundCands();
+      const ans = cands[Math.floor(Math.random() * cands.length)];
+      this.modal = 'sound';
+      this.sq = { answer: ans, order: L.options(ans, SOUND_KEYS, 4), tries: 0, peeked: false, reveal: false, recorded: false, wrong: {} };
+      this.sqBox.setVisible(true);
+      this.renderSound();
+      this.time.delayedCall(250, () => this.playSound());
+    }
+
+    playSound() { if (this.sq) { const t = ANIMALS[this.sq.answer].sound; speak(t + ' ' + t); } }
+
+    renderSound() {
+      const q = this.sq;
+      const st = L.stage(this.s.words, q.answer); // 依正確答案的階段決定所有卡片怎麼顯示
+      const showIcon = st < 2 || q.reveal;
+      const zh = st === 0 && this.subs();
+      this.sqSound.setText(ANIMALS[q.answer].sound + ' ' + ANIMALS[q.answer].sound);
+      this.sqZh.setVisible(this.subs());
+      this.sqLens.setVisible(st >= 2 && !q.reveal);
+      this.sqHint.setText(q.tries > 0 && !q.done ? ANIMALS[q.answer].hint : '');
+      this.sqCards.forEach((c, i) => {
+        const k = q.order[i];
+        c.bg.clear();
+        c.bg.fillStyle(0xffffff, 1); c.bg.fillRoundedRect(-85, -100, 170, 200, 24);
+        c.bg.lineStyle(4, 0xffcc80, 1); c.bg.strokeRoundedRect(-85, -100, 170, 200, 24);
+        c.icon.setVisible(showIcon); drawIcon(c.icon, k);
+        c.en.setText(k).setY(showIcon ? 44 : 0);
+        c.zh.setText(zh ? ANIMALS[k].zh : '').setY(showIcon ? 76 : 34);
+        c.card.setAlpha(q.wrong[k] ? 0.35 : 1);
+      });
+    }
+
+    pickSound(i) {
+      if (this.modal !== 'sound') return;
+      const q = this.sq, k = q.order[i], c = this.sqCards[i];
+      if (q.wrong[k] || q.done) return;
+      if (q.tries === 0) { this.stats.sound.q += 1; if (k === q.answer) this.stats.sound.first += 1; }
+      if (k === q.answer) {
+        q.done = true;
+        if (!q.recorded) L.answer(this.s.words, k, { day: this.s.day, options: q.order.length, firstTry: q.tries === 0, peeked: q.peeked });
+        this.s.stardust += 2;
+        c.bg.lineStyle(6, 0x43a047, 1); c.bg.strokeRoundedRect(-85, -100, 170, 200, 24);
+        this.tweens.add({ targets: c.card, scale: 1.12, yoyo: true, duration: 200 });
+        speak('Yes! It is ' + art(k) + '.');
+        this.time.delayedCall(BOT ? 50 : 1000, () => {
+          this.sqBox.setVisible(false);
+          this.modal = null;
+          this.bushReady = false; this.bushNote.setVisible(false); this.bushT = 25;
+          this.floatText(OFF + 150, 380, '+2 ★', '#e65100');
+          this.renderSound();
+          this.refreshAll();
+        });
+      } else {
+        // 選錯：再播一次，並給一句提示（牠住在哪裡）
+        q.tries += 1;
+        q.wrong[k] = true;
+        if (!q.recorded) { L.answer(this.s.words, q.answer, { day: this.s.day, options: q.order.length, firstTry: false, peeked: q.peeked }); q.recorded = true; }
+        this.tweens.add({ targets: c.card, x: c.x + 10, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+        this.renderSound();
+        this.playSound();
       }
     }
 
@@ -1017,7 +1605,7 @@
       this.modal = 'diary';
       this.held = null; this.tool = null; this.redrawTools();
       if (!s.diaryQ || s.diaryQ.day !== s.day) {
-        const q = L.diary(Object.assign({ weather: s.weather }, s.ev), { weather: WEATHER_KEYS, plant: PLANT_KEYS });
+        const q = L.diary(Object.assign({ weather: s.weather }, s.ev), { weather: WEATHER_KEYS, plant: PLANT_KEYS, animal: ANIMAL_KEYS });
         s.diaryQ = Object.assign(q, { day: s.day, tries: 0, recorded: false, done: false, wrong: {} });
       }
       this.dyBox.setVisible(true);
@@ -1092,7 +1680,11 @@
 
     // --- 圖鑑 ---
     pickCard(e) {
-      if (!this.s.lib[e.k]) { this.libDetailEn.setText('?'); this.libDetailZh.setText('還沒發現，試試看種下它或等到那種天氣'); return; }
+      if (!this.s.lib[e.k]) {
+        this.libDetailEn.setText('?');
+        this.libDetailZh.setText(e.kind === 'animal' ? '還沒遇到。完成居民的願望，去池塘森林幫牠蓋一個家' : '還沒發現，試試看種下它或等到那種天氣');
+        return;
+      }
       speak(e.en);
       L.seen(this.s.words, e.en, this.s.day);
       this.libDetailEn.setText(e.en);
@@ -1156,7 +1748,7 @@
     // 箭頭位置每幀計算，跟著玩家目前的狀態走
     tutTarget() {
       const s = this.s;
-      if (s.tut >= 6 || this.modal) return null;
+      if (s.tut >= 6 || this.modal || this.zone !== 'meadow') return null;
       const plots = s.plots;
       switch (TUT[s.tut]) {
         case 'seed': return { x: TOOL_X.bean, y: 585 };
@@ -1175,7 +1767,7 @@
           return i < 0 ? null : { x: this.plotObjs[i].x, y: this.plotObjs[i].y - 130 };
         }
         case 'give':
-          if (!s.wish) return null;
+          if (!s.wishes.rabbit) return null;
           return this.held ? { x: RABBIT.x, y: RABBIT.y - 130 } : { x: BAG_X.bean, y: 585 };
         default: return null;
       }
@@ -1250,21 +1842,40 @@
     }
 
     refreshWish() {
-      const item = this.s.wish;
-      this.wish.setVisible(!!item);
+      this.drawWish(this.rabbitWish, this.s.wishes.rabbit, this.wishQ('rabbit'));
+      const who = this.s.fwho, fw = who && this.s.wishes[who];
+      if (fw) {
+        const p = this.posOf(who);
+        this.forestWish.c.setPosition(p.x - 120, p.y - 250);
+        this.forestWish.zone.setPosition(p.x + 30, p.y - 195);
+      }
+      this.drawWish(this.forestWish, fw, fw ? this.wishQ(who) : null);
+    }
+
+    drawWish(b, item, q) {
+      b.c.setVisible(!!item);
+      if (b.zone.input) b.zone.input.enabled = !!item;
       if (!item) return;
       const st = L.stage(this.s.words, item);
-      const showPic = st < 2 || this.wq2.reveal;
-      const showZh = this.subs() && (st === 0 || this.wq2.reveal);
-      this.wishG.clear(); drawBubble(this.wishG, 0, 0, 340, 126, 120);
-      this.wishIcon.setVisible(showPic);
-      if (showPic) drawIcon(this.wishIcon, item);
-      this.wishEn.setX(showPic ? 118 : 24).setText(wishSentence(item));
-      this.wishZh.setX(showPic ? 118 : 24).setText(showZh ? '我想要' + zhOf(item) : '');
+      const showPic = st < 2 || q.reveal;
+      const showZh = this.subs() && (st === 0 || q.reveal);
+      b.g.clear(); drawBubble(b.g, 0, 0, 340, 126, 120);
+      b.icon.setVisible(showPic);
+      if (showPic) drawIcon(b.icon, item);
+      b.en.setX(showPic ? 118 : 24).setText(wishSentence(item));
+      b.zh.setX(showPic ? 118 : 24).setText(showZh ? '我想要' + zhOf(item) : '');
     }
 
     refreshLibrary() {
-      this.libCards.forEach(({ e, bg, icon, name }) => {
+      const pages = Math.ceil(LIB.length / LIB_PER_PAGE);
+      this.libPageText.setText((this.libPage + 1) + ' / ' + pages);
+      this.libCards.forEach((slot, i) => {
+        const e = LIB[this.libPage * LIB_PER_PAGE + i];
+        slot.e = e || null;
+        slot.card.setVisible(!!e);
+        if (!e) return;
+        const { bg, icon, name } = slot;
+        drawIcon(icon, e.k);
         const got = !!this.s.lib[e.k];
         bg.clear();
         bg.fillStyle(got ? 0xffffff : 0xe3dccf, 1); bg.fillRoundedRect(-110, -84, 220, 168, 22);
@@ -1277,6 +1888,8 @@
     refreshAll() {
       this.dustText.setText(String(this.s.stardust));
       this.refreshWish();
+      this.renderForest();
+      this.renderNav();
       this.refreshTut();
       this.redrawTools();
     }
@@ -1290,13 +1903,31 @@
         if (this.s.diaryQ && this.s.diaryQ.done) this.goodNight(); else this.pickDiary(Math.floor(Math.random() * 3));
         return;
       }
+      if (this.modal === 'build') {
+        // 建造選單：三張卡片加上關閉鈕，隨機點一個（星砂不夠時只會關閉）
+        const r = Math.floor(Math.random() * 4);
+        if (r === 3 || this.s.stardust < HAB_COST) this.closeModal(); else this.pickBuild(r);
+        return;
+      }
+      if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal) { this.closeModal(); return; }
+      // 只點目前畫面上看得到的東西
       const acts = [];
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
-      for (let i = 0; i < 6; i++) acts.push(() => this.onPlot(i));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
-      acts.push(() => this.onRabbit());
-      acts.push(() => this.onBubble());
+      if (this.zone === 'meadow') {
+        for (let i = 0; i < 6; i++) acts.push(() => this.onPlot(i));
+        acts.push(() => this.giveTo('rabbit'));
+        acts.push(() => this.onBubble('rabbit'));
+        acts.push(() => this.goZone('forest'));
+      } else {
+        for (let i = 0; i <= Math.min(this.s.lotsOpen, LOT_X.length - 1); i++) acts.push(() => this.onLot(i));
+        acts.push(() => this.onVisitor(false));
+        acts.push(() => this.onVisitor(true));
+        acts.push(() => this.onBush());
+        acts.push(() => this.onBubble(this.s.fwho));
+        acts.push(() => this.goZone('meadow'));
+      }
       pickOne(acts)();
     }
 
@@ -1309,14 +1940,20 @@
         天氣題第一次就對: pct(this.stats.weather),
         日記第一次就對: pct(this.stats.diary),
         交付第一次就對: wish,
+        棲地第一次就對: pct(this.stats.habitat),
+        叫聲第一次就對: pct(this.stats.sound),
+        住下來的動物: this.residents().length,
+        開放的空地: this.s.lotsOpen,
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
     }
 
     // --- 特效 ---
-    floatText(x, y, str, color) {
-      const t = txt(this, x, y, str, 30, color, { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5).setDepth(50);
+    // fixed：座標是畫面座標（介面上的提示），不跟著相機平移
+    floatText(x, y, str, color, fixed) {
+      const t = txt(this, x, y, str, 30, color, { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5).setDepth(fixed ? 120 : 50);
+      if (fixed) t.setScrollFactor(0);
       this.tweens.add({ targets: t, y: y - 60, alpha: 0, duration: 1100, onComplete: () => t.destroy() });
     }
     splash(x, y) {
@@ -1334,9 +1971,9 @@
         this.tweens.add({ targets: d, x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, alpha: 0, duration: 650, onComplete: () => d.destroy() });
       }
     }
-    hearts() {
+    hearts(x, y) {
       for (let i = 0; i < 5; i++) {
-        const d = this.add.graphics({ x: RABBIT.x + Phaser.Math.Between(-50, 50), y: RABBIT.y - 90 }).setDepth(50);
+        const d = this.add.graphics({ x: x + Phaser.Math.Between(-50, 50), y: y - 90 }).setDepth(50);
         d.fillStyle(0xf06292, 1); d.fillCircle(-6, -4, 7); d.fillCircle(6, -4, 7); d.fillTriangle(-13, -1, 13, -1, 0, 14);
         this.tweens.add({ targets: d, y: d.y - 90, alpha: 0, duration: 1200, delay: i * 120, onComplete: () => d.destroy() });
       }
@@ -1432,6 +2069,11 @@
           if (kind !== 'sun') o.hg.setAlpha(1);
         }
       }
+
+      // 池塘森林：草叢倒數（只在森林裡、時間有在走時倒數），以及安排下一位訪客
+      if (running && this.zone === 'forest') this.tickBush(dt);
+      this.bushG.rotation = this.bushReady ? Math.sin(tSec * 14) * 0.09 : 0;
+      if (s.forestOpen && !s.visitor && !this.visitorTimer) this.scheduleVisitor(4000);
 
       // 教學箭頭
       const tg = this.tutTarget();

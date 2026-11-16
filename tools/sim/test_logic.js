@@ -25,6 +25,15 @@ const L = require('../../game/logic.js');
   ok(5); assert.strictEqual(L.stage(w, 'x'), 2);
   assert.strictEqual(w.x.ok, 7, '給家長看的 ok 是累計值，不因退回而扣');
 }
+// 升階要求最近 5 題正確率 ≥ 60%：亂猜（對錯交替偏錯）累積再多 ok 也不升階
+{
+  const w = {}, q = (day, ok) => L.answer(w, 'g', { day, options: 3, firstTry: ok, peeked: false });
+  for (let d = 1; d <= 30; d++) { q(d, true); q(d, false); q(d, false); }
+  assert.ok(w.g.ok >= 4 && w.g.days >= 3);
+  assert.strictEqual(L.stage(w, 'g'), 0, '正確率 33% 不升階');
+  q(31, true); q(31, true); q(32, true);
+  assert.strictEqual(L.stage(w, 'g'), 1, '最近 5 題 3 對 2 錯（60%）後升階');
+}
 // 排程器：不連續同字、新字當天上限、到期字優先
 {
   const w = {};
@@ -33,10 +42,16 @@ const L = require('../../game/logic.js');
     assert.notStrictEqual(p, 'a');
   }
   assert.strictEqual(L.pick(w, ['a'], 1, 'a'), 'a', '只有一個候選時可以重複');
-  L.asked(w, 'a', 5); L.asked(w, 'b', 5);
-  const ws = L.weights(w, ['a', 'b', 'c'], 5, null);
-  assert.strictEqual(ws.find((x) => x.w === 'c').wt, 0, '有到期字或已引入 2 個新字時不引入新字');
-  assert.strictEqual(ws.find((x) => x.w === 'a').cat, 'due');
+  const sc = { n: 0 };
+  L.asked(w, 'a', 5, sc); L.asked(w, 'b', 5, sc);
+  let ws = L.weights(w, ['a', 'b', 'c'], 5, null, sc);
+  assert.strictEqual(ws.find((x) => x.w === 'c').wt, 0, '還有字在複習期時不引入新字');
+  assert.strictEqual(ws.find((x) => x.w === 'a').cat, 'wait', '剛出過，還沒隔夠');
+  sc.n += 2;
+  ws = L.weights(w, ['a', 'b', 'c'], 5, null, sc);
+  assert.strictEqual(ws.find((x) => x.w === 'a').cat, 'due', '隔夠了就到期');
+  for (let i = 0; i < 3; i++) L.asked(w, 'a', 6, sc);
+  assert.notStrictEqual(L.weights(w, ['a'], 6, null, sc)[0].cat, 'due', '複習 3 次後離開複習期');
 }
 // §3.5 日記：答案來自當天，干擾項不能是當天也發生的事，選項 3 個
 {
@@ -56,5 +71,8 @@ const L = require('../../game/logic.js');
     assert.ok(d.text.startsWith(d.before) && d.text.includes(d.answer));
   }
   assert.strictEqual(kinds.size, 4, '四種句型都會出現');
+  const d = L.diary({ weather: 'sunny', planted: [], picked: [], gave: [], came: ['owl'] },
+    { weather: ['sunny', 'cloudy'], plant: [], animal: ['owl', 'frog', 'duck'] }, () => 0.99);
+  assert.strictEqual(d.text, 'An owl came to my island.');
 }
 console.log('OK');
