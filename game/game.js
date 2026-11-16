@@ -248,12 +248,12 @@
 
   // 裝飾（遊戲企劃「圖鑑完成度換取外觀和家具」）：圖鑑達到 lib 項才能買，擺在草地固定位置，只是好看
   const DECOR = [
-    { k: 'flowerbed', zh: '花圃',   en: 'flowers',  lib: 8,  price: 20, x: 320,  y: 612 },
+    { k: 'flowerbed', zh: '花圃',   en: 'flowers',  lib: 8,  price: 20, x: 320,  y: 594 },
     { k: 'fence',     zh: '籬笆',   en: 'fence',    lib: 10, price: 25, x: 600,  y: 392 },
     { k: 'bench',     zh: '長椅',   en: 'bench',    lib: 14, price: 35, x: 880,  y: 600 },
     { k: 'lamppost',  zh: '路燈',   en: 'lamp',     lib: 17, price: 45, x: 330,  y: 470 },
     { k: 'flag',      zh: '旗子',   en: 'flag',     lib: 20, price: 55, x: 870,  y: 430 },
-    { k: 'fountain',  zh: '噴水池', en: 'fountain', lib: 23, price: 80, x: 175,  y: 605 },
+    { k: 'fountain',  zh: '噴水池', en: 'fountain', lib: 23, price: 80, x: 190,  y: 582 },
   ];
 
   // 指路（§4.17）：市集的第三種訂單 Where is the zoo?，十字路口四個方向各有一個地點
@@ -2089,9 +2089,9 @@
       this.critT = 4; this.critter = null;
     }
 
-    // 找一塊符合條件的成熟作物
-    critterSpot(plants) {
-      const i = this.s.plots.findIndex((p) => plants.includes(p.plant) && p.progress >= 1);
+    // 找一塊長到一定程度的作物（開花、快成熟時；只看「成熟」的話，作物一熟就被收成，小生物幾乎不會出現）
+    critterSpot(plants, min) {
+      const i = this.s.plots.findIndex((p) => plants.includes(p.plant) && p.progress >= (min || 0.6));
       return i < 0 ? null : { x: this.plotObjs[i].x + 30, y: this.plotObjs[i].y - 90 };
     }
 
@@ -2106,9 +2106,9 @@
       if (this.critT > 0) return;
       this.critT = 6;
       const opts = [];
-      if (s.weather === 'sunny') { const p = this.critterSpot(['rose']); if (p) opts.push(['butterfly', p]); }
-      if (s.weather !== 'rainy') { const p = this.critterSpot(['corn', 'grape']); if (p) opts.push(['bee', p]); }
-      if (s.weather === 'cloudy') { const p = this.critterSpot(['carrot']); if (p) opts.push(['ant', { x: p.x - 30, y: p.y + 60 }]); }
+      if (s.weather === 'sunny') { const p = this.critterSpot(['rose'], 0.8); if (p) opts.push(['butterfly', p]); }
+      if (s.weather !== 'rainy') { const p = this.critterSpot(['corn', 'grape'], 0.6); if (p) opts.push(['bee', p]); }
+      if (s.weather === 'cloudy') { const p = this.critterSpot(['carrot'], 0.6); if (p) opts.push(['ant', { x: p.x - 30, y: p.y + 60 }]); }
       if (s.weather === 'sunny' && s.prevWeather === 'rainy' && s.t < 40) opts.push(['rainbow', { x: 820, y: 230 }]);
       if (!opts.length) return;
       // 還沒發現的優先出現
@@ -5102,7 +5102,7 @@
       this.pkSay = txt(this, 640, 190, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
       this.pkZh = txt(this, 640, 228, '', 20, '#6b7c8c').setOrigin(0.5);
       this.pkMsg = txt(this, 640, 585, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.pkProg = txt(this, 1000, 140, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.pkProg = txt(this, 960, 140, '', 20, '#6b7c8c').setOrigin(0.5);
       c.add([this.pkTitle, this.pkSay, this.pkZh, this.pkMsg, this.pkProg]);
       this.pkCards = [0, 1, 2, 3].map((i) => {
         const card = this.add.container(640 + (i - 1.5) * 190, 400);
@@ -5993,7 +5993,8 @@
       this.dayBar.fillStyle(0xffc107, 1); this.dayBar.fillRoundedRect(490, 62, Math.max(16, 300 * frac), 16, 8);
       this.dayIcon.setX(490 + 300 * frac);
       const fest = festivalOf(s.day);
-      this.dayText.setText('Day ' + s.day + '  ' + weekday(s.day) + (fest ? '  ' + fest.k.charAt(0).toUpperCase() + fest.k.slice(1) : (this.isDrillDay() ? '  Drill Day' : (s.day % 7 === 6 && s.town ? '  Family Day' : ''))));
+      const dayLabel = 'Day ' + s.day + '  ' + weekday(s.day) + (fest ? '  ' + fest.k.charAt(0).toUpperCase() + fest.k.slice(1) : (this.isDrillDay() ? '  Drill Day' : (s.day % 7 === 6 && s.town ? '  Family Day' : '')));
+      if (this.dayText.text !== dayLabel) { this.dayText.setText(dayLabel); this.dayText.setFontSize(dayLabel.length > 22 ? 19 : 24); }
 
       // 雲飄動
       this.clouds.forEach((c) => { c.g.x += c.v * dt * (s.weather === 'windy' ? 6 : 1); if (c.g.x > W + 200) c.g.x = -300; });

@@ -109,7 +109,7 @@
   function repair(sc, s) {
     if (s.crack && s.day >= s.crack.ready) { sc.openFix(s.crack.k); return; }
     const k = Object.keys(FIXCOST).find((x) => !s.fixed[x] && (x === 'well' || s[FIXZONE[x]]) && s.stardust >= FIXCOST[x] + 10);
-    if (k) { sc.openFix(k); A.log.push('day ' + s.day + ' 修 ' + k); }
+    if (k) { sc.openFix(k); if (sc.modal === 'fix') A.log.push('day ' + s.day + ' 修 ' + k); }
   }
 
   // 部位願望：哪種作物是哪個部位
@@ -121,8 +121,9 @@
   function decor(sc, s) {
     const d = DECOR.find(([k, lib, price]) => !s.decor[k] && sc.libCount() >= lib && s.stardust >= price + 30);
     if (!d) return;
-    sc.openDecor(); sc.buyDecor(d[0]); sc.buyDecor(d[0]); sc.closeModal();
-    A.log.push('day ' + s.day + ' 買裝飾 ' + d[0]);
+    sc.openDecor(); if (sc.modal !== 'decor') return;
+    sc.buyDecor(d[0]); sc.buyDecor(d[0]); sc.closeModal();
+    if (s.decor[d[0]]) A.log.push('day ' + s.day + ' 買裝飾 ' + d[0]);
   }
 
   function wishes(sc, s) {
@@ -196,9 +197,10 @@
       if (sc.critter) sc.tapCritter();
       farm(sc, s);
       wishes(sc, s);
+      // 會打開視窗的動作一次只做一件（不然後面的動作會把前面打開的視窗關掉）
       buySeeds(sc, s);
-      repair(sc, s);
-      decor(sc, s);
+      if (!sc.modal) repair(sc, s);
+      if (!sc.modal) decor(sc, s);
       forest(sc, s);
       if (A.todo.length && s.t > 5) A.todo.shift()();
     } catch (e) { A.errors.push('day ' + s.day + ' ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
