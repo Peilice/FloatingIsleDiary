@@ -9,7 +9,8 @@
   // 進入各階段的門檻（§1.2）：階段 1 要 ok≥2 且 days≥2，階段 2 要 ok≥4 且 days≥3
   const STAGE_UP = [null, { pts: 2, days: 2 }, { pts: 4, days: 3 }];
   const NEW_PER_DAY = 2;
-  // 升階另外要求最近 RECENT 題的正確率至少 ACC（M2 忽略測試發現：只看累計 ok，長期亂猜也會升階）
+  // 升階另外要求最近 RECENT 題的正確率至少 ACC（M2 忽略測試發現：只看累計 ok，長期亂猜也會升階），
+  // 而且整體答對不少於答錯（最終測試發現：作答上百次的字，亂猜也會碰上「最近 5 題對 3 題」的運氣）
   const RECENT = 5, ACC = 0.6;
   // 新字的複習：引入後還要再出 REVIEWS 次，兩次之間至少隔 GAP 次別的出題（以出題次數計，不以遊戲日計）
   const REVIEWS = 3, GAP = 2;
@@ -58,7 +59,7 @@
       if (o.lastOk !== q.day) { o.days += 1; o.lastOk = q.day; }
       o.streak = 0;
       remember(o, 1);
-      while (o.stage < 2 && o.pts >= STAGE_UP[o.stage + 1].pts && o.days >= STAGE_UP[o.stage + 1].days && accuracy(o) >= ACC) o.stage += 1;
+      while (o.stage < 2 && o.pts >= STAGE_UP[o.stage + 1].pts && o.days >= STAGE_UP[o.stage + 1].days && accuracy(o) >= ACC && o.ok >= o.miss) o.stage += 1;
       return 'ok';
     }
     o.miss += 1;

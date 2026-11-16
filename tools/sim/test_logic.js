@@ -32,7 +32,20 @@ const L = require('../../game/logic.js');
   assert.ok(w.g.ok >= 4 && w.g.days >= 3);
   assert.strictEqual(L.stage(w, 'g'), 0, '正確率 33% 不升階');
   q(31, true); q(31, true); q(32, true);
-  assert.strictEqual(L.stage(w, 'g'), 1, '最近 5 題 3 對 2 錯（60%）後升階');
+  assert.strictEqual(L.stage(w, 'g'), 0, '最近 5 題剛好 60% 也不夠：整體答對比答錯少（亂猜的運氣）');
+  // 真的學會之後：一直答對，整體答對追上答錯就升階
+  let d = 33; while (L.stage(w, 'g') === 0 && d < 200) q(d++, true);
+  assert.ok(w.g.ok >= w.g.miss, '整體答對追上答錯才升階');
+  assert.strictEqual(L.stage(w, 'g'), 2, '追上後同時滿足階段 1、2 的門檻');
+}
+// 作答很多次的亂猜（33%）：100 次模擬都不會升階
+{
+  let rng = 1; const R = () => ((rng = (rng * 1103515245 + 12345) % 2147483648) / 2147483648);
+  for (let run = 0; run < 100; run++) {
+    const w = {};
+    for (let i = 0; i < 300; i++) L.answer(w, 'x', { day: 1 + Math.floor(i / 3), options: 3, firstTry: R() < 1 / 3, peeked: false });
+    assert.strictEqual(L.stage(w, 'x'), 0, '亂猜不會升階');
+  }
 }
 // 排程器：不連續同字、新字當天上限、到期字優先
 {

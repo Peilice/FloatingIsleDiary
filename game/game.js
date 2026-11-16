@@ -1254,7 +1254,8 @@
       this.dayBar = this.add.graphics().setDepth(40);
       this.dayText = txt(this, 640, 20, '', 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5, 0).setDepth(41);
       this.dayIcon = makeIcon(this, 'sun', 640, 70, 0.8).setDepth(42);
-      this.dayWeatherIcon = makeIcon(this, 'sunny', 780, 36, 0.7).setDepth(42);
+      // 天氣圖示放在日期列右邊；演練日的日期文字比較長（Day 28  Sunday  Drill Day），要留空間
+      this.dayWeatherIcon = makeIcon(this, 'sunny', 835, 36, 0.7).setDepth(42);
     }
 
     setMuted(on) {
@@ -2428,6 +2429,17 @@
       this.ivBox = c;
     }
 
+    // 過 delay 毫秒後執行 fn；玩家正開著視窗就每秒再試一次，直到當天結束（避免演練、邀請整天被跳過）
+    whenFree(delay, fn) {
+      const day = this.s.day;
+      const go = () => {
+        if (this.s.day !== day) return;
+        if (this.paused()) { this.time.delayedCall(BOT ? 20 : 1000, go); return; }
+        fn();
+      };
+      this.time.delayedCall(delay, go);
+    }
+
     // 每天早上（天氣播報後）：今天有派對就舉辦；沒有約的話，隔幾天會有居民來邀請
     morningEvents() {
       const s = this.s;
@@ -2448,10 +2460,10 @@
       }
       // 演練日：早上播報後開始演練（同一天不再發派對邀請）
       const drill = this.isDrillDay() && s.drillDay !== s.day;
-      if (drill) this.time.delayedCall(BOT ? 20 : 3800, () => { if (!this.paused() && s.drillDay !== s.day) this.openDrill(); });
+      if (drill) this.whenFree(BOT ? 20 : 3800, () => { if (s.drillDay !== s.day) this.openDrill(); });
       // 辦派對那天不發新邀請，避免兩件事擠在同一個早上
       if (s.town && !s.party && !partyToday && !drill && s.day - (s.lastInvite || 0) >= 3) {
-        this.time.delayedCall(BOT ? 20 : 4200, () => { if (!this.paused() && !s.party) this.openInvite(); });
+        this.whenFree(BOT ? 20 : 4200, () => { if (!s.party) this.openInvite(); });
       }
     }
 
@@ -2663,8 +2675,15 @@
         q.water = 'hot'; // 補救：倒熱水進去
       }
       this.renderTea();
-      if (q.water === 'hot' && q.sugar > 0) {
-        this.tweens.addCounter({ from: q.sugar, to: 0, duration: BOT ? 10 : 1200, onUpdate: (tw) => { q.sugar = tw.getValue(); this.renderTea(); }, onComplete: () => { q.sugar = 0; this.renderTea(); } });
+      // 熱水裡的糖約 1.2 秒溶完：用遊戲時鐘（time event）而不是動畫計時，狀態才不會受畫面更新速度影響
+      if (q.water === 'hot' && q.sugar > 0 && !q.melting) {
+        q.melting = true;
+        const step = q.sugar / 12;
+        this.time.addEvent({ delay: BOT ? 1 : 100, repeat: 11, callback: () => {
+          q.sugar = Math.max(0, q.sugar - step);
+          if (q.sugar < 0.001) q.sugar = 0;
+          if (this.tq === q) this.renderTea();
+        } });
       }
     }
 
@@ -3848,7 +3867,9 @@
         return;
       }
       this.renderDrill();
-      this.time.delayedCall(BOT ? 10 : 500, () => speak(DRILL[q.step].say));
+      // 先把要唸的句子存起來：0.5 秒內玩家可能又答了下一題
+      const say = DRILL[q.step].say;
+      this.time.delayedCall(BOT ? 10 : 500, () => { if (this.dr === q && !q.done) speak(say); });
     }
 
     // ---------- 回收站（§4.18）：A 垃圾分類、B 找出池塘汙染的來源 ----------
