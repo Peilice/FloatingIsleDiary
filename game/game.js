@@ -75,10 +75,11 @@
   const BEACH_HARVEST = 5, BEACH_LIB = 5;
   const STATION_PAID = 2;   // 每個實驗站每天前幾回合給星砂
   const BEACH = [
-    { k: 'tea',    x: 250,  en: 'Tea',    zh: '甜茶',     icon: 'tea',    color: 0xef6c00 },
-    { k: 'acid',   x: 510,  en: 'Juice',  zh: '紫色花汁', icon: 'flask',  color: 0x8e24aa },
-    { k: 'magnet', x: 770,  en: 'Magnet', zh: '磁鐵',     icon: 'magnet', color: 0xc62828 },
-    { k: 'dig',    x: 1030, en: 'Dig',    zh: '挖挖看',   icon: 'shovel', color: 0x6d4c2f },
+    { k: 'tea',     x: 220,  en: 'Tea',     zh: '甜茶',     icon: 'tea',     color: 0xef6c00 },
+    { k: 'acid',    x: 430,  en: 'Juice',   zh: '紫色花汁', icon: 'flask',   color: 0x8e24aa },
+    { k: 'magnet',  x: 640,  en: 'Magnet',  zh: '磁鐵',     icon: 'magnet',  color: 0xc62828 },
+    { k: 'dig',     x: 850,  en: 'Dig',     zh: '挖挖看',   icon: 'shovel',  color: 0x6d4c2f },
+    { k: 'recycle', x: 1060, en: 'Recycle', zh: '回收',     icon: 'recycle', color: 0x2e7d32 },
   ];
   // 紫色花汁（紫甘藍汁之類的指示劑）：酸性變粉紅、中性維持紫色、鹼性變綠（§4.8）
   const TASTES = ['sour', 'sweet', 'bitter'];
@@ -125,6 +126,40 @@
   const INSTR = ['bell', 'drum', 'guitar', 'piano'];
   const INSTR_SOUND = { bell: 'Ding!', drum: 'Boom!', guitar: 'Strum!', piano: 'Plink!' };
   const FOG_DIRS = ['left', 'front', 'right'];
+
+  // 防災（M5，§4.16）：每第 7 天是演練日。防災包 8 選 5（順序打散，避免干擾項固定在最後）
+  const BAG_ITEMS = [
+    { k: 'water',      en: 'water',         zh: '水',     good: true },
+    { k: 'toy',        en: 'toy',           zh: '玩具',   good: false },
+    { k: 'flashlight', en: 'flashlight',    zh: '手電筒', good: true },
+    { k: 'food',       en: 'food',          zh: '食物',   good: true },
+    { k: 'candy',      en: 'candy',         zh: '糖果',   good: false },
+    { k: 'radio',      en: 'radio',         zh: '收音機', good: true },
+    { k: 'firstaid',   en: 'first aid kit', zh: '急救包', good: true },
+    { k: 'blanket',    en: 'blanket',       zh: '毯子',   good: true },
+  ];
+  // 演練口令：drop、cover 在單字表裡記 ok；hold 不在，只顯示
+  const DRILL = [
+    { k: 'drop',  word: 'drop',  say: 'Drop!',    zh: '趴下！' },
+    { k: 'cover', word: 'cover', say: 'Cover!',   zh: '掩護！躲到桌子下、護住頭' },
+    { k: 'hold',  word: null,    say: 'Hold on!', zh: '穩住！抓住桌腳' },
+  ];
+  // 環境（M5，§4.18）：分類桶與東西（依台灣的分類：面紙、口香糖是一般垃圾）
+  const BINS3 = ['paper', 'bottle', 'garbage'];
+  const BIN_COLOR = { paper: 0x1e88e5, bottle: 0x43a047, garbage: 0x757575 };
+  const BIN_ZH = { paper: '紙類', bottle: '瓶罐', garbage: '一般垃圾' };
+  const TRASH = [
+    { k: 'newspaper', zh: '報紙',       bin: 'paper' },
+    { k: 'paperbox',  zh: '紙盒',       bin: 'paper' },
+    { k: 'pbottle',   zh: '寶特瓶',     bin: 'bottle' },
+    { k: 'gbottle',   zh: '玻璃瓶',     bin: 'bottle' },
+    { k: 'tissue',    zh: '用過的面紙', bin: 'garbage' },
+    { k: 'gum',       zh: '口香糖',     bin: 'garbage' },
+  ];
+  const TRASH_HINT = { paper: '想想看它是用什麼做的？', bottle: '想想看它是用什麼做的？', garbage: '想想看它能不能回收再用？' };
+  // 池塘汙染：三個可能的汙染源，只有一個真的有髒水流進池塘
+  const POLLUTERS = [{ k: 'pipe', zh: '排水管' }, { k: 'trashpile', zh: '垃圾堆' }, { k: 'oilboat', zh: '小船' }];
+  const POLL_POS = [{ x: 360, y: 320 }, { x: 640, y: 290 }, { x: 920, y: 320 }];
 
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
@@ -176,6 +211,7 @@
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
       harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
+      bagReady: false, drillDay: 0,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -440,6 +476,11 @@
         [8, 16, 24].forEach((r) => { g.beginPath(); g.arc(-10, 0, r, -0.7, 0.7, false); g.strokePath(); });
         g.fillStyle(0x546e7a, 1); g.fillCircle(-14, 0, 5);
         break;
+      case 'recycle':
+        g.lineStyle(5, 0x2e7d32, 1);
+        for (let k = 0; k < 3; k++) { const a = -Math.PI / 2 + k * 2 * Math.PI / 3, b = a + 2 * Math.PI / 3 - 0.5; g.beginPath(); g.arc(0, 0, 18, a + 0.25, b, false); g.strokePath();
+          g.fillStyle(0x2e7d32, 1); g.fillTriangle(Math.cos(b) * 18 - 6, Math.sin(b) * 18 - 6, Math.cos(b) * 18 + 6, Math.sin(b) * 18 + 6, Math.cos(b + 0.4) * 18, Math.sin(b + 0.4) * 18); }
+        break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
       case 'banana': drawFruit(g, 'banana', 'yellow'); break;
@@ -516,6 +557,65 @@
     else if (k === 'drum') { g.fillStyle(0xe53935, 1); g.fillRect(-24, -10, 48, 30); g.fillStyle(0xeceff1, 1); g.fillEllipse(0, -10, 48, 16); g.lineStyle(2, 0xffffff, 1); g.lineBetween(-24, -4, 24, 20); g.lineBetween(24, -4, -24, 20); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(14, -26, 4, -14); }
     else if (k === 'guitar') { g.fillStyle(0xa1887f, 1); g.fillCircle(-4, 10, 16); g.fillCircle(6, -4, 12); g.fillStyle(0x5d4037, 1); g.fillCircle(-2, 6, 5); g.fillRect(8, -34, 6, 30); g.lineStyle(1, 0xffffff, 1); g.lineBetween(11, -32, -4, 18); }
     else { g.fillStyle(0x37474f, 1); g.fillRoundedRect(-28, -16, 56, 34, 4); g.fillStyle(0xffffff, 1); for (let i = 0; i < 6; i++) g.fillRect(-25 + i * 9, -2, 8, 18); g.fillStyle(0x212121, 1); [0, 1, 3, 4].forEach((i) => g.fillRect(-19 + i * 9, -2, 5, 10)); }
+  }
+
+  // 防災包的東西
+  function drawBagItem(g, k) {
+    g.clear();
+    switch (k) {
+      case 'water': g.fillStyle(0x81d4fa, 1); g.fillRoundedRect(-10, -16, 20, 34, 6); g.fillStyle(0x1e88e5, 1); g.fillRect(-6, -22, 12, 7); break;
+      case 'flashlight': g.fillStyle(0x546e7a, 1); g.fillRect(-18, -6, 26, 12); g.fillTriangle(8, -10, 8, 10, 18, 0); g.fillStyle(0xfff59d, 0.8); g.fillTriangle(18, 0, 30, -12, 30, 12); break;
+      case 'food': g.fillStyle(0xbdbdbd, 1); g.fillRoundedRect(-14, -14, 28, 30, 4); g.fillStyle(0xff7043, 1); g.fillRect(-14, -4, 28, 12); break;
+      case 'radio': g.fillStyle(0x6d4c41, 1); g.fillRoundedRect(-20, -10, 40, 26, 5); g.fillStyle(0xeceff1, 1); g.fillCircle(-8, 3, 7); g.fillRect(4, -4, 12, 4); g.lineStyle(2, 0x424242, 1); g.lineBetween(10, -10, 20, -24); break;
+      case 'firstaid': g.fillStyle(0xffffff, 1); g.fillRoundedRect(-18, -14, 36, 28, 5); g.lineStyle(2, 0xbdbdbd, 1); g.strokeRoundedRect(-18, -14, 36, 28, 5); g.fillStyle(0xe53935, 1); g.fillRect(-3, -10, 6, 20); g.fillRect(-10, -3, 20, 6); break;
+      case 'blanket': g.fillStyle(0x7986cb, 1); g.fillRoundedRect(-20, -12, 40, 26, 6); g.fillStyle(0x9fa8da, 1); g.fillRect(-20, -2, 40, 5); break;
+      case 'toy': g.fillStyle(0xa1887f, 1); g.fillCircle(-9, -12, 6); g.fillCircle(9, -12, 6); g.fillCircle(0, -4, 12); g.fillEllipse(0, 14, 22, 18); g.fillStyle(0x333333, 1); g.fillCircle(-4, -6, 1.8); g.fillCircle(4, -6, 1.8); break;
+      default: g.fillStyle(0xf06292, 1); g.fillEllipse(0, 0, 22, 14); g.fillTriangle(-11, 0, -20, -8, -20, 8); g.fillTriangle(11, 0, 20, -8, 20, 8);
+    }
+  }
+  // 演練動作：只有圖、沒有字
+  function drawDrill(g, k) {
+    g.clear();
+    const desk = () => { g.fillStyle(0x8d6e63, 1); g.fillRect(-34, -16, 68, 8); g.fillRect(-30, -8, 6, 34); g.fillRect(24, -8, 6, 34); };
+    g.fillStyle(0xbcaaa4, 1); g.fillRect(-40, 26, 80, 4);
+    if (k === 'drop') {
+      // 趴下：人跪低、手撐地
+      g.fillStyle(0xf2994a, 1); g.fillCircle(-14, 2, 8);
+      g.lineStyle(5, 0x5c6bc0, 1); g.lineBetween(-8, 8, 14, 12); g.lineBetween(14, 12, 14, 26); g.lineBetween(-8, 8, -12, 26);
+      g.fillStyle(0xffffff, 0.9); g.fillTriangle(-30, -30, -20, -30, -25, -18);
+    } else if (k === 'cover') {
+      // 掩護：在桌子下，雙手護頭
+      desk();
+      g.fillStyle(0xf2994a, 1); g.fillCircle(-4, 4, 8);
+      g.lineStyle(4, 0xf2994a, 1); g.lineBetween(-12, 2, -4, -4); g.lineBetween(4, 2, -4, -4);
+      g.lineStyle(5, 0x5c6bc0, 1); g.lineBetween(-2, 12, 10, 24); g.lineBetween(-6, 12, -12, 24);
+    } else {
+      // 穩住：在桌子下，一手抓住桌腳
+      desk();
+      g.fillStyle(0xf2994a, 1); g.fillCircle(-4, 8, 8);
+      g.lineStyle(4, 0xf2994a, 1); g.lineBetween(2, 10, 24, 6);
+      g.fillStyle(0xf2994a, 1); g.fillCircle(25, 6, 4);
+      g.lineStyle(5, 0x5c6bc0, 1); g.lineBetween(-4, 16, 6, 26); g.lineBetween(-8, 16, -16, 26);
+    }
+  }
+  // 回收的東西
+  function drawTrash(g, k) {
+    g.clear();
+    switch (k) {
+      case 'newspaper': g.fillStyle(0xeceff1, 1); g.fillRect(-20, -16, 40, 32); g.lineStyle(2, 0x90a4ae, 1); [-8, -2, 4, 10].forEach((y) => g.lineBetween(-16, y, 16, y)); g.fillStyle(0x90a4ae, 1); g.fillRect(-16, -13, 14, 3); break;
+      case 'paperbox': g.fillStyle(0xd7a35a, 1); g.fillRect(-18, -12, 36, 28); g.fillStyle(0xbf8a40, 1); g.fillTriangle(-18, -12, 18, -12, 0, -22); break;
+      case 'pbottle': g.fillStyle(0xb3e5fc, 0.9); g.fillRoundedRect(-9, -14, 18, 32, 6); g.fillRect(-5, -20, 10, 7); g.fillStyle(0x1e88e5, 1); g.fillRect(-5, -24, 10, 4); g.fillRect(-9, 0, 18, 6); break;
+      case 'gbottle': g.fillStyle(0x43a047, 0.85); g.fillRoundedRect(-9, -10, 18, 28, 5); g.fillRect(-4, -22, 8, 13); g.fillStyle(0xffffff, 0.4); g.fillRect(-6, -6, 3, 18); break;
+      case 'tissue': g.fillStyle(0xffffff, 1); g.fillCircle(-6, 0, 10); g.fillCircle(6, 2, 9); g.fillCircle(0, -6, 8); g.lineStyle(1.5, 0xbdbdbd, 1); g.strokeCircle(-6, 0, 10); break;
+      default: g.fillStyle(0xf48fb1, 1); g.fillEllipse(0, 0, 26, 18); g.fillStyle(0xf8bbd0, 1); g.fillEllipse(-4, -3, 10, 6);
+    }
+  }
+  // 池塘汙染的嫌疑者
+  function drawPolluter(g, k) {
+    g.clear();
+    if (k === 'pipe') { g.fillStyle(0x78909c, 1); g.fillRect(-26, -10, 40, 16); g.fillRect(12, -14, 10, 24); g.fillStyle(0x546e7a, 1); g.fillRect(-26, -10, 40, 4); }
+    else if (k === 'trashpile') { g.fillStyle(0x616161, 1); g.fillCircle(-10, 6, 12); g.fillCircle(8, 4, 13); g.fillCircle(0, -6, 10); g.fillStyle(0xffca28, 1); g.fillRect(-4, -2, 8, 8); }
+    else { g.fillStyle(0x8d6e63, 1); g.fillTriangle(-26, -2, 26, -2, 18, 12); g.fillTriangle(-26, -2, -18, 12, 18, 12); g.fillStyle(0xeceff1, 1); g.fillTriangle(0, -2, 0, -28, 16, -6); }
   }
 
   // 磁鐵站的東西
@@ -666,7 +766,7 @@
       this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, bag: { q: 0, first: 0 }, drill: { q: 0, first: 0 }, recycle: { q: 0, first: 0 }, pond: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -708,6 +808,8 @@
       this.buildCircuit();
       this.buildMusic();
       this.buildFog();
+      this.buildDrill();
+      this.buildRecycle();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1229,7 +1331,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -2169,8 +2271,11 @@
         }
         s.party = null;
       }
+      // 演練日：早上播報後開始演練（同一天不再發派對邀請）
+      const drill = this.isDrillDay() && s.drillDay !== s.day;
+      if (drill) this.time.delayedCall(BOT ? 20 : 3800, () => { if (!this.paused() && s.drillDay !== s.day) this.openDrill(); });
       // 辦派對那天不發新邀請，避免兩件事擠在同一個早上
-      if (s.town && !s.party && !partyToday && s.day - (s.lastInvite || 0) >= 3) {
+      if (s.town && !s.party && !partyToday && !drill && s.day - (s.lastInvite || 0) >= 3) {
         this.time.delayedCall(BOT ? 20 : 4200, () => { if (!this.paused() && !s.party) this.openInvite(); });
       }
     }
@@ -2266,6 +2371,7 @@
       if (k === 'tea') this.openTea();
       else if (k === 'acid') this.openAcid();
       else if (k === 'magnet') this.openMagnet();
+      else if (k === 'recycle') this.openRecycle();
       else this.openDig();
     }
 
@@ -3417,6 +3523,310 @@
       this.time.delayedCall(BOT ? 10 : 900, () => this.fogCall());
     }
 
+    // ---------- 演練日（§4.16）：每第 7 天；A 準備防災包、B 演練 Drop! Cover! Hold on! ----------
+    isDrillDay(d) { return (d || this.s.day) % 7 === 0; }
+
+    buildDrill() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfff8e1);
+      c.add(txt(this, 640, 98, 'Drill Day 防災演練日', 28, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.drSay = txt(this, 640, 150, '', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.drZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.drMsg = txt(this, 640, 612, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.drSay, this.drZh, this.drMsg]);
+      // A：防災包，8 樣東西 2 排
+      this.bagCards = BAG_ITEMS.map((it, i) => {
+        const card = this.add.container(355 + (i % 4) * 190, 300 + Math.floor(i / 4) * 150);
+        const bg = this.add.graphics();
+        const icon = this.add.graphics({ y: -14 }).setScale(1.4); drawBagItem(icon, it.k);
+        const name = txt(this, 0, 44, it.en, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 66, it.zh, 16, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, icon, name, zh]);
+        card.setSize(170, 136).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.toggleBag(i));
+        c.add(card);
+        return { card, bg, x: card.x };
+      });
+      this.bagPack = makeButton(this, 640, 560, 220, 60, 0xe65100, 'Pack 裝好了', 24, () => this.packBag());
+      c.add(this.bagPack);
+      // B：演練，3 張只有圖的動作卡
+      this.drCards = DRILL.map((d, i) => {
+        const card = this.add.container(640 + (i - 1) * 230, 390);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-100, -110, 200, 220, 22);
+        bg.lineStyle(4, 0xffcc80, 1); bg.strokeRoundedRect(-100, -110, 200, 220, 22);
+        const pic = this.add.graphics().setScale(1.5);
+        card.add([bg, pic]);
+        card.setSize(200, 220).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickDrill(i));
+        c.add(card);
+        return { card, pic, x: card.x };
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.drBox = c;
+    }
+
+    openDrill() {
+      const s = this.s;
+      this.modal = 'drill';
+      this.dr = { part: s.bagReady ? 'drill' : 'bag', sel: {}, bagTries: 0, step: 0, tries: 0, recorded: false, reveal: false, wrong: {}, order: L.shuffle([0, 1, 2]), done: false };
+      ['earthquake', 'safe', 'flashlight', 'bag'].forEach((w) => L.seen(s.words, w, s.day));
+      this.drBox.setVisible(true);
+      // 輕微搖晃，提示「演練開始」（不放真實災難畫面）
+      if (!BOT) this.cameras.main.shake(400, 0.004);
+      this.renderDrill();
+      this.time.delayedCall(300, () => speak(this.dr.part === 'bag' ? 'It is Drill Day. Pack your safety bag.' : 'It is Drill Day. ' + DRILL[0].say));
+    }
+
+    renderDrill() {
+      const q = this.dr, bag = q.part === 'bag', zh = this.subs();
+      this.bagCards.forEach((b, i) => {
+        b.card.setVisible(bag);
+        b.bg.clear();
+        const on = !!q.sel[i];
+        b.bg.fillStyle(on ? 0xfff3e0 : 0xffffff, 1); b.bg.fillRoundedRect(-85, -68, 170, 136, 18);
+        b.bg.lineStyle(on ? 6 : 3, on ? 0xff9800 : 0xd7ccc8, 1); b.bg.strokeRoundedRect(-85, -68, 170, 136, 18);
+      });
+      this.bagPack.setVisible(bag);
+      // 卡片位置每次打亂，不能靠「從左點到右」
+      this.drCards.forEach((c, i) => { c.card.setVisible(!bag && !q.done); c.card.setAlpha(q.wrong[i] ? 0.35 : 1); drawDrill(c.pic, DRILL[q.order[i]].k); });
+      if (bag) {
+        const n = Object.values(q.sel).filter(Boolean).length;
+        this.drSay.setText('Pack your safety bag.');
+        this.drZh.setText(zh ? '準備防災包：選 5 樣地震時用得到的東西' : '');
+        this.bagPack.setAlpha(n === 5 ? 1 : 0.45);
+        if (!this.drMsg.text || this.drMsg.text.indexOf('5') >= 0) this.drMsg.setText(n + ' / 5');
+      } else if (q.done) {
+        this.drSay.setText('You are safe!');
+        this.drZh.setText(zh ? '你很安全！演練完成' : '');
+      } else {
+        const d = DRILL[q.step];
+        const st = d.word ? L.stage(this.s.words, d.word) : 0;
+        this.drSay.setText(d.say);
+        this.drZh.setText(zh && (st === 0 || q.reveal) ? d.zh : '');
+        this.drMsg.setText((q.step + 1) + ' / 3');
+      }
+    }
+
+    toggleBag(i) {
+      const q = this.dr;
+      if (this.modal !== 'drill' || q.part !== 'bag') return;
+      const n = Object.values(q.sel).filter(Boolean).length;
+      if (!q.sel[i] && n >= 5) { this.tweens.add({ targets: this.bagPack, scale: 1.08, yoyo: true, duration: 120 }); return; }
+      q.sel[i] = !q.sel[i];
+      speak(BAG_ITEMS[i].en);
+      this.drMsg.setText('');
+      this.renderDrill();
+    }
+
+    packBag() {
+      const s = this.s, q = this.dr;
+      if (this.modal !== 'drill' || q.part !== 'bag') return;
+      const picked = BAG_ITEMS.filter((it, i) => q.sel[i]);
+      if (picked.length !== 5) return;
+      const bad = picked.filter((it) => !it.good);
+      if (q.bagTries === 0) { this.stats.bag.q += 1; if (!bad.length) this.stats.bag.first += 1; }
+      q.bagTries += 1;
+      if (bad.length) {
+        // 選錯不扣東西：說明為什麼用不到，換掉再裝
+        BAG_ITEMS.forEach((it, i) => { if (q.sel[i] && !it.good) this.tweens.add({ targets: this.bagCards[i].card, x: this.bagCards[i].x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => this.bagCards[i].card.setX(this.bagCards[i].x) }); });
+        this.drMsg.setText(bad.map((it) => it.zh).join('、') + '在地震時用不到，換成別的吧');
+        speak('Try again.');
+        return;
+      }
+      s.bagReady = true;
+      speak('Your bag is ready!');
+      q.part = 'drill';
+      this.drMsg.setText('');
+      this.renderDrill();
+      this.time.delayedCall(BOT ? 10 : 900, () => speak(DRILL[0].say));
+    }
+
+    pickDrill(i) {
+      const s = this.s, q = this.dr, d = DRILL[q.step], c = this.drCards[i];
+      if (this.modal !== 'drill' || q.part !== 'drill' || q.done || q.wrong[i]) return;
+      const right = q.order[i] === q.step;
+      if (q.tries === 0) { this.stats.drill.q += 1; if (right) this.stats.drill.first += 1; }
+      if (!q.recorded && d.word) { L.answer(s.words, d.word, { day: s.day, options: DRILL.length, firstTry: right, peeked: false }); }
+      q.recorded = true;
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[i] = true;
+        this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+        speak('Try again. ' + d.say);
+        this.renderDrill();
+        return;
+      }
+      this.tweens.add({ targets: c.card, scale: 1.08, yoyo: true, duration: 150 });
+      q.step += 1; q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.order = L.shuffle([0, 1, 2]);
+      if (q.step >= DRILL.length) {
+        q.done = true;
+        s.drillDay = s.day;
+        speak('You are safe! Great job!');
+        this.renderDrill();
+        this.drMsg.setText(s.bagReady ? 'Your bag is ready, too! 防災包也準備好了' : '');
+        s.stardust += 5;
+        this.floatText(640, 330, 'Safe!  +5 ★', '#e65100', true);
+        this.refreshAll();
+        return;
+      }
+      this.renderDrill();
+      this.time.delayedCall(BOT ? 10 : 500, () => speak(DRILL[q.step].say));
+    }
+
+    // ---------- 回收站（§4.18）：A 垃圾分類、B 找出池塘汙染的來源 ----------
+    buildRecycle() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xf1f8e9);
+      c.add(txt(this, 640, 98, 'Recycle 回收與環境', 28, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.rcSay = txt(this, 640, 150, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.rcZh = txt(this, 640, 188, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.rcMsg = txt(this, 640, 612, '', 22, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.rcProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      c.add([this.rcSay, this.rcZh, this.rcMsg, this.rcProg]);
+      // A：分類
+      this.rcItem = this.add.graphics({ x: 640, y: 290 }).setScale(1.8);
+      this.rcItemName = txt(this, 640, 350, '', 20, '#6b7c8c').setOrigin(0.5);
+      c.add([this.rcItem, this.rcItemName]);
+      this.rcBins = BINS3.map((w, i) => {
+        const b = this.add.container(640 + (i - 1) * 230, 490);
+        const bg = this.add.graphics();
+        bg.fillStyle(BIN_COLOR[w], 1); bg.fillRoundedRect(-90, -70, 180, 140, 18);
+        bg.fillStyle(0x000000, 0.15); bg.fillRect(-90, -70, 180, 22);
+        const en = txt(this, 0, 6, w, 30, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 42, '', 18, '#ffffff').setOrigin(0.5);
+        b.add([bg, en, zh]);
+        b.setSize(180, 140).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => this.sortTrash(i));
+        c.add(b);
+        return { b, zh, x: b.x, w };
+      });
+      // B：池塘與三個可能的汙染源
+      this.rcPond = this.add.graphics();
+      c.add(this.rcPond);
+      this.rcSus = POLLUTERS.map((p, i) => {
+        const z = this.add.container(POLL_POS[i].x, POLL_POS[i].y);
+        const g = this.add.graphics().setScale(1.4); drawPolluter(g, p.k);
+        const nm = txt(this, 0, 50, p.zh, 18, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
+        z.add([g, nm]);
+        z.setSize(140, 130).setInteractive({ useHandCursor: true });
+        z.on('pointerdown', () => this.pickPolluter(i));
+        c.add(z);
+        return { z, x: z.x };
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.rcBox = c;
+    }
+
+    openRecycle() {
+      this.modal = 'recycle';
+      // 分類回合和池塘回合輪流
+      const mode = this.rq && this.rq.mode === 'sort' && this.rq.done ? 'pond' : 'sort';
+      this.rq = { mode, round: 0, n: 5, done: false };
+      ['recycle', 'clean', 'dirty', 'garbage'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.rcBox.setVisible(true);
+      if (mode === 'sort') this.nextTrash(); else this.newPond();
+    }
+
+    nextTrash() {
+      const q = this.rq;
+      q.item = TRASH[Math.floor(Math.random() * TRASH.length)];
+      q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.itemDone = false;
+      this.renderRecycle();
+      this.time.delayedCall(200, () => speak('Where does it go?'));
+    }
+
+    newPond() {
+      const q = this.rq;
+      q.culprit = Math.floor(Math.random() * POLLUTERS.length);
+      q.order = L.shuffle([0, 1, 2]);
+      q.tries = 0; q.wrong = {}; q.clean = false;
+      this.renderRecycle();
+      this.time.delayedCall(200, () => speak('The pond is dirty. What makes it dirty?'));
+    }
+
+    renderRecycle() {
+      const q = this.rq, zh = this.subs(), sort = q.mode === 'sort';
+      this.rcItem.setVisible(sort); this.rcItemName.setVisible(sort);
+      this.rcBins.forEach((b) => b.b.setVisible(sort));
+      this.rcSus.forEach((x) => x.z.setVisible(!sort));
+      this.rcPond.clear();
+      this.rcProg.setText(sort ? Math.min(q.round + 1, q.n) + ' / ' + q.n : '');
+      if (sort) {
+        const st = L.stage(this.s.words, q.item.bin);
+        this.rcSay.setText('Where does it go?');
+        this.rcZh.setText(zh ? '它要丟到哪一桶？' : '');
+        drawTrash(this.rcItem, q.item.k);
+        this.rcItemName.setText(q.item.zh);
+        this.rcBins.forEach((b) => { b.zh.setText(zh && (st === 0 || q.reveal) ? BIN_ZH[b.w] : ''); b.b.setAlpha(q.wrong[b.w] ? 0.35 : 1); });
+        if (!q.itemDone) this.rcMsg.setText(q.reveal ? TRASH_HINT[q.item.bin] : '');
+        return;
+      }
+      // 池塘：汙染時是灰褐色；從真正的汙染源有一道髒水流向池塘
+      const p = this.rcPond;
+      p.fillStyle(q.clean ? 0x4fc3f7 : 0x8d8a6a, 1); p.fillEllipse(640, 470, 360, 130);
+      if (q.clean) { p.fillStyle(0xff8a3d, 1); [[590, 470], [690, 455]].forEach(([x, y]) => { p.fillEllipse(x, y, 34, 16); p.fillTriangle(x + 14, y, x + 26, y - 8, x + 26, y + 8); }); }
+      else {
+        const src = POLL_POS[q.order.indexOf(q.culprit)];
+        p.lineStyle(10, 0x6d6a4a, 0.8); p.lineBetween(src.x, src.y + 40, 640 + (src.x - 640) * 0.35, 430);
+      }
+      this.rcSus.forEach((x, i) => {
+        const k = q.order[i];
+        x.z.setPosition(POLL_POS[i].x, POLL_POS[i].y);
+        drawPolluter(x.z.list[0], POLLUTERS[k].k);
+        x.z.list[1].setText(POLLUTERS[k].zh);
+        x.z.setAlpha(q.wrong[i] ? 0.35 : (q.clean && k === q.culprit ? 0.2 : 1));
+      });
+      this.rcSay.setText(q.clean ? 'The pond is clean!' : 'The pond is dirty.');
+      this.rcZh.setText(zh ? (q.clean ? '池塘變乾淨了，魚回來了！' : '池塘變髒了，是哪一個造成的？找出來移走') : '');
+      if (!q.clean && !q.tries) this.rcMsg.setText('Look where the dirty water comes from. 看看髒水從哪裡流過來');
+    }
+
+    sortTrash(i) {
+      const s = this.s, q = this.rq, w = BINS3[i], b = this.rcBins[i];
+      if (this.modal !== 'recycle' || q.mode !== 'sort' || q.itemDone || q.wrong[w]) return;
+      const right = w === q.item.bin;
+      if (q.tries === 0) { this.stats.recycle.q += 1; if (right) this.stats.recycle.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.item.bin, { day: s.day, options: BINS3.length, firstTry: right, peeked: false }); q.recorded = true; }
+      speak(w);
+      if (!right) {
+        // 放錯：東西回到桌上（不扣東西），露出中文與提示
+        q.tries += 1; q.reveal = true; q.wrong[w] = true;
+        this.tweens.add({ targets: b.b, x: b.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => b.b.setX(b.x) });
+        this.renderRecycle();
+        return;
+      }
+      q.itemDone = true; q.round += 1;
+      this.tweens.add({ targets: b.b, scale: 1.08, yoyo: true, duration: 150 });
+      this.rcMsg.setText('Good! 丟對了');
+      const cur = q;
+      if (q.round >= q.n) {
+        q.done = true;
+        this.stationDone('recycle', 3, 'Clean island!');
+        this.time.delayedCall(BOT ? 30 : 1400, () => { if (this.modal === 'recycle' && this.rq === cur) this.openRecycle(); });
+      } else {
+        this.time.delayedCall(BOT ? 30 : 700, () => { if (this.modal === 'recycle' && this.rq === cur) this.nextTrash(); });
+      }
+    }
+
+    pickPolluter(i) {
+      const q = this.rq, x = this.rcSus[i];
+      if (this.modal !== 'recycle' || q.mode !== 'pond' || q.clean || q.wrong[i]) return;
+      const right = q.order[i] === q.culprit;
+      if (q.tries === 0) { this.stats.pond.q += 1; if (right) this.stats.pond.first += 1; }
+      if (!right) {
+        q.tries += 1; q.wrong[i] = true;
+        this.tweens.add({ targets: x.z, x: x.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => x.z.setX(x.x) });
+        this.rcMsg.setText('Not this one. Follow the dirty water. 不是它，跟著髒水找找看');
+        this.renderRecycle();
+        return;
+      }
+      q.clean = true; q.done = true;
+      speak('The pond is clean! The fish are back.');
+      this.renderRecycle();
+      this.rcMsg.setText('You moved it away. 移走之後，池塘乾淨了');
+      this.stationDone('recycle', 3, 'Clean pond!');
+      const cur = q;
+      this.time.delayedCall(BOT ? 30 : 1800, () => { if (this.modal === 'recycle' && this.rq === cur) this.openRecycle(); });
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -3790,6 +4200,18 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'drill') {
+        const q = this.dr;
+        if (q.done || Math.random() < 0.02) { this.closeModal(); return; }
+        if (q.part === 'bag') { if (Math.random() < 0.8) this.toggleBag(Math.floor(Math.random() * 8)); else this.packBag(); }
+        else this.pickDrill(Math.floor(Math.random() * 3));
+        return;
+      }
+      if (this.modal === 'recycle') {
+        if (Math.random() < 0.03) { this.closeModal(); return; }
+        if (this.rq.mode === 'sort') this.sortTrash(Math.floor(Math.random() * 3)); else this.pickPolluter(Math.floor(Math.random() * 3));
+        return;
+      }
       if (['circuit', 'music', 'fog'].includes(this.modal)) {
         if (Math.random() < 0.03) { this.closeModal(); return; }
         const r = Math.random();
@@ -3882,6 +4304,10 @@
         電路缺口第一次放導體: pct(this.stats.circuit),
         樂器第一次就修對: pct(this.stats.music),
         霧中每步第一次走對: pct(this.stats.fog),
+        防災包第一次全對: pct(this.stats.bag),
+        演練口令第一次就對: pct(this.stats.drill),
+        回收分類第一次就對: pct(this.stats.recycle),
+        汙染源第一次就對: pct(this.stats.pond),
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
@@ -3935,7 +4361,7 @@
       this.dayBar.fillStyle(0xffffff, 0.75); this.dayBar.fillRoundedRect(490, 62, 300, 16, 8);
       this.dayBar.fillStyle(0xffc107, 1); this.dayBar.fillRoundedRect(490, 62, Math.max(16, 300 * frac), 16, 8);
       this.dayIcon.setX(490 + 300 * frac);
-      this.dayText.setText('Day ' + s.day + '  ' + weekday(s.day));
+      this.dayText.setText('Day ' + s.day + '  ' + weekday(s.day) + (this.isDrillDay() ? '  Drill Day' : ''));
 
       // 雲飄動
       this.clouds.forEach((c) => { c.g.x += c.v * dt * (s.weather === 'windy' ? 6 : 1); if (c.g.x > W + 200) c.g.x = -300; });
