@@ -8,12 +8,16 @@
 (() => {
   const HOME = { frog: 'pond', duck: 'pond', fish: 'pond', bird: 'tree', monkey: 'tree', cow: 'grass', horse: 'grass' };
   const PRICE = [0, 0, 0, 0, 8, 10, 12];
+  const FIXMAT = { well: 'stone', bridge: 'wood', dock: 'wood', stairs: 'stone' };
+  const FIXCOST = { well: 30, bridge: 40, dock: 50, stairs: 60 };
+  const FIXZONE = { well: 'meadowOpen', bridge: 'forestOpen', dock: 'beachOpen', stairs: 'caveOpen' };
   const A = window.__agent = { log: [], milestones: {}, today: -1, todo: [], errors: [], modalFrames: 0, lastModal: null };
   const mark = (k, s) => { if (!A.milestones[k]) A.milestones[k] = s.day; };
 
   function solveModal(sc, s) {
     const m = sc.modal;
     if (m === 'map') { sc.pickIsle('meadow'); return; }   // 開始時的地圖：先去草地
+    if (m === 'fix') { const q = sc.fq2; if (q.done) return; sc.pickMaterial(['wood', 'stone', 'metal', 'glass'].indexOf(FIXMAT[q.k])); return; }
     if (m === 'weather') { if (!sc.wq.done) sc.pickWeather(sc.wq.order.indexOf(sc.wq.answer)); return; }
     if (m === 'diary') { if (s.diaryQ && !s.diaryQ.done) sc.pickDiary(s.diaryQ.options.indexOf(s.diaryQ.answer)); else sc.goodNight(); return; }
     if (m === 'drill') {
@@ -99,6 +103,13 @@
     A.log.push('day ' + s.day + ' 買 ' + next[0]);
   }
 
+  // 修設施：先修裂痕（免費），再依序修星砂夠的設施（留 10 顆備用）
+  function repair(sc, s) {
+    if (s.crack && s.day >= s.crack.ready) { sc.openFix(s.crack.k); return; }
+    const k = Object.keys(FIXCOST).find((x) => !s.fixed[x] && (x === 'well' || s[FIXZONE[x]]) && s.stardust >= FIXCOST[x] + 10);
+    if (k) { sc.openFix(k); A.log.push('day ' + s.day + ' 修 ' + k); }
+  }
+
   function wishes(sc, s) {
     ['rabbit', s.fwho].filter(Boolean).forEach((who) => {
       const want = s.wishes[who];
@@ -151,6 +162,7 @@
       if (sc.groupOpen('geo')) mark('地質洞窟', s);
       if (sc.groupOpen('eco')) mark('生態研究所', s);
       if (s.drillDay) mark('第一次演練', s);
+      if (Object.keys(s.fixed || {}).length >= 3) mark('修好 3 個設施', s);
       if (sc.modal) {
         // 卡在同一個視窗太久就記下來（可能是死局）
         A.modalFrames = sc.modal === A.lastModal ? A.modalFrames + 1 : 0;
@@ -165,6 +177,7 @@
       farm(sc, s);
       wishes(sc, s);
       buySeeds(sc, s);
+      repair(sc, s);
       forest(sc, s);
       if (A.todo.length && s.t > 5) A.todo.shift()();
     } catch (e) { A.errors.push('day ' + s.day + ' ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
@@ -183,7 +196,7 @@
     } catch (e) { A.errors.push('step ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
     g.renderer.render = rr;
     const s = __ci.state;
-    return { day: s.day, stardust: s.stardust, seeds: s.seeds.join(','), dustByDay: (A.dust || []).join(' '), buys: A.log.filter((l) => /買/.test(l)), lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
+    return { day: s.day, stardust: s.stardust, seeds: s.seeds.join(','), dustByDay: (A.dust || []).join(' '), buys: A.log.filter((l) => /買|修/.test(l)), crack: s.crack, lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
   };
 })();
 'agent ready';

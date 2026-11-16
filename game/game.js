@@ -117,7 +117,7 @@
 
   // 燈塔（M4）：在洞穴左邊。§5 原定「修好 3 個設施」，目前還沒有設施系統，先改成「完成洞穴實驗 3 回合」
   const LOFF = -3840;
-  const LIGHT_NEED = 3;
+  const LIGHT_NEED = 3;     // 修好幾個設施後開放燈塔（§5）
   const LIGHTHOUSE = [
     { k: 'circuit', x: 260, en: 'Circuit', zh: '電路',     icon: 'bulb',  color: 0xf57f17 },
     { k: 'music',   x: 520, en: 'Music',   zh: '修樂器',   icon: 'bell',  color: 0x8e24aa },
@@ -235,6 +235,16 @@
     { name: '英語：拼寫', codes: '英語 4-Ⅲ-3、Ac-Ⅲ-9', keys: ['spell'] },
   ];
 
+  // 設施（§3.4「星砂換設施」；§5 燈塔解鎖＝修好 3 個設施）。修理要選對材料（物質類單字），修好有小好處
+  const MATERIALS = ['wood', 'stone', 'metal', 'glass'];
+  const FAC = {
+    well:   { zone: 'meadow', x: 1150,        y: 560, w: 110, en: 'well',   zh: '水井', price: 30, mat: 'stone', perk: '澆一次水的量變多' },
+    bridge: { zone: 'forest', x: OFF + 640,   y: 405, w: 150, en: 'bridge', zh: '小橋', price: 40, mat: 'wood',  perk: '森林的訪客來得比較快' },
+    dock:   { zone: 'beach',  x: BOFF + 1200, y: 575, w: 100, en: 'dock',   zh: '碼頭', price: 50, mat: 'wood',  perk: '市集每天多 1 單給星砂' },
+    stairs: { zone: 'cave',   x: COFF + 1150, y: 545, w: 110, en: 'stairs', zh: '樓梯', price: 60, mat: 'stone', perk: '燈塔就在前面' },
+  };
+  const FAC_KEYS = Object.keys(FAC);
+
   // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
   const MAP = [
     { z: 'lighthouse', x: 170,  y: 430, en: 'Lighthouse', zh: '燈塔',     color: 0x9ccb86, icon: 'bulb' },
@@ -302,7 +312,7 @@
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
       harvested: 0, beachOpen: false, caveOpen: false, caveDone: 0, lightOpen: false,
-      bagReady: false, drillDay: 0, lightDone: 0,
+      bagReady: false, drillDay: 0, lightDone: 0, fixed: {}, crack: null,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -791,6 +801,42 @@
     else drawIcon(g, w);
   }
 
+  // 設施：fixed 修好、crack 有裂痕；壞掉的是灰色、缺了幾塊
+  function drawFacility(g, k, fixed, crack) {
+    g.clear();
+    const c1 = fixed ? null : 0x9e9e9e;
+    if (k === 'well') {
+      g.fillStyle(c1 || 0x90a4ae, 1); g.fillRoundedRect(-30, -10, 60, 34, 8);
+      g.fillStyle(0x4fc3f7, fixed ? 1 : 0.3); g.fillEllipse(0, -10, 50, 12);
+      if (fixed) { g.fillStyle(0x8d6e63, 1); g.fillRect(-28, -54, 6, 44); g.fillRect(22, -54, 6, 44); g.fillStyle(0xc62828, 1); g.fillTriangle(-38, -52, 38, -52, 0, -78); }
+      else { g.fillStyle(0x757575, 1); g.fillRect(-28, -30, 6, 20); g.fillRect(20, -22, 10, 6); }
+    } else if (k === 'bridge') {
+      g.fillStyle(0x4fc3f7, 0.6); g.fillEllipse(0, 18, 150, 24);
+      g.fillStyle(c1 || 0xa1887f, 1);
+      for (let i = -3; i <= 3; i++) { if (!fixed && (i === 0 || i === 1)) continue; g.fillRect(i * 18 - 8, -6 + Math.abs(i) * 3, 16, 14); }
+      g.lineStyle(4, c1 || 0x6d4c41, 1); g.lineBetween(-64, 6, -64, -18); g.lineBetween(64, 6, 64, -18);
+      if (fixed) { g.beginPath(); g.arc(0, 60, 82, -2.3, -0.85, false); g.strokePath(); }
+    } else if (k === 'dock') {
+      g.fillStyle(0x4fc3f7, 0.6); g.fillRect(-50, 10, 100, 30);
+      g.fillStyle(c1 || 0x6d4c41, 1); [-36, 0, 36].forEach((x) => g.fillRect(x - 4, -4, 8, 40));
+      g.fillStyle(c1 || 0xa1887f, 1);
+      for (let i = 0; i < 5; i++) { if (!fixed && i === 2) continue; g.fillRect(-48 + i * 20, -10, 18, 10); }
+    } else {
+      g.fillStyle(c1 || 0x9e98a8, 1);
+      for (let i = 0; i < 4; i++) { if (!fixed && i === 2) continue; g.fillRect(-40 + i * 18, 20 - i * 16, 80 - i * 18, 16); }
+      if (fixed) { g.fillStyle(0xffd54a, 1); g.fillCircle(30, -50, 8); }
+    }
+    if (crack) { g.lineStyle(3, 0x3e2723, 1); g.lineBetween(-14, -16, -4, -2); g.lineBetween(-4, -2, -12, 8); g.lineBetween(-12, 8, -2, 20); }
+  }
+  // 材料
+  function drawMaterial(g, m) {
+    g.clear();
+    if (m === 'wood') { g.fillStyle(0xa1887f, 1); g.fillRoundedRect(-24, -10, 48, 20, 8); g.fillStyle(0x8d6e63, 1); g.fillEllipse(-24, 0, 12, 20); g.lineStyle(2, 0x6d4c41, 1); g.strokeEllipse(-24, 0, 6, 10); }
+    else if (m === 'stone') drawSoil(g, 'rock', 1);
+    else if (m === 'metal') { g.fillStyle(0xb0bec5, 1); g.fillRect(-24, -8, 48, 16); g.fillStyle(0xeceff1, 1); g.fillRect(-24, -8, 48, 4); g.fillStyle(0x78909c, 1); g.fillRect(-24, 4, 48, 4); }
+    else { g.fillStyle(0xb3e5fc, 0.7); g.fillRect(-20, -18, 40, 36); g.lineStyle(2, 0x81d4fa, 1); g.strokeRect(-20, -18, 40, 36); g.lineStyle(2, 0xffffff, 0.9); g.lineBetween(-12, -10, -4, -16); }
+  }
+
   // 磁鐵站的東西
   function drawMagItem(g, k) {
     g.clear();
@@ -958,7 +1004,7 @@
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
       this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, light: { q: 0, first: 0 }, moon: { q: 0, first: 0 }, push: { q: 0, first: 0 }, circuit: { q: 0, first: 0 }, music: { q: 0, first: 0 }, fog: { q: 0, first: 0 }, bag: { q: 0, first: 0 }, drill: { q: 0, first: 0 }, recycle: { q: 0, first: 0 }, pond: { q: 0, first: 0 },
-        water: { q: 0, first: 0 }, typhoon: { q: 0, first: 0 }, prep: { q: 0, first: 0 }, food: { q: 0, first: 0 }, photo: { q: 0, first: 0 }, spell: { q: 0, first: 0 }, pitch: { q: 0, first: 0 }, fossil: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+        water: { q: 0, first: 0 }, typhoon: { q: 0, first: 0 }, fix: { q: 0, first: 0 }, prep: { q: 0, first: 0 }, food: { q: 0, first: 0 }, photo: { q: 0, first: 0 }, spell: { q: 0, first: 0 }, pitch: { q: 0, first: 0 }, fossil: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
@@ -972,10 +1018,10 @@
       const before = new Set(this.children.list);
       const zoneObjs = {};
       const grab = (z, fn) => { const b = new Set(this.children.list); fn(); zoneObjs[z] = this.children.list.filter((o) => !b.has(o)); };
-      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); });
-      grab('forest', () => this.buildForest());
-      grab('beach', () => this.buildBeach());
-      grab('cave', () => this.buildCave());
+      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); });
+      grab('forest', () => { this.buildForest(); this.buildFacility('bridge'); });
+      grab('beach', () => { this.buildBeach(); this.buildFacility('dock'); });
+      grab('cave', () => { this.buildCave(); this.buildFacility('stairs'); });
       grab('lighthouse', () => this.buildLighthouse());
       grab('research', () => this.buildResearch());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
@@ -1007,6 +1053,7 @@
       this.buildParent();
       this.buildMap();
       this.buildSeeds();
+      this.buildFix();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1544,7 +1591,7 @@
     closeModal() {
       if (this.modal === 'map') return;
       if (this.sdBox) this.sdBox.setVisible(false);
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox, this.fxBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1691,7 +1738,7 @@
       const o = this.plotObjs[i];
       if (p.plant && p.progress >= 1) { this.harvest(i); return; }
       if (this.tool === 'water') {
-        p.water = Math.min(1, p.water + 0.6);
+        p.water = Math.min(1, p.water + (this.s.fixed.well ? 0.9 : 0.6)); // 水井修好：澆一次水的量變多
         this.splash(o.x, o.y - 60);
         speak('water');
         if (p.plant) this.markDone('water');
@@ -1898,7 +1945,7 @@
 
     checkLight() {
       const s = this.s;
-      if (s.lightOpen || !s.caveOpen || (s.caveDone || 0) < LIGHT_NEED) return;
+      if (s.lightOpen || !s.caveOpen || this.fixedCount() < LIGHT_NEED) return;
       s.lightOpen = true;
       if (this.zone === 'cave') this.floatText(180, 320, 'New place!', '#e53935', true);
       if (this.navL) this.renderNav();
@@ -1939,7 +1986,7 @@
       this.navBC.setVisible(this.zone === 'cave');
       this.navL.setVisible(this.zone === 'cave');
       this.navL.setAlpha(s.lightOpen ? 1 : 0.55);
-      this.navLLabel.setText(s.lightOpen ? '燈塔' : '實驗 ' + Math.min(s.caveDone || 0, LIGHT_NEED) + '/' + LIGHT_NEED);
+      this.navLLabel.setText(s.lightOpen ? '燈塔' : '設施 ' + Math.min(this.fixedCount(), LIGHT_NEED) + '/' + LIGHT_NEED);
       this.navCL.setVisible(this.zone === 'lighthouse');
       this.navR.setVisible(this.zone === 'forest');
       this.navR.setAlpha(this.researchOpen() ? 1 : 0.55);
@@ -1976,7 +2023,7 @@
         return '再' + need.join('、');
       }
       if (z === 'cave') return s.caveOpen ? null : (!s.beachOpen ? '先開放海灘' : '圖鑑再 ' + Math.max(0, CAVE_LIB - this.libCount()) + ' 項');
-      if (z === 'lighthouse') return s.lightOpen ? null : (!s.caveOpen ? '先開放洞穴' : '洞穴實驗再完成 ' + Math.max(0, LIGHT_NEED - (s.caveDone || 0)) + ' 回合');
+      if (z === 'lighthouse') return s.lightOpen ? null : (!s.caveOpen ? '先開放洞穴' : '再修好 ' + Math.max(0, LIGHT_NEED - this.fixedCount()) + ' 個設施（★ 修理）');
       return this.researchOpen() ? null : '要先開放其他 5 座島';
     }
 
@@ -2082,6 +2129,7 @@
       if (this.visitorTimer || s.visitor || !s.forestOpen) return;
       if (!this.freeLot()) return;
       if (!ANIMAL_KEYS.some((a) => !this.residents().includes(a))) return;
+      if (s.fixed.bridge) delay = Math.round(delay / 2); // 小橋修好：訪客來得比較快
       this.visitorTimer = this.time.delayedCall(delay, () => {
         this.visitorTimer = null;
         if (this.paused()) { this.scheduleVisitor(1000); return; }
@@ -2616,7 +2664,7 @@
       // 市集每天只有前 MARKET_PAID 單給星砂（原本沒有上限，可以一直刷）
       const s = this.s;
       if (!s.mkPaid || s.mkPaid.day !== s.day) s.mkPaid = { day: s.day, n: 0 };
-      const paid = s.mkPaid.n < MARKET_PAID;
+      const paid = s.mkPaid.n < MARKET_PAID + (s.fixed.dock ? 1 : 0); // 碼頭修好：每天多 1 單
       if (paid) { s.mkPaid.n += 1; s.stardust += 4; }
       if (o.type === 'fruit') speak('Thank you!');
       this.floatText(640, 300, paid ? 'Thank you!  +4 ★' : 'Thank you!' + (this.subs() ? '  今天的星砂拿完了' : ''), '#d81b60', true);
@@ -3971,8 +4019,10 @@
         c.add(card);
         return { card, bg, x: card.x };
       });
-      this.bagPack = makeButton(this, 640, 560, 220, 60, 0xe65100, 'Pack 裝好了', 24, () => this.packBag());
-      c.add(this.bagPack);
+      this.bagPack = makeButton(this, 560, 560, 220, 60, 0xe65100, 'Pack 裝好了', 24, () => this.packBag());
+      // 先不準備：直接演練（防災包沒準備好，演練後設施的裂痕要等明天才能修）
+      this.bagSkip = makeButton(this, 800, 560, 200, 60, 0x90a4ae, 'Skip 先不準備', 22, () => this.skipBag());
+      c.add([this.bagPack, this.bagSkip]);
       // B：演練，3 張只有圖的動作卡
       this.drCards = DRILL.map((d, i) => {
         const card = this.add.container(640 + (i - 1) * 230, 390);
@@ -4012,6 +4062,7 @@
         b.bg.lineStyle(on ? 6 : 3, on ? 0xff9800 : 0xd7ccc8, 1); b.bg.strokeRoundedRect(-85, -68, 170, 136, 18);
       });
       this.bagPack.setVisible(bag);
+      this.bagSkip.setVisible(bag);
       // 卡片位置每次打亂，不能靠「從左點到右」
       this.drCards.forEach((c, i) => { c.card.setVisible(!bag && !q.done); c.card.setAlpha(q.wrong[i] ? 0.35 : 1); drawDrill(c.pic, DRILL[q.order[i]].k); });
       if (bag) {
@@ -4041,6 +4092,15 @@
       speak(BAG_ITEMS[i].en);
       this.drMsg.setText('');
       this.renderDrill();
+    }
+
+    skipBag() {
+      const q = this.dr;
+      if (this.modal !== 'drill' || q.part !== 'bag') return;
+      q.part = 'drill';
+      this.drMsg.setText('');
+      this.renderDrill();
+      this.time.delayedCall(BOT ? 10 : 600, () => { if (this.dr === q && !q.done) speak(DRILL[0].say); });
     }
 
     packBag() {
@@ -4088,7 +4148,8 @@
         this.touch('drill');
         speak('You are safe! Great job!');
         this.renderDrill();
-        this.drMsg.setText(s.bagReady ? 'Your bag is ready, too! 防災包也準備好了' : '');
+        const crack = this.crackAfterDrill();
+        this.drMsg.setText((s.bagReady ? '防災包也準備好了。' : '') + crack);
         s.stardust += 5;
         this.floatText(640, 330, 'Safe!  +5 ★', '#e65100', true);
         this.refreshAll();
@@ -4793,6 +4854,134 @@
       return b;
     }
 
+    // ---------- 設施修理（§3.4、§5）：花星砂修好壞掉的設施，修理時要選對材料 ----------
+    fixedCount() { return FAC_KEYS.filter((k) => this.s.fixed[k]).length; }
+
+    buildFacility(k) {
+      const f = FAC[k];
+      const g = this.add.graphics({ x: f.x, y: f.y }).setDepth(8);
+      const sign = txt(this, f.x, f.y - 74, '', 18, '#c62828', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 4, align: 'center' }).setOrigin(0.5).setDepth(16);
+      const zone = this.add.zone(f.x, f.y - 20, f.w || 120, 110).setDepth(20).setInteractive();
+      zone.on('pointerdown', () => this.openFix(k));
+      (this.facObjs = this.facObjs || {})[k] = { g, sign };
+    }
+
+    renderFacilities() {
+      if (!this.facObjs) return;
+      const s = this.s;
+      FAC_KEYS.forEach((k) => {
+        const o = this.facObjs[k], fixed = !!s.fixed[k], crack = s.crack && s.crack.k === k;
+        drawFacility(o.g, k, fixed, crack);
+        o.sign.setText(!fixed ? '! ★' + FAC[k].price : (crack ? '!' : ''));
+      });
+    }
+
+    buildFix() {
+      const c = this.modalBase(80, 230, 110, 820, 500, 0xfffaf0);
+      this.fxTitle = txt(this, 640, 140, '', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fxSay = txt(this, 640, 190, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fxZh = txt(this, 640, 228, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.fxPic = this.add.graphics({ x: 640, y: 300 }).setScale(1.2);
+      this.fxMsg = txt(this, 640, 575, '', 20, '#c62828', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
+      c.add([this.fxTitle, this.fxSay, this.fxZh, this.fxPic, this.fxMsg]);
+      this.fxCards = MATERIALS.map((m, i) => {
+        const card = this.add.container(640 + (i - 1.5) * 170, 460);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-72, -70, 144, 140, 18);
+        bg.lineStyle(4, 0xbcaaa4, 1); bg.strokeRoundedRect(-72, -70, 144, 140, 18);
+        const pic = this.add.graphics({ y: -16 }).setScale(1.3); drawMaterial(pic, m);
+        const en = txt(this, 0, 38, m, 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 60, '', 16, '#6b7c8c').setOrigin(0.5);
+        card.add([bg, pic, en, zh]);
+        card.setSize(144, 140).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickMaterial(i));
+        c.add(card);
+        return { card, zh, x: card.x };
+      });
+      this.closeButton(c, 1020, 140, () => this.closeModal());
+      this.fxBox = c;
+    }
+
+    openFix(k) {
+      if (this.paused()) return;
+      const s = this.s, f = FAC[k];
+      const crack = s.crack && s.crack.k === k;
+      if (s.fixed[k] && !crack) { speak('The ' + f.en + ' is fine.'); this.floatText(f.x, f.y - 100, f.zh + '好好的！' + f.perk, '#2e7d32'); return; }
+      if (crack && s.day < s.crack.ready) {
+        // 防災包沒準備好：演練後的裂痕要等到明天才能修（只是變慢，沒有損失）
+        this.floatText(f.x, f.y - 100, '防災包沒準備好，修理要等到明天', '#c62828');
+        return;
+      }
+      if (!crack && s.stardust < f.price) { this.floatText(f.x, f.y - 100, '修理需要 ★' + f.price, '#c62828'); return; }
+      this.held = null; this.tool = null; this.redrawTools();
+      this.modal = 'fix';
+      this.fq2 = { k, crack, tries: 0, recorded: false, reveal: false, wrong: {}, done: false };
+      L.seen(s.words, f.mat, s.day);
+      this.fxBox.setVisible(true);
+      this.renderFix();
+      this.time.delayedCall(200, () => speak(this.fq2.say));
+    }
+
+    renderFix() {
+      const q = this.fq2, f = FAC[q.k], st = L.stage(this.s.words, f.mat), zh = this.subs();
+      q.say = 'Fix the ' + f.en + '! We need ' + f.mat + '.';
+      this.fxTitle.setText((q.crack ? 'Crack! ' : 'Fix it! ') + f.zh + (q.crack ? '有裂痕' : '壞掉了') + (q.crack ? '' : '　★' + f.price));
+      this.fxSay.setText(q.say);
+      this.fxZh.setText(zh && (st === 0 || q.reveal) ? '修好' + f.zh + '！我們需要' + zhOf(f.mat) + '。' : '');
+      drawFacility(this.fxPic, q.k, false, false);
+      this.fxCards.forEach((c, i) => {
+        const m = MATERIALS[i];
+        c.zh.setText(zh && st === 0 ? zhOf(m) : '');
+        c.card.setAlpha(q.wrong[m] ? 0.35 : 1);
+      });
+      if (!q.done) this.fxMsg.setText(q.crack ? '修裂痕不用星砂' : '選對材料才會付錢修理（選錯不扣星砂）');
+    }
+
+    pickMaterial(i) {
+      const s = this.s, q = this.fq2;
+      if (this.modal !== 'fix' || !q || q.done) return;
+      const m = MATERIALS[i], f = FAC[q.k], c = this.fxCards[i];
+      if (q.wrong[m]) return;
+      const right = m === f.mat;
+      if (q.tries === 0) { this.stats.fix.q += 1; if (right) this.stats.fix.first += 1; }
+      if (!q.recorded) { L.answer(s.words, f.mat, { day: s.day, options: MATERIALS.length, firstTry: right, peeked: false }); q.recorded = true; }
+      speak(m);
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[m] = true;
+        this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
+        this.renderFix();
+        this.fxMsg.setText('Not ' + m + '. 不是這個材料，再聽一次');
+        return;
+      }
+      if (!q.crack) {
+        if (s.stardust < f.price) { this.fxMsg.setText('修理需要 ★' + f.price); return; }
+        s.stardust -= f.price;
+        s.fixed[q.k] = true;
+      } else {
+        s.crack = null;
+      }
+      q.done = true;
+      this.touch('fix');
+      speak('Great! The ' + f.en + ' is fixed!');
+      this.fxMsg.setText(q.crack ? '裂痕修好了！' : '修好了！' + f.perk);
+      this.renderFacilities();
+      this.checkLight();
+      this.refreshAll();
+      const cur = q;
+      this.time.delayedCall(BOT ? 30 : 1300, () => { if (this.modal === 'fix' && this.fq2 === cur) this.closeModal(); });
+    }
+
+    // 演練後，已修好的設施裡隨機一個出現裂痕（防災包準備好就能當天修，沒準備要等明天）
+    crackAfterDrill() {
+      const s = this.s;
+      const fixed = FAC_KEYS.filter((k) => s.fixed[k]);
+      if (!fixed.length || s.crack) return '';
+      const k = fixed[Math.floor(Math.random() * fixed.length)];
+      s.crack = { k, ready: s.bagReady ? s.day : s.day + 1 };
+      this.renderFacilities();
+      return FAC[k].zh + '有一點裂痕。' + (s.bagReady ? '防災包準備好了，今天就能修。' : '防災包沒準備好，要等明天才能修。');
+    }
+
     // --- 天氣題 ---
     needWeatherQ() { return this.s.day >= 2 && this.s.askedDay !== this.s.day; }
 
@@ -5151,6 +5340,7 @@
       this.renderForest();
       this.renderNav();
       this.renderResearch();
+      this.renderFacilities();
       this.refreshTut();
       this.redrawTools();
     }
@@ -5172,6 +5362,7 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'fix') { if (Math.random() < 0.1) this.closeModal(); else this.pickMaterial(Math.floor(Math.random() * MATERIALS.length)); return; }
       if (this.modal === 'seeds') {
         const r = Math.random();
         if (r < 0.15) this.closeSeeds(); else this.pickSeed(PLANT_KEYS[Math.floor(Math.random() * PLANT_KEYS.length)]);
@@ -5241,6 +5432,7 @@
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
+      FAC_KEYS.filter((k) => FAC[k].zone === this.zone).forEach((k) => acts.push(() => this.openFix(k)));
       if (this.zone === 'research') {
         RLABS.forEach((b) => acts.push(() => this.openLab(b.k)));
         acts.push(() => this.goZone('forest'));
