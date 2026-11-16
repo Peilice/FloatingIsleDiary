@@ -67,7 +67,7 @@
     if (m === 'lab') {
       const q = sc.xq, k = sc.labKind;
       if (!q || q.done) return done();
-      if (q.pickAt) { q.pickAt(q.cur().answer); return; }   // 延伸題（選擇題流程）
+      if (q.pickAt) { if (!q.wait && q.cur()) q.pickAt(q.cur().answer); return; }   // 延伸題（選擇題流程）；換題中先等
       if (k === 'water') { [['heater', 'sun'], ['cold', 'high'], ['cup', 'under']].forEach(([p, sp]) => { if (q.place[sp] !== p) { if (q.place[sp]) sc.waterSpot(sp); sc.waterPart(p); sc.waterSpot(sp); } }); }
       else if (k === 'typhoon') { if (q.step === 1) sc.pickSymbol(q.order.indexOf('T')); else { q.prep.forEach((p, j) => { if (p.good && !q.sel[j]) sc.pickPrep(j); }); sc.prepDone(); } }
       else if (k === 'food') { if (!q.busy) sc.pickFood(q.order.findIndex((ai) => q.sc.good.includes(['grass', 'den', 'rabbits', 'cut'][ai]))); }

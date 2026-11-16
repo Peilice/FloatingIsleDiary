@@ -4606,8 +4606,9 @@
         this.rxContent.removeAll(true);
         const cur = qs[q.i];
         cur.tries = 0; cur.wrong = {}; cur.ok = false;
+        q.wait = false;
         this.rxSet(cur.say, cur.zh, cur.hint || '');
-        if (cur.scene) { const g = this.add.graphics(); cur.scene(g); this.rx(g); }
+        if (cur.scene) { const g = this.rx(this.add.graphics()); cur.scene(g); }
         const n = cur.opts.length, w = n > 3 ? 180 : 200;
         cur.cards = cur.opts.map((o, j) => this.rxCard(640 + (j - (n - 1) / 2) * (w + 20), cur.y || 470, w, 160, (card) => {
           const g = this.add.graphics({ y: -16 }); o.draw(g); card.add(g);
@@ -4617,7 +4618,8 @@
       };
       const pick = (j) => {
         const cur = qs[q.i];
-        if (this.modal !== 'lab' || this.xq !== q || q.done || cur.ok || cur.wrong[j]) return;
+        // 答對後到下一題出現前（約 1.6 秒）舊卡片還在畫面上：這段時間的點擊不算
+        if (this.modal !== 'lab' || this.xq !== q || q.done || q.wait || !cur || !cur.wrong || cur.ok || cur.wrong[j]) return;
         const right = j === cur.answer;
         if (cur.tries === 0) {
           stat.q += 1; if (right) stat.first += 1;
@@ -4633,8 +4635,9 @@
         cur.ok = true;
         speak(cur.yes || 'Yes!');
         this.rxMsg.setText(cur.after || 'Yes! 對了');
-        if (cur.result) { const g = this.add.graphics(); cur.result(g); this.rx(g); }
+        if (cur.result) { const g = this.rx(this.add.graphics()); cur.result(g); }
         q.i += 1;
+        q.wait = true;
         if (q.i < qs.length) this.time.delayedCall(BOT ? 20 : 1600, () => { if (this.xq === q && this.modal === 'lab') show(); });
         else { q.done = true; this.labDone(this.labStation || statKey, doneMsg); }
       };
@@ -4687,22 +4690,22 @@
       const left = Math.random() < 0.5;            // 水流往左下或右下
       const sandX = left ? 430 : 850;
       const spots = L.shuffle([
-        { x: left ? 520 : 760, y: 395, good: true },  // 在水流的路上、沙地上方
-        { x: left ? 820 : 460, y: 395, good: false }, // 另一邊，沒有水流過
-        { x: 640, y: 255, good: false },              // 山頂，雨還沒聚成水流
+        { x: left ? 535 : 745, y: 360, good: true },  // 在水流的路上、沙地上方
+        { x: left ? 805 : 475, y: 360, good: false }, // 另一邊，沒有水流過
+        { x: 640, y: 262, good: false },              // 山頂，雨還沒聚成水流
       ]);
       const names = ['A', 'B', 'C'];
       const scene = (g) => {
-        g.fillStyle(0x8d6e63, 1); g.fillTriangle(400, 470, 880, 470, 640, 240);
-        g.fillStyle(0x78909c, 1); g.fillCircle(600, 215, 22); g.fillCircle(640, 205, 26); g.fillCircle(680, 215, 22);
-        g.lineStyle(2, 0x1e88e5, 1); [600, 630, 660, 690].forEach((x) => g.lineBetween(x, 238, x - 4, 252));
-        g.fillStyle(0xe8cf8f, 1); g.fillEllipse(sandX, 480, 150, 40);
+        g.fillStyle(0x8d6e63, 1); g.fillTriangle(420, 440, 860, 440, 640, 245);
+        g.fillStyle(0x78909c, 1); g.fillCircle(560, 225, 16); g.fillCircle(588, 218, 20); g.fillCircle(616, 225, 16);
+        g.lineStyle(2, 0x1e88e5, 1); [568, 588, 608].forEach((x) => g.lineBetween(x, 244, x - 4, 256));
+        g.fillStyle(0xe8cf8f, 1); g.fillEllipse(sandX, 450, 150, 36);
         // 水流路徑（箭頭）
         g.lineStyle(6, 0x4fc3f7, 0.9);
-        const pts = left ? [[640, 270], [590, 330], [530, 400], [460, 460]] : [[640, 270], [690, 330], [750, 400], [820, 460]];
+        const pts = left ? [[640, 270], [590, 320], [540, 380], [470, 440]] : [[640, 270], [690, 320], [740, 380], [810, 440]];
         for (let i = 0; i < pts.length - 1; i++) g.lineBetween(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
         spots.forEach((p, i) => { g.lineStyle(3, 0xffffff, 1); g.strokeRect(p.x - 26, p.y - 14, 52, 28); });
-        this.rx(txt(this, sandX, 480, '沙地', 16, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
+        this.rx(txt(this, sandX, 452, '沙地', 16, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
         spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#27384a', strokeThickness: 4 }).setOrigin(0.5)));
       };
       const opts = spots.map((p, i) => ({ draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-30, -6, 60, 16); g.lineStyle(2, 0x616161, 1); for (let x = -30; x < 30; x += 12) g.strokeRect(x, -6, 12, 8); }, label: '蓋在 ' + names[i] }));
