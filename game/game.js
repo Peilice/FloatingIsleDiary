@@ -41,6 +41,10 @@
     carrot: { need: 0.3, secs: 75, part: 'root',  partZh: '根',   art: 'a carrot', fact: '我們吃的紅蘿蔔是它的「根」，長在土裡。' },
     bean:   { need: 0.5, secs: 110, part: 'seed',  partZh: '種子', art: 'a bean',   fact: '我們吃的豆子是它的「種子」，種下去又能長出新的豆子。' },
     rose:   { need: 0.7, secs: 150, part: 'flower',partZh: '花',   art: 'a rose',   fact: '玫瑰需要很多陽光才會開花，躲在樹蔭下長得慢。' },
+    // 以下用星砂買種子（price）才能種
+    corn:   { need: 0.6, secs: 120, part: 'seed',  partZh: '種子', art: 'some corn', price: 20, fact: '我們吃的玉米粒是它的「種子」，一株玉米需要很多陽光。' },
+    potato: { need: 0.4, secs: 100, part: 'stem',  partZh: '莖',   art: 'a potato',  price: 35, fact: '馬鈴薯長在土裡，但我們吃的是它的「莖」（塊莖），不是根喔。' },
+    grape:  { need: 0.7, secs: 140, part: 'fruit', partZh: '果實', art: 'a grape',   price: 50, fact: '葡萄是它的「果實」，長在會攀爬的藤蔓上。' },
   };
   const PLANT_KEYS = Object.keys(PLANTS);
 
@@ -48,12 +52,12 @@
   // sound 叫聲（畫面上同時顯示文字，靜音也能玩）、hint 聽錯時的提示、likes 住下來後會想要的東西
   const ANIMALS = {
     frog:   { zh: '青蛙', home: 'pond',  clue: 'water', say: 'I like water.',     sayZh: '我喜歡水。',   sound: 'Ribbit!',  hint: 'It lives in a pond.', likes: ['rose'],           fact: '青蛙小時候是住在水裡的蝌蚪，長大後住在池塘邊。' },
-    duck:   { zh: '鴨子', home: 'pond',  clue: 'swim',  say: 'I can swim.',       sayZh: '我會游泳。',   sound: 'Quack!',   hint: 'It lives in a pond.', likes: ['bean', 'rose'],   fact: '鴨子的腳有蹼，像槳一樣幫牠划水。' },
+    duck:   { zh: '鴨子', home: 'pond',  clue: 'swim',  say: 'I can swim.',       sayZh: '我會游泳。',   sound: 'Quack!',   hint: 'It lives in a pond.', likes: ['bean', 'rose', 'corn'], fact: '鴨子的腳有蹼，像槳一樣幫牠划水。' },
     fish:   { zh: '魚',   home: 'pond',  clue: 'water', say: 'I live in water.',  sayZh: '我住在水裡。', sound: null,       hint: '',                    likes: [],                 fact: '魚用鰓呼吸水裡的氧氣，離開水就不能活。' },
-    bird:   { zh: '鳥',   home: 'tree',  clue: 'tree',  say: 'I live in a tree.', sayZh: '我住在樹上。', sound: 'Tweet!',   hint: 'It lives in a tree.', likes: ['bean'],           fact: '鳥有翅膀和羽毛，常在樹上用樹枝築巢。' },
-    monkey: { zh: '猴子', home: 'tree',  clue: 'climb', say: 'I can climb.',      sayZh: '我會爬樹。',   sound: 'Ooh ooh ah ah!', hint: 'It lives in a tree.', likes: ['bean', 'carrot'], fact: '猴子的手腳都能抓握，很適合在樹上爬來爬去。' },
-    cow:    { zh: '牛',   home: 'grass', clue: 'grass', say: 'I eat grass.',      sayZh: '我吃草。',     sound: 'Moo!',     hint: 'It eats grass.',      likes: ['carrot', 'bean'], fact: '牛吃草，會把吞下去的草再吐回嘴裡慢慢嚼。' },
-    horse:  { zh: '馬',   home: 'grass', clue: 'grass', say: 'I like grass.',     sayZh: '我喜歡草。',   sound: 'Neigh!',   hint: 'It eats grass.',      likes: ['carrot'],         fact: '馬吃草，腿又長又有力，可以跑得很快。' },
+    bird:   { zh: '鳥',   home: 'tree',  clue: 'tree',  say: 'I live in a tree.', sayZh: '我住在樹上。', sound: 'Tweet!',   hint: 'It lives in a tree.', likes: ['bean', 'corn', 'grape'], fact: '鳥有翅膀和羽毛，常在樹上用樹枝築巢。' },
+    monkey: { zh: '猴子', home: 'tree',  clue: 'climb', say: 'I can climb.',      sayZh: '我會爬樹。',   sound: 'Ooh ooh ah ah!', hint: 'It lives in a tree.', likes: ['bean', 'carrot', 'grape'], fact: '猴子的手腳都能抓握，很適合在樹上爬來爬去。' },
+    cow:    { zh: '牛',   home: 'grass', clue: 'grass', say: 'I eat grass.',      sayZh: '我吃草。',     sound: 'Moo!',     hint: 'It eats grass.',      likes: ['carrot', 'bean', 'corn', 'potato'], fact: '牛吃草，會把吞下去的草再吐回嘴裡慢慢嚼。' },
+    horse:  { zh: '馬',   home: 'grass', clue: 'grass', say: 'I like grass.',     sayZh: '我喜歡草。',   sound: 'Neigh!',   hint: 'It eats grass.',      likes: ['carrot', 'corn'], fact: '馬吃草，腿又長又有力，可以跑得很快。' },
   };
   const ANIMAL_KEYS = Object.keys(ANIMALS);
   const SOUND_KEYS = ANIMAL_KEYS.filter((k) => ANIMALS[k].sound);
@@ -73,7 +77,7 @@
   // 海灘（M4）：在草地左邊一個畫面寬；收成 5 次、圖鑑 5 項後開放（§5）
   const BOFF = -1280;
   const BEACH_HARVEST = 5, BEACH_LIB = 5;
-  const STATION_PAID = 2;   // 每個實驗站每天前幾回合給星砂
+  const STATION_PAID = 5;   // 所有實驗站合計，每天前幾回合給星砂（經濟調整：原本每站各 2 回合 ×3，18 站全開後一天可拿 108）
   const BEACH = [
     { k: 'tea',     x: 220,  en: 'Tea',     zh: '甜茶',     icon: 'tea',     color: 0xef6c00 },
     { k: 'acid',    x: 430,  en: 'Juice',   zh: '紫色花汁', icon: 'flask',   color: 0x8e24aa },
@@ -261,6 +265,9 @@
     { k: 'carrot', en: 'carrot', zh: '紅蘿蔔', kind: 'plant' },
     { k: 'bean',   en: 'bean',   zh: '豆子',   kind: 'plant' },
     { k: 'rose',   en: 'rose',   zh: '玫瑰',   kind: 'plant' },
+    { k: 'corn',   en: 'corn',   zh: '玉米',   kind: 'plant' },
+    { k: 'potato', en: 'potato', zh: '馬鈴薯', kind: 'plant' },
+    { k: 'grape',  en: 'grape',  zh: '葡萄',   kind: 'plant' },
     { k: 'sunny',  en: 'sunny',  zh: '晴天',   kind: 'weather', fact: '晴天陽光充足，植物長得快，水也乾得快。' },
     { k: 'cloudy', en: 'cloudy', zh: '多雲',   kind: 'weather', fact: '多雲時陽光變少，需要很多陽光的植物會長得慢。' },
     { k: 'rainy',  en: 'rainy',  zh: '下雨',   kind: 'weather', fact: '下雨時植物會得到水，不用自己澆，但陽光很少。' },
@@ -269,9 +276,13 @@
   ANIMAL_KEYS.forEach((k) => LIB.push({ k, en: k, zh: ANIMALS[k].zh, kind: 'animal', fact: ANIMALS[k].fact }));
   const LIB_PER_PAGE = 8;
 
-  const TOOL_KEYS = ['carrot', 'bean', 'rose', 'water', 'shovel'];
-  const TOOL_X = { carrot: 100, bean: 206, rose: 312, water: 418, shovel: 524 };
-  const BAG_X = { carrot: 730, bean: 862, rose: 994 };
+  // 工具列：種子袋（點了選種子、買種子）、澆水壺、鏟子；背包依作物順序排，只顯示有種子的作物
+  const TOOL_KEYS = ['seeds', 'water', 'shovel'];
+  const TOOL_X = { seeds: 100, water: 206, shovel: 312 };
+  const BAG_X = { carrot: 470, bean: 562, rose: 654, corn: 746, potato: 838, grape: 930 };
+  const START_SEEDS = ['carrot', 'bean', 'rose'];
+  const MARKET_PAID = 2;    // 市集每天前幾單給星砂
+  const STATION_REWARD = 2; // 實驗站一回合給的星砂
   const PLOT_X = [430, 600, 770];
   const PLOT_Y = [430, 550];
   const RABBIT = { x: 1020, y: 500 };
@@ -284,7 +295,7 @@
   function defaultState() {
     return {
       v: 2, day: 1, t: 0, weather: 'sunny', stardust: 0,
-      inv: { carrot: 0, bean: 0, rose: 0 },
+      inv: { carrot: 0, bean: 0, rose: 0, corn: 0, potato: 0, grape: 0 }, seeds: START_SEEDS.slice(),
       plots: Array.from({ length: 6 }, () => ({ plant: null, progress: 0, water: 0.3 })),
       words: {}, lib: { sunny: true }, tut: 0, done: {}, muted: false,
       wishes: {}, fwho: null, lastWish: null, sched: { n: 0 }, gaveTotal: 0,
@@ -325,6 +336,8 @@
     if ('wish' in s) { if (s.wish) s.wishes.rabbit = s.wish; delete s.wish; }
     if (!s.ev.came) s.ev.came = [];
     if (!s.ev.party) s.ev.party = [];
+    if (!s.seeds) s.seeds = START_SEEDS.slice();
+    Object.keys(PLANTS).forEach((k) => { if (s.inv[k] == null) s.inv[k] = 0; });
     // M4 前沒有記錄收成次數：用背包裡的作物＋送出去的願望估計（寧可少算，不憑空給）。
     // 用 harvestedV 標記是否轉換過（新存檔的預設值 0 會讓「沒有這個欄位」的判斷失效）
     if (s.harvestedV !== 1) {
@@ -342,7 +355,7 @@
       if (s.diary && s.diary.length) t.diary = 1;
       if (s.party || (s.lastInvite || 0) > 0) t.calendar = 1;
       if ((s.drillDay || 0) > 0) t.drill = 1;
-      if (s.paid) Object.keys(s.paid).forEach((k) => { if (k !== 'day') t[k] = 1; });
+      if (s.paid) Object.keys(s.paid).forEach((k) => { if (k !== 'day' && k[0] !== '_') t[k] = 1; });
     }
     if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; s.caveOpen = true; s.lightOpen = true; } // 偵錯：直接開放所有區域
     return s;
@@ -571,6 +584,15 @@
         g.lineStyle(5, 0x2e7d32, 1);
         for (let k = 0; k < 3; k++) { const a = -Math.PI / 2 + k * 2 * Math.PI / 3, b = a + 2 * Math.PI / 3 - 0.5; g.beginPath(); g.arc(0, 0, 18, a + 0.25, b, false); g.strokePath();
           g.fillStyle(0x2e7d32, 1); g.fillTriangle(Math.cos(b) * 18 - 6, Math.sin(b) * 18 - 6, Math.cos(b) * 18 + 6, Math.sin(b) * 18 + 6, Math.cos(b + 0.4) * 18, Math.sin(b + 0.4) * 18); }
+        break;
+      case 'corn':
+        g.fillStyle(0x7cb342, 1); g.fillTriangle(-4, 22, -18, -6, 0, 10); g.fillTriangle(4, 22, 18, -6, 0, 10);
+        g.fillStyle(0xfdd835, 1); g.fillEllipse(0, -4, 16, 40);
+        g.fillStyle(0xf9a825, 1); for (let y = -18; y <= 10; y += 7) { g.fillCircle(-3, y, 2); g.fillCircle(3, y + 3, 2); }
+        break;
+      case 'potato':
+        g.fillStyle(0xc8a165, 1); g.fillEllipse(0, 2, 40, 28);
+        g.fillStyle(0x8d6e4a, 1); g.fillCircle(-8, -2, 2); g.fillCircle(6, 4, 2); g.fillCircle(10, -5, 1.5);
         break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
@@ -829,6 +851,24 @@
       for (let i = -3; i <= 3; i++) g.lineBetween(0, -2, i * 7, -h - Math.abs(i) * -3);
       g.fillStyle(leaf, 1); for (let i = -3; i <= 3; i++) g.fillCircle(i * 7, -h + Math.abs(i) * 3, 5);
       if (p >= 1) { g.fillStyle(0xff8a1f, 1); g.fillEllipse(0, -2, 26, 14); g.fillStyle(0xd96a00, 1); g.fillEllipse(0, -2, 12, 6); }
+    } else if (type === 'corn') {
+      // 玉米：高高的莖，成熟時長出黃色玉米
+      const h = 30 + k * 50;
+      g.lineStyle(5, stemC, 1); g.lineBetween(0, 0, 0, -h);
+      g.fillStyle(leaf, 1); g.fillTriangle(0, -h * 0.4, -22, -h * 0.55, -2, -h * 0.5); g.fillTriangle(0, -h * 0.65, 22, -h * 0.8, 2, -h * 0.75);
+      if (p >= 1) { g.fillStyle(0xfdd835, 1); g.fillEllipse(8, -h * 0.5, 10, 26); }
+    } else if (type === 'potato') {
+      // 馬鈴薯：矮矮的一叢葉子，成熟時土上露出馬鈴薯
+      const h = 18 + k * 18;
+      g.fillStyle(leaf, 1); for (let i = -2; i <= 2; i++) g.fillEllipse(i * 9, -h + Math.abs(i) * 5, 14, 10);
+      g.lineStyle(3, stemC, 1); g.lineBetween(0, 0, 0, -h + 4);
+      if (p >= 1) { g.fillStyle(0xc8a165, 1); g.fillEllipse(-12, -2, 20, 12); g.fillEllipse(12, 0, 18, 11); }
+    } else if (type === 'grape') {
+      // 葡萄：攀爬的藤蔓，成熟時掛著一串紫色葡萄
+      const h = 26 + k * 40;
+      g.lineStyle(4, 0x6d4c41, 1); g.lineBetween(0, 0, 0, -h); g.lineBetween(0, -h, 20, -h - 6);
+      g.fillStyle(leaf, 1); g.fillEllipse(-12, -h * 0.5, 18, 12); g.fillEllipse(14, -h * 0.75, 18, 12);
+      if (p >= 1) { g.fillStyle(0x8e24aa, 1); [[14, -h + 8], [20, -h + 8], [17, -h + 14], [11, -h + 14], [16, -h + 20]].forEach(([x, y]) => g.fillCircle(x, y, 4)); }
     } else if (type === 'bean') {
       const h = 24 + k * 36;
       g.lineStyle(4, stemC, 1); g.lineBetween(0, 0, 0, -h);
@@ -966,6 +1006,7 @@
       this.buildLab();
       this.buildParent();
       this.buildMap();
+      this.buildSeeds();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
@@ -1179,29 +1220,29 @@
     buildToolbar() {
       const bar = this.add.graphics().setDepth(30);
       bar.fillStyle(0xffffff, 0.8); bar.fillRoundedRect(30, 616, 1220, 92, 26);
-      bar.lineStyle(3, 0xcfd8e0, 1); bar.lineBetween(612, 630, 612, 694);
+      bar.lineStyle(3, 0xcfd8e0, 1); bar.lineBetween(370, 630, 370, 694);
       this.tools = {};
       TOOL_KEYS.forEach((k) => {
         const c = this.add.container(TOOL_X[k], 662).setDepth(31);
         const bg = this.add.graphics();
-        const icon = makeIcon(this, k, 0, -8, k === 'shovel' ? 0.9 : 1.1);
+        const icon = makeIcon(this, k === 'seeds' ? 'carrot' : k, 0, -8, k === 'shovel' ? 0.9 : 1.1);
         const label = txt(this, 0, 28, k, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
         c.add([bg, icon, label]);
         c.setSize(100, 84).setInteractive({ useHandCursor: true });
         c.on('pointerdown', () => this.selectTool(k));
-        this.tools[k] = { c, bg, k };
+        this.tools[k] = { c, bg, k, icon, label };
       });
       // 背包：先點物品拿在手上，再點居民交給牠（不顯示英文名稱，靠願望句子判斷）
-      txt(this, 640, 662, '背包', 20, '#6b7c8c').setOrigin(0.5).setDepth(31);
+      txt(this, 400, 662, '背包', 18, '#6b7c8c').setOrigin(0.5).setDepth(31);
       this.bag = {};
       PLANT_KEYS.forEach((k) => {
         const x = BAG_X[k];
         const c = this.add.container(x, 662).setDepth(31);
         const bg = this.add.graphics();
-        const icon = makeIcon(this, k, -22, 0, 0.95);
-        const n = txt(this, 14, 0, 'x0', 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5);
+        const icon = makeIcon(this, k, -18, 0, 0.8);
+        const n = txt(this, 6, 0, 'x0', 22, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5);
         c.add([bg, icon, n]);
-        c.setSize(122, 80).setInteractive({ useHandCursor: true });
+        c.setSize(90, 80).setInteractive({ useHandCursor: true });
         c.on('pointerdown', () => this.selectBag(k));
         this.bag[k] = { c, bg, icon, n, k };
       });
@@ -1502,6 +1543,7 @@
     paused() { return !!this.modal; }
     closeModal() {
       if (this.modal === 'map') return;
+      if (this.sdBox) this.sdBox.setVisible(false);
       [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox, this.ltBox, this.mnBox, this.puBoxBox, this.ciBox, this.muBox, this.fgBox, this.drBox, this.rcBox, this.rxBox, this.paBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
@@ -1537,6 +1579,8 @@
     // --- 工具與背包 ---
     selectTool(k) {
       if (this.paused()) return;
+      if (k === 'seeds') { this.openSeeds(); return; }
+      if (PLANTS[k] && !this.s.seeds.includes(k)) return;
       this.tool = this.tool === k ? null : k;
       this.held = null;
       this.redrawTools();
@@ -1544,6 +1588,88 @@
       else if (k === 'shovel') speak('shovel');
       else { speak(k + ' seed'); L.seen(this.s.words, 'seed', this.s.day); }
       if (this.tool && PLANTS[this.tool]) this.markDone('seed');
+    }
+
+    // ---------- 種子袋：選要種的種子；還沒有的可以用星砂買（點兩下確認） ----------
+    buildSeeds() {
+      const c = this.add.container(0, 0).setDepth(85).setVisible(false);
+      c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x10243a, 0.35).setInteractive().on('pointerdown', () => this.closeSeeds()));
+      const g = this.add.graphics();
+      g.fillStyle(0xfffaf0, 1); g.fillRoundedRect(150, 380, 800, 222, 24);
+      g.lineStyle(4, 0xffcc80, 1); g.strokeRoundedRect(150, 380, 800, 222, 24);
+      c.add(g);
+      c.add(txt(this, 180, 396, 'Seeds 種子袋', 22, '#e65100', { fontStyle: 'bold' }));
+      this.sdMsg = txt(this, 880, 398, '', 18, '#c62828', { fontStyle: 'bold' }).setOrigin(1, 0);
+      c.add(this.sdMsg);
+      this.sdCards = PLANT_KEYS.map((k, i) => {
+        const card = this.add.container(220 + i * 126, 506);
+        const bg = this.add.graphics();
+        const icon = makeIcon(this, k, 0, -22, 1.1);
+        const name = txt(this, 0, 28, k, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const price = txt(this, 0, 54, '', 18, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+        card.add([bg, icon, name, price]);
+        card.setSize(114, 150).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickSeed(k));
+        c.add(card);
+        return { card, bg, icon, price, k };
+      });
+      this.closeButton(c, 930, 380, () => this.closeSeeds());
+      this.sdBox = c;
+    }
+
+    openSeeds() {
+      if (this.modal) return;
+      this.modal = 'seeds';
+      this.buyArmSeed = null;
+      this.sdMsg.setText('');
+      this.renderSeeds();
+      this.sdBox.setVisible(true);
+    }
+
+    closeSeeds() { this.sdBox.setVisible(false); if (this.modal === 'seeds') this.modal = null; }
+
+    renderSeeds() {
+      const s = this.s;
+      this.sdCards.forEach((c) => {
+        const own = s.seeds.includes(c.k), on = this.tool === c.k;
+        c.bg.clear();
+        c.bg.fillStyle(own ? (on ? 0xffe082 : 0xffffff) : 0xeeeeee, 1); c.bg.fillRoundedRect(-57, -75, 114, 150, 16);
+        c.bg.lineStyle(on ? 5 : 3, on ? 0xff9800 : 0xd7ccc8, 1); c.bg.strokeRoundedRect(-57, -75, 114, 150, 16);
+        c.icon.setAlpha(own ? 1 : 0.45);
+        c.price.setText(own ? (this.subs() ? zhOf(c.k) : '') : '★' + PLANTS[c.k].price);
+        c.price.setColor(own ? '#6b7c8c' : '#e65100');
+      });
+    }
+
+    pickSeed(k) {
+      const s = this.s;
+      if (this.modal !== 'seeds') return;
+      if (s.seeds.includes(k)) {
+        this.closeSeeds();
+        this.tool = null;
+        this.selectTool(k);
+        return;
+      }
+      // 還沒有這種種子：第一次點顯示價格，3 秒內再點一次才買
+      const price = PLANTS[k].price;
+      if (this.buyArmSeed !== k) {
+        this.buyArmSeed = k;
+        this.time.delayedCall(3000, () => { if (this.buyArmSeed === k) { this.buyArmSeed = null; this.sdMsg.setText(''); } });
+        this.sdMsg.setText(s.stardust >= price ? '再點一次買下 ' + zhOf(k) + ' 種子 ★' + price : '星砂不夠，需要 ★' + price);
+        speak(k + ' seeds');
+        return;
+      }
+      this.buyArmSeed = null;
+      if (s.stardust < price) { this.sdMsg.setText('星砂不夠，需要 ★' + price); return; }
+      s.stardust -= price;
+      s.seeds.push(k);
+      s.lib[k] = true;
+      L.seen(s.words, k, s.day);
+      this.sdMsg.setText('買到了！New seeds: ' + k);
+      speak('New seeds! ' + k);
+      this.renderSeeds();
+      this.refreshLibrary();
+      this.refreshAll();
     }
 
     selectBag(k) {
@@ -1582,7 +1708,7 @@
         this.refreshAll();
         return;
       }
-      if (this.tool && PLANTS[this.tool] && !p.plant) {
+      if (this.tool && PLANTS[this.tool] && this.s.seeds.includes(this.tool) && !p.plant) {
         const k = this.tool;
         p.plant = k; p.progress = 0;
         this.s.lib[k] = true;
@@ -2487,9 +2613,13 @@
       const o = this.mo;
       o.done = true;
       this.touch(o.type === 'fruit' ? 'market' : 'clothes');
-      this.s.stardust += 4;
+      // 市集每天只有前 MARKET_PAID 單給星砂（原本沒有上限，可以一直刷）
+      const s = this.s;
+      if (!s.mkPaid || s.mkPaid.day !== s.day) s.mkPaid = { day: s.day, n: 0 };
+      const paid = s.mkPaid.n < MARKET_PAID;
+      if (paid) { s.mkPaid.n += 1; s.stardust += 4; }
       if (o.type === 'fruit') speak('Thank you!');
-      this.floatText(640, 300, 'Thank you!  +4 ★', '#d81b60', true);
+      this.floatText(640, 300, paid ? 'Thank you!  +4 ★' : 'Thank you!' + (this.subs() ? '  今天的星砂拿完了' : ''), '#d81b60', true);
       this.tweens.add({ targets: this.mkWho, y: this.mkWho.y - 30, yoyo: true, duration: 200 });
       this.refreshAll();
       this.time.delayedCall(BOT ? 50 : 1400, () => { if (this.modal === 'market' && this.mo === o) this.newOrder(); });
@@ -2675,16 +2805,18 @@
       return { who, say, zh };
     }
 
-    // 實驗站開著時時間暫停，為了不讓星砂可以無限刷：每站每天只有前 STATION_PAID 回合給星砂，之後照樣能玩
+    // 實驗站開著時時間暫停，為了不讓星砂可以無限刷：所有實驗站合計每天只有前 STATION_PAID 回合給星砂，之後照樣能玩
     stationDone(key, reward, msg) {
       const s = this.s;
+      reward = STATION_REWARD;
       this.touch(key);
       if (CAVE.some((c) => c.k === key)) { s.caveDone = (s.caveDone || 0) + 1; this.checkLight(); }
       if (LIGHTHOUSE.some((c) => c.k === key)) s.lightDone = (s.lightDone || 0) + 1;
       if (!s.paid || s.paid.day !== s.day) s.paid = { day: s.day };
-      const n = s.paid[key] || 0;
+      s.paid[key] = (s.paid[key] || 0) + 1;   // 各站完成次數（家長端推算用）
+      const n = s.paid._total || 0;
       if (n < STATION_PAID) {
-        s.paid[key] = n + 1;
+        s.paid._total = n + 1;
         s.stardust += reward;
         this.floatText(640, 330, msg + '  +' + reward + ' ★', '#d81b60', true);
       } else {
@@ -4727,7 +4859,7 @@
       this.modal = 'diary';
       this.held = null; this.tool = null; this.redrawTools();
       if (!s.diaryQ || s.diaryQ.day !== s.day) {
-        const q = L.diary(Object.assign({ weather: s.weather }, s.ev), { weather: WEATHER_KEYS, plant: PLANT_KEYS, animal: ANIMAL_KEYS, weekday: WEEK });
+        const q = L.diary(Object.assign({ weather: s.weather }, s.ev), { weather: WEATHER_KEYS, plant: s.seeds, animal: ANIMAL_KEYS, weekday: WEEK });
         s.diaryQ = Object.assign(q, { day: s.day, tries: 0, recorded: false, done: false, wrong: {} });
       }
       this.dyBox.setVisible(true);
@@ -4822,7 +4954,7 @@
     // --- 教學：檢查「是否已完成該步」，不檢查種了什麼 ---
     tutLines() {
       return [
-        { en: 'Tap a seed.',            zh: '點一下任何一種種子' },
+        { en: 'Tap the seeds.',         zh: '點種子袋，選一種種子' },
         { en: 'Plant it here.',         zh: '再點一塊空地，把它種下去' },
         { en: 'Water it.',              zh: '點澆水壺，再點你種的植物' },
         { en: 'Wait. It will grow.',    zh: '等一等，它會長大。看看太陽和雨' },
@@ -4874,9 +5006,9 @@
       if (s.tut >= 6 || this.modal || this.zone !== 'meadow') return null;
       const plots = s.plots;
       switch (TUT[s.tut]) {
-        case 'seed': return { x: TOOL_X.bean, y: 585 };
+        case 'seed': return { x: TOOL_X.seeds, y: 585 };
         case 'plant': {
-          if (!this.tool || !PLANTS[this.tool]) return { x: TOOL_X.bean, y: 585 };
+          if (!this.tool || !PLANTS[this.tool]) return { x: TOOL_X.seeds, y: 585 };
           const i = [1, 2, 4, 5, 0, 3].find((j) => !plots[j].plant);
           return i == null ? null : { x: this.plotObjs[i].x, y: this.plotObjs[i].y - 100 };
         }
@@ -4891,7 +5023,7 @@
         }
         case 'give':
           if (!s.wishes.rabbit) return null;
-          return this.held ? { x: RABBIT.x, y: RABBIT.y - 130 } : { x: BAG_X.bean, y: 585 };
+          return this.held ? { x: RABBIT.x, y: RABBIT.y - 130 } : { x: BAG_X[PLANT_KEYS.find((k) => (s.inv[k] || 0) > 0) || 'carrot'], y: 585 };
         default: return null;
       }
     }
@@ -4949,7 +5081,9 @@
     // --- 重繪 ---
     redrawTools() {
       Object.values(this.tools).forEach((t) => {
-        const on = this.tool === t.k;
+        // 種子袋：手上拿著種子時亮起來，並顯示那種種子的圖
+        const on = t.k === 'seeds' ? !!PLANTS[this.tool] : this.tool === t.k;
+        if (t.k === 'seeds') { drawIcon(t.icon, PLANTS[this.tool] ? this.tool : 'carrot'); t.label.setText(PLANTS[this.tool] ? this.tool : 'seeds'); }
         t.bg.clear();
         t.bg.fillStyle(on ? 0xffe082 : 0xf1f5f9, 1); t.bg.fillRoundedRect(-50, -42, 100, 84, 18);
         if (on) { t.bg.lineStyle(4, 0xff9800, 1); t.bg.strokeRoundedRect(-50, -42, 100, 84, 18); }
@@ -4957,9 +5091,10 @@
       Object.values(this.bag).forEach((b) => {
         const on = this.held === b.k;
         const n = this.s.inv[b.k] || 0;
+        b.c.setVisible(this.s.seeds.includes(b.k));
         b.bg.clear();
-        b.bg.fillStyle(on ? 0xffe082 : 0xf6f8fa, 1); b.bg.fillRoundedRect(-61, -40, 122, 80, 18);
-        if (on) { b.bg.lineStyle(4, 0xff9800, 1); b.bg.strokeRoundedRect(-61, -40, 122, 80, 18); }
+        b.bg.fillStyle(on ? 0xffe082 : 0xf6f8fa, 1); b.bg.fillRoundedRect(-45, -40, 90, 80, 16);
+        if (on) { b.bg.lineStyle(4, 0xff9800, 1); b.bg.strokeRoundedRect(-45, -40, 90, 80, 16); }
         b.n.setText('x' + n);
         b.c.setAlpha(n > 0 ? 1 : 0.45);
       });
@@ -5037,6 +5172,11 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (this.modal === 'seeds') {
+        const r = Math.random();
+        if (r < 0.15) this.closeSeeds(); else this.pickSeed(PLANT_KEYS[Math.floor(Math.random() * PLANT_KEYS.length)]);
+        return;
+      }
       if (this.modal === 'lab') {
         if (Math.random() < 0.03) { this.closeModal(); return; }
         const q = this.xq, R = (n) => Math.floor(Math.random() * n);

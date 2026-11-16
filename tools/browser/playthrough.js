@@ -81,12 +81,22 @@
       if (!p.plant) {
         // 樹蔭（0、3）種紅蘿蔔；其他依願望需要或輪流
         const shade = i % 3 === 0;
-        const k = shade ? 'carrot' : (wanted.find((w) => (s.inv[w] || 0) === 0) || ['bean', 'rose', 'carrot'][(s.day + i) % 3]);
+        // 沒種過的作物先種一次（才會進圖鑑、出現在願望裡），再依願望需要或輪流
+        const fresh = s.seeds.find((k2) => !s.lib[k2]);
+        const k = shade ? 'carrot' : (fresh || wanted.find((w) => (s.inv[w] || 0) === 0) || s.seeds[(s.day + i) % s.seeds.length]);
         sc.tool = k; sc.onPlot(i);
       }
       if (p.plant && p.water < 0.3) { sc.tool = 'water'; sc.onPlot(i); }
     });
     sc.tool = null;
+  }
+
+  // 星砂夠就買新種子（留 10 顆備用）
+  function buySeeds(sc, s) {
+    const next = [['corn', 20], ['potato', 35], ['grape', 50]].find(([k]) => !s.seeds.includes(k));
+    if (!next || s.stardust < next[1] + 10) return;
+    sc.openSeeds(); sc.pickSeed(next[0]); sc.pickSeed(next[0]); sc.closeSeeds();
+    A.log.push('day ' + s.day + ' 買 ' + next[0]);
   }
 
   function wishes(sc, s) {
@@ -151,9 +161,10 @@
         return;
       }
       A.lastModal = null; A.modalFrames = 0;
-      if (A.today !== s.day) planDay(sc, s);
+      if (A.today !== s.day) { (A.dust = A.dust || []).push(s.stardust); planDay(sc, s); }
       farm(sc, s);
       wishes(sc, s);
+      buySeeds(sc, s);
       forest(sc, s);
       if (A.todo.length && s.t > 5) A.todo.shift()();
     } catch (e) { A.errors.push('day ' + s.day + ' ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
@@ -172,7 +183,7 @@
     } catch (e) { A.errors.push('step ' + (e.stack || e).toString().split('\n').slice(0, 2).join(' | ')); }
     g.renderer.render = rr;
     const s = __ci.state;
-    return { day: s.day, stardust: s.stardust, lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
+    return { day: s.day, stardust: s.stardust, seeds: s.seeds.join(','), dustByDay: (A.dust || []).join(' '), buys: A.log.filter((l) => /買/.test(l)), lots: s.lots.filter((l) => l.animal).length + '/' + s.lotsOpen, lib: __ci.scene.libCount(), harvested: s.harvested, gave: s.gaveTotal, caveDone: s.caveDone, lightDone: s.lightDone, milestones: A.milestones, errors: A.errors.slice(-5) };
   };
 })();
 'agent ready';
