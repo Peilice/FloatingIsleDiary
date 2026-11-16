@@ -157,6 +157,7 @@
     { kind: 'picked',  wt: 2, list: (ev) => ev.picked,  pool: 'plant', make: (w) => ['I picked ' + an(w), '.'] },
     { kind: 'gave',    wt: 2, list: (ev) => ev.gave,    pool: 'plant', make: (w) => ['I gave ' + an(w), ' to my friend.'] },
     { kind: 'came',    wt: 3, list: (ev) => ev.came || [], pool: 'animal', make: (w) => [cap(an(w)), ' came to my island.'] },
+    { kind: 'party',   wt: 4, list: (ev) => ev.party || [], pool: 'weekday', make: (w) => ['I went to a party on ', '.'] },
   ];
   /* ev：{ weather, planted[], picked[], gave[], came[] }，pools：{ weather[], plant[], animal[] }
    * 只選「至少湊得出 3 個選項」的句型；當天種了兩種時，另一種不能當干擾項 */
