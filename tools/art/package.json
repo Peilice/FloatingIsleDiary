@@ -1,0 +1,8 @@
+{
+  "name": "floating-isle-art",
+  "private": true,
+  "description": "貼紙素材產生器：node stickers.js 產生 SVG 與 PNG",
+  "devDependencies": {
+    "@resvg/resvg-js": "2.6.2"
+  }
+}

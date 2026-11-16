@@ -12,7 +12,10 @@
   const PAPER = 0xfbf6ea;           // 手帳內頁
   // 貼紙素材（tools/art/stickers.js 產生，放在 game/art/）
   const ART_KEYS = ['panda', 'lion', 'tiger', 'bear', 'dog', 'pig', 'chicken', 'elephant', 'snake', 'deer', 'dolphin', 'whale',
-    'rabbit', 'frog', 'duck', 'fish', 'bird', 'monkey', 'cow', 'horse', 'fox', 'stamp'];
+    'rabbit', 'frog', 'duck', 'fish', 'bird', 'monkey', 'cow', 'horse', 'fox', 'stamp',
+    'apple-red', 'apple-green', 'apple-yellow', 'grape-purple', 'grape-green', 'banana',
+    'hat', 'coat', 'umbrella', 'raincoat', 'shoes'];
+  const fruitArt = (item, color) => 'st-' + (item === 'banana' ? 'banana' : item + '-' + color);
   const params = new URLSearchParams(location.search);
   const FAST = Number(params.get('fast')) || 0;
   const SPEED = FAST > 1 ? FAST : (FAST ? 4 : 1);
@@ -1430,8 +1433,8 @@
   // ---------- 島嶼主畫面 ----------
   class Island extends Phaser.Scene {
     preload() {
-      // 貼紙用 2 倍解析度點陣化，顯示時縮小，平板上才清楚
-      ART_KEYS.forEach((k) => this.load.svg('st-' + k, 'art/' + k + '.svg', { width: 320, height: 320 }));
+      // 貼紙是 tools/art/stickers.js 預先輸出的 320px PNG（2 倍解析度），顯示時縮小
+      ART_KEYS.forEach((k) => this.load.image('st-' + k, 'art/' + k + '.png'));
     }
 
     constructor() { super('Island'); }
@@ -3035,7 +3038,10 @@
         bg.fillStyle(0xdcc49b, 1); bg.fillRoundedRect(-68, 18, 136, 34, { tl: 0, tr: 0, bl: 18, br: 18 });
         bg.lineStyle(3, INK, 1); bg.lineBetween(-68, 18, 68, 18);
         const g = this.add.graphics({ y: -6 }).setScale(1.5); drawFruit(g, item, color);
+        const art = fruitArt(item, color), has = this.textures.exists(art);
+        g.setVisible(!has);
         b.add([bg, g]);
+        if (has) b.add(this.add.image(0, -8, art).setDisplaySize(96, 96));
         b.setSize(144, 104).setInteractive({ useHandCursor: true });
         b.on('pointerdown', () => this.addFruit(i));
         c.add(b);
@@ -3044,8 +3050,9 @@
       this.mkBasket = this.add.container(915, 395).setAngle(1.5);
       const bk = this.add.graphics(); drawStickerCard(bk, 270, 170);
       this.mkBasketG = [0, 1, 2, 3, 4].map(() => this.add.graphics({ y: -4 }).setScale(1.1).setVisible(false));
+      this.mkBasketI = [0, 1, 2, 3, 4].map(() => this.add.image(0, -4, 'st-apple-red').setDisplaySize(54, 54).setVisible(false));
       this.mkBasketN = txt(this, 0, 48, '', 24, '#6b7686', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5);
-      this.mkBasket.add([bk].concat(this.mkBasketG, [this.mkBasketN, txt(this, 0, -58, 'Basket 籃子', 20, '#a0573a').setOrigin(0.5)]));
+      this.mkBasket.add([bk].concat(this.mkBasketG, this.mkBasketI, [this.mkBasketN, txt(this, 0, -58, 'Basket 籃子', 20, '#a0573a').setOrigin(0.5)]));
       this.mkClear = makeButton(this, 830, 524, 120, 56, 0x8fa3b3, 'Clear', 24, () => this.clearFruit());
       this.mkGive = makeButton(this, 930, 604, 270, 66, 0x2f8a5b, 'Here you are.', 26, () => this.giveFruit());
       c.add([this.mkBasket, this.mkClear, this.mkGive]);
@@ -3055,13 +3062,14 @@
         const card = this.add.container(640 + (i - 1.5) * 210, 470).setAngle([-2.5, 1.5, -1, 2.5][i]);
         const bg = this.add.graphics(); drawStickerCard(bg, 180, 214);
         const icon = makeIcon(this, 'hat', 0, -28, 1.8);
+        const img = this.add.image(0, -30, 'st-hat').setDisplaySize(124, 124).setVisible(false);
         const en = txt(this, 0, 48, '', 30, '#2b3a55', { fontFamily: FONT_EN, fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 80, '', 20, '#4f5a6b').setOrigin(0.5);
-        card.add([bg, icon, en, zh]);
-        card.setSize(170, 200).setInteractive({ useHandCursor: true });
+        card.add([bg, icon, img, en, zh]);
+        card.setSize(180, 214).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickCloth(i));
         c.add(card);
-        return { card, icon, en, zh, x: card.x };
+        return { card, icon, img, en, zh, x: card.x };
       });
       // 指路：十字路口＋四個方向的地點卡片（上、左、右、下）
       this.mkRoad = this.add.graphics();
@@ -3178,6 +3186,9 @@
         if (fruit || way) return;
         const k = o.rack[i];
         drawIcon(c.icon, k);
+        const has = this.textures.exists('st-' + k);
+        c.icon.setVisible(!has); c.img.setVisible(has);
+        if (has) c.img.setTexture('st-' + k).setDisplaySize(124, 124);
         c.en.setText(k);
         c.zh.setText(this.subs() && st === 0 ? zhOf(k) : '');
         c.card.setAlpha(o.wrong[k] ? 0.35 : 1);
@@ -3185,9 +3196,14 @@
       if (fruit) {
         // 籃子裡的水果：最多 5 個排一排（先建好 5 個圖，依數量顯示）
         const b = o.basket, step = 44, x0 = -((b.n - 1) * step) / 2;
+        const art = b.bin != null && fruitArt(BINS[b.bin][0], BINS[b.bin][1]), has = art && this.textures.exists(art);
         this.mkBasketG.forEach((g, i) => {
-          g.setVisible(b.bin != null && i < b.n);
-          if (b.bin != null && i < b.n) { g.setX(x0 + i * step); drawFruit(g, BINS[b.bin][0], BINS[b.bin][1]); }
+          const on = b.bin != null && i < b.n;
+          g.setVisible(on && !has);
+          if (on && !has) { g.setX(x0 + i * step); drawFruit(g, BINS[b.bin][0], BINS[b.bin][1]); }
+          const im = this.mkBasketI[i];
+          im.setVisible(on && has);
+          if (on && has) im.setTexture(art).setDisplaySize(54, 54).setX(x0 + i * step);
         });
         this.mkBasketN.setText(b.n ? 'x ' + b.n : '');
       }

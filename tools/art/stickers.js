@@ -47,6 +47,41 @@ function bumps(cx, cy, r, n, br) {
   return d + 'Z';
 }
 
+// 蘋果：同一個外形換顏色
+function apple(c) {
+  return [
+    P('M120 78 Q150 54 178 78 Q204 106 194 150 Q182 198 144 202 Q130 204 120 196 Q110 204 96 202 Q58 198 46 150 Q36 106 62 78 Q90 54 120 78Z', G(c), ink()),
+    P('M120 80 Q118 60 126 44', 'none', `stroke="${INK}" stroke-width="10" stroke-linecap="round"`),
+    P('M120 80 Q118 60 126 44', 'none', `stroke="#7a4f2a" stroke-width="5" stroke-linecap="round"`),
+    P('M128 56 Q150 34 176 44 Q160 70 128 56Z', G('#5aa83f'), ink(3.5)),
+    shine(80, 104, 14, 24, 20), C(92, 140, 4, '#ffffff', 'opacity=".5"'),
+  ];
+}
+// 葡萄：一串圓粒（上寬下窄）
+function grape(c) {
+  const rows = [[4, 88], [3, 122], [2, 154], [1, 184]];
+  const out = [P('M120 72 Q122 52 134 40', 'none', `stroke="${INK}" stroke-width="10" stroke-linecap="round"`),
+    P('M120 72 Q122 52 134 40', 'none', `stroke="#6d4a2a" stroke-width="5" stroke-linecap="round"`),
+    P('M128 60 Q162 36 188 56 Q162 78 128 60Z', G('#5aa83f'), ink(3.5))];
+  rows.forEach(([n, y]) => {
+    for (let i = 0; i < n; i++) {
+      const x = 120 + (i - (n - 1) / 2) * 36;
+      out.push(C(x, y, 20, G(c), ink(3.6)), C(x - 7, y - 7, 4.5, '#ffffff', 'opacity=".6"'));
+    }
+  });
+  return out;
+}
+// 一隻球鞋
+function shoe(x, y) {
+  const t = (d) => d.replace(/(-?\d+(\.\d+)?) (-?\d+(\.\d+)?)/g, (m, a, _, b) => (Number(a) + x) + ' ' + (Number(b) + y));
+  return [
+    P(t('M6 40 Q4 10 30 6 L56 4 Q66 26 96 30 Q120 34 122 52 L122 62 L6 62Z'), G('#3d7fd6'), ink()),
+    P(t('M2 58 L126 58 Q126 76 110 76 L14 76 Q2 76 2 58Z'), '#ffffff', ink()),
+    P(t('M44 22 L66 34 M40 32 L62 42 M36 42 L56 50'), 'none', `stroke="#ffffff" stroke-width="4" stroke-linecap="round"`),
+    P(t('M18 18 Q30 12 44 12'), 'none', `stroke="${light('#3d7fd6', 0.5)}" stroke-width="5" stroke-linecap="round"`),
+  ].join('');
+}
+
 const ART = {
   panda: () => [
     C(66, 64, 24, G('#2f333b'), ink()), C(174, 64, 24, G('#2f333b'), ink()),
@@ -225,6 +260,59 @@ const ART = {
     E(120, 150, 10, 7.5, INK), shine(116, 148, 3.5, 2, 0), smile(120, 162, 7),
     cheek(82, 146, 8), cheek(158, 146, 8), shine(92, 82, 18, 8),
   ],
+  // ---- 水果（市集水果訂單：BINS 的 6 種）----
+  'apple-red': () => apple('#e8443a'),
+  'apple-green': () => apple('#8cc63f'),
+  'apple-yellow': () => apple('#f5cf3a'),
+  'grape-purple': () => grape('#8e4fb5'),
+  'grape-green': () => grape('#a4cf55'),
+  banana: () => [
+    P('M64 70 Q40 140 96 186 Q150 214 196 176 Q150 186 118 156 Q84 124 84 72Z', G('#eebb2c'), ink()),
+    P('M60 64 L84 72 L80 56Z', '#6d5233', ink(3)),
+    P('M80 66 Q66 140 120 176 Q166 200 206 162 Q206 152 196 150 Q160 176 126 150 Q96 120 100 70Z', G('#f8d84e'), ink()),
+    P('M96 64 L100 74 L82 70Z', '#6d5233', ink(3)),
+    P('M206 162 L214 160 L208 150Z', '#6d5233', ink(3)),
+    P('M98 92 Q96 136 132 160', 'none', `stroke="${light('#f8d84e', 0.6)}" stroke-width="6" stroke-linecap="round"`),
+  ],
+  // ---- 衣物（市集衣物訂單）----
+  hat: () => [
+    E(120, 150, 100, 34, G('#e9c46a'), ink()),
+    P('M66 146 Q66 72 120 70 Q174 72 174 146 Q120 160 66 146Z', G('#f0cf7c'), ink()),
+    P('M68 126 Q120 142 172 126 L172 144 Q120 158 68 144Z', G('#e5484d'), ink(3.5)),
+    P('M80 110 Q120 116 160 110', 'none', `stroke="${dark('#f0cf7c', 0.15)}" stroke-width="2.5" stroke-linecap="round"`),
+    shine(98, 96, 14, 7),
+  ],
+  coat: () => [
+    P('M74 70 L40 100 L30 186 L62 190 L72 120 Z', G('#3f8fb5'), ink()),
+    P('M166 70 L200 100 L210 186 L178 190 L168 120 Z', G('#3f8fb5'), ink()),
+    P('M74 68 Q120 56 166 68 L176 206 Q120 216 64 206Z', G('#4aa0c6'), ink()),
+    P('M98 62 L120 96 L142 62 Q132 58 120 60 Q108 58 98 62Z', '#f6efe1', ink(3.5)),
+    P('M120 96 L120 208', 'none', ink(3.5)),
+    C(108, 122, 5.5, '#f6d36b', ink(2.5)), C(108, 150, 5.5, '#f6d36b', ink(2.5)), C(108, 178, 5.5, '#f6d36b', ink(2.5)),
+    P('M136 150 L160 150 L160 172 L136 172Z', G('#3f8fb5'), ink(3)),
+    shine(92, 92, 10, 18, 0),
+  ],
+  umbrella: () => [
+    P('M120 120 L120 196 Q120 214 138 214 Q154 214 154 198', 'none', `stroke="${INK}" stroke-width="11" stroke-linecap="round"`),
+    P('M120 120 L120 196 Q120 214 138 214 Q154 214 154 198', 'none', `stroke="#8a5a36" stroke-width="5" stroke-linecap="round"`),
+    P('M24 126 Q30 46 120 40 Q210 46 216 126 Q200 112 184 126 Q168 112 152 126 Q136 112 120 126 Q104 112 88 126 Q72 112 56 126 Q40 112 24 126Z', G('#e8443a'), ink()),
+    P('M120 40 Q96 80 88 126 Q104 112 120 126 Q136 112 152 126 Q144 80 120 40Z', G('#fff6ee'), ink(3.5)),
+    C(120, 36, 6, '#8a5a36', ink(3)), shine(70, 74, 16, 8),
+  ],
+  raincoat: () => [
+    P('M84 50 Q120 24 156 50 Q172 70 168 96 L72 96 Q68 70 84 50Z', G('#f6c43a'), ink()),
+    P('M92 96 Q120 64 148 96Z', '#fdf1c7', ink(3)),
+    P('M72 92 L36 122 L30 192 L60 196 L72 136Z', G('#f2b52c'), ink()),
+    P('M168 92 L204 122 L210 192 L180 196 L168 136Z', G('#f2b52c'), ink()),
+    P('M72 92 Q120 104 168 92 L182 210 Q120 222 58 210Z', G('#f8cd45'), ink()),
+    P('M120 104 L120 214', 'none', ink(3.5)),
+    C(108, 132, 5, '#ffffff', ink(2.5)), C(108, 160, 5, '#ffffff', ink(2.5)), C(108, 188, 5, '#ffffff', ink(2.5)),
+    P('M180 60 Q174 72 180 78 Q186 72 180 60Z', '#5ab4e6', ink(2)), P('M200 84 Q194 96 200 102 Q206 96 200 84Z', '#5ab4e6', ink(2)),
+    shine(96, 130, 9, 20, 0),
+  ],
+  shoes: () => [
+    shoe(36, 104), shoe(108, 132),
+  ],
   // 印章：選對時蓋在卡片上
   stamp: () => [
     `<g transform="rotate(-14 120 120)">`,
@@ -263,8 +351,16 @@ function svgFor(name) {
 `;
 }
 
+const { Resvg } = require('@resvg/resvg-js');   // cd tools/art && npm install
+const svgDir = path.join(__dirname, 'svg');
 const out = path.join(__dirname, '..', '..', 'game', 'art');
+fs.mkdirSync(svgDir, { recursive: true });
 fs.mkdirSync(out, { recursive: true });
-Object.keys(ART).forEach((k) => fs.writeFileSync(path.join(out, k + '.svg'), svgFor(k)));
-fs.writeFileSync(path.join(out, 'index.json'), JSON.stringify(Object.keys(ART)) + '\n');
-console.log('wrote', Object.keys(ART).length, 'stickers to', out);
+Object.keys(ART).forEach((k) => {
+  const svg = svgFor(k);
+  fs.writeFileSync(path.join(svgDir, k + '.svg'), svg);
+  // 2 倍解析度：顯示約 160px，點陣 320px
+  const png = new Resvg(svg, { fitTo: { mode: 'width', value: 320 } }).render().asPng();
+  fs.writeFileSync(path.join(out, k + '.png'), png);
+});
+console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)');

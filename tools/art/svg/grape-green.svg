@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#9fcd90"/><stop offset="0.55" stop-color="#5aa83f"/><stop offset="1" stop-color="#4f903e"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g4" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g5" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g6" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g7" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g8" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g9" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <radialGradient id="g10" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#cae39c"/><stop offset="0.55" stop-color="#a4cf55"/><stop offset="1" stop-color="#8cb050"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M120 72 Q122 52 134 40" fill="none" stroke="#2b3a55" stroke-width="10" stroke-linecap="round"/>
+    <path d="M120 72 Q122 52 134 40" fill="none" stroke="#6d4a2a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M128 60 Q162 36 188 56 Q162 78 128 60Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="66" cy="88" r="20" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="59" cy="81" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="102" cy="88" r="20" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="95" cy="81" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="138" cy="88" r="20" fill="url(#g3)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="131" cy="81" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="174" cy="88" r="20" fill="url(#g4)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="167" cy="81" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="84" cy="122" r="20" fill="url(#g5)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="77" cy="115" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="120" cy="122" r="20" fill="url(#g6)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="113" cy="115" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="156" cy="122" r="20" fill="url(#g7)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="149" cy="115" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="102" cy="154" r="20" fill="url(#g8)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="95" cy="147" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="138" cy="154" r="20" fill="url(#g9)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="131" cy="147" r="4.5" fill="#ffffff" opacity=".6"/>
+    <circle cx="120" cy="184" r="20" fill="url(#g10)" stroke="#2b3a55" stroke-width="3.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="113" cy="177" r="4.5" fill="#ffffff" opacity=".6"/>
+  </g>
+</svg>

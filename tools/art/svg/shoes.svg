@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#8eb5e7"/><stop offset="0.55" stop-color="#3d7fd6"/><stop offset="1" stop-color="#376eba"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#8eb5e7"/><stop offset="0.55" stop-color="#3d7fd6"/><stop offset="1" stop-color="#376eba"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M42 144 Q40 114 66 110 L92 108 Q102 130 132 134 Q156 138 158 156 L158 166 L42 166Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M38 162 L162 162 Q162 180 146 180 L50 180 Q38 180 38 162Z" fill="#ffffff" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M80 126 L102 138 M76 136 L98 146 M72 146 L92 154" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><path d="M54 122 Q66 116 80 116" fill="none" stroke="#9ebfeb" stroke-width="5" stroke-linecap="round"/>
+    <path d="M114 172 Q112 142 138 138 L164 136 Q174 158 204 162 Q228 166 230 184 L230 194 L114 194Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M110 190 L234 190 Q234 208 218 208 L122 208 Q110 208 110 190Z" fill="#ffffff" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M152 154 L174 166 M148 164 L170 174 M144 174 L164 182" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><path d="M126 150 Q138 144 152 144" fill="none" stroke="#9ebfeb" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

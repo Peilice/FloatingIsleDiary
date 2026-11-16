@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90bed4"/><stop offset="0.55" stop-color="#3f8fb5"/><stop offset="1" stop-color="#397b9f"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90bed4"/><stop offset="0.55" stop-color="#3f8fb5"/><stop offset="1" stop-color="#397b9f"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#96c8de"/><stop offset="0.55" stop-color="#4aa0c6"/><stop offset="1" stop-color="#4289ac"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90bed4"/><stop offset="0.55" stop-color="#3f8fb5"/><stop offset="1" stop-color="#397b9f"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M74 70 L40 100 L30 186 L62 190 L72 120 Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M166 70 L200 100 L210 186 L178 190 L168 120 Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M74 68 Q120 56 166 68 L176 206 Q120 216 64 206Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M98 62 L120 96 L142 62 Q132 58 120 60 Q108 58 98 62Z" fill="#f6efe1" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M120 96 L120 208" fill="none" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="108" cy="122" r="5.5" fill="#f6d36b" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="108" cy="150" r="5.5" fill="#f6d36b" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="108" cy="178" r="5.5" fill="#f6d36b" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M136 150 L160 150 L160 172 L136 172Z" fill="url(#g3)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="92" cy="92" rx="10" ry="18" fill="#ffffff" opacity=".45" transform="rotate(0 92 92)"/>
+  </g>
+</svg>

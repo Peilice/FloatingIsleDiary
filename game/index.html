@@ -9,14 +9,15 @@
 <title>浮島日記</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- 中文：粉圓（Huninn）；英文：Andika（識字教學字型）。離線時改用系統字型 -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Huninn&display=swap">
 <style>
   html, body { margin: 0; height: 100%; background: #cfe9ff; overflow: hidden; }
   #game { position: fixed; inset: 0; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
   canvas { display: block; touch-action: none; }
+  /* 字型放在專案裡，離線也能用（OFL 授權，見 fonts/OFL-*.txt；子集由 tools/fonts/subset.py 產生） */
+  /* 中文：粉圓 Huninn；英文：Andika（識字教學字型） */
+  @font-face { font-family: "Huninn"; src: url("fonts/Huninn-subset.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "Andika"; src: url("fonts/Andika-Regular.woff2") format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "Andika"; src: url("fonts/Andika-Bold.woff2") format("woff2"); font-weight: 700; font-display: block; }
 </style>
 </head>
 <body>

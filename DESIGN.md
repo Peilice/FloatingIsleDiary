@@ -179,7 +179,7 @@ components:
 **英文字型：** Andika（備援 Huninn、Segoe UI）
 **中文字型：** 粉圓 Huninn（備援 Noto Sans TC、Microsoft JhengHei、PingFang TC、Heiti TC）
 
-**Character:** Andika 是識字教學字型，a、g 是手寫形狀，I、l、1 好分辨，給剛學字母的孩子；粉圓圓潤、像手寫，讓中文跟貼紙世界同一個溫度。兩者經由 `index.html` 的 Google Fonts 載入，遊戲啟動前用 `fontsReady` 等字型（最多 2.5 秒），避免 canvas 先用系統字畫出來。
+**Character:** Andika 是識字教學字型，a、g 是手寫形狀，I、l、1 好分辨，給剛學字母的孩子；粉圓圓潤、像手寫，讓中文跟貼紙世界同一個溫度。兩者經由 `index.html` 的 @font-face 從 `game/fonts/` 載入，遊戲啟動前用 `fontsReady` 等字型（最多 2.5 秒），避免 canvas 先用系統字畫出來。
 
 ### Hierarchy
 - **Dialogue 對話**（Andika 700、46px，寬超過 560px 每次縮 2px，最小 34px）：居民說的那一句英文，墨線色，放在墨線對話框裡。
@@ -289,8 +289,6 @@ components:
 
 ## 已知待辦（不屬於系統規則）
 
-- 動物園以外的其他 15 種訂單，圖仍是程式繪製，只是放進貼紙卡框；目前只有動物園訂單的卡片與說話的居民使用 SVG 貼紙。
-- 字型仍從 Google Fonts 線上載入，尚未本機化；離線時退回系統字型，與 PWA 離線可玩的目標衝突。
-- SVG 素材尚未輸出成 PNG；目前靠瀏覽器即時點陣化。
-- iPad Safari 尚未實機驗證（SVG 濾鏡、字型載入、效能）。
+- 市集訂單裡，動物園、水果、衣物已經是貼紙素材；其他 14 種（指路、職業、學校用品、季節、食物、數字、身體、動作、感覺、時段、地點、物品、顏色、月份）的圖仍是程式繪製，放進貼紙卡框。
+- iPad Safari 尚未實機驗證（貼紙已改成預先輸出的 PNG，不再依賴瀏覽器的 SVG 濾鏡；仍需確認字型與效能）。
 - 草地、日記本、圖鑑、實驗站、邀請卡、設定等畫面尚未改版，仍是舊視覺。
