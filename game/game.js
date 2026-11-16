@@ -225,7 +225,7 @@
     { name: '植物生長與部位', codes: 'INb-Ⅱ-6、INa-Ⅱ-7、INe-Ⅱ-11', keys: ['plant'] },
     { name: '天氣與觀測', codes: 'INd-Ⅱ-4、INd-Ⅱ-6、INd-Ⅱ-7', keys: ['weather'] },
     { name: '衣物與天氣', codes: 'INf-Ⅱ-4', keys: ['clothes'] },
-    { name: '動物與棲地', codes: 'INc-Ⅱ-8、INb-Ⅱ-5、INb-Ⅱ-7', keys: ['habitat'] },
+    { name: '動物與棲地', codes: 'INc-Ⅱ-8、INb-Ⅱ-5、INb-Ⅱ-7', keys: ['habitat', 'classify'] },
     { name: '聲音與振動', codes: 'INe-Ⅱ-5、INe-Ⅱ-10', keys: ['sound', 'music', 'fog'] },
     { name: '溶解與溫度', codes: 'INe-Ⅱ-2、INe-Ⅱ-3', keys: ['tea'] },
     { name: '酸鹼與變色', codes: 'INe-Ⅱ-4', keys: ['acid'] },
@@ -375,6 +375,18 @@
     { k: 'magnet',    en: 'magnet',    zh: '磁鐵', kind: 'thing', fact: '磁鐵會吸住鐵做的東西，但銅和鋁做的東西吸不住。', hint: '去海灘試試磁鐵' },
   ].forEach((e) => LIB.push(e));
   const LIB_PER_PAGE = 8;
+  // 圖鑑篩選（遊戲企劃「動物外形與分類」）：依特徵篩選，自然形成分類活動。猴子用四肢攀爬，手腳不好分，不放進腳的分類
+  const LIB_FILTERS = [
+    { k: 'all',   en: 'All',          zh: '全部',     has: () => true },
+    { k: 'fly',   en: 'It can fly.',  zh: '會飛',     list: ['bird', 'duck', 'butterfly', 'bee'] },
+    { k: 'swim',  en: 'It can swim.', zh: '會游泳',   list: ['frog', 'duck', 'fish'] },
+    { k: 'six',   en: 'Six legs',     zh: '6 隻腳',   list: ['butterfly', 'bee', 'ant'] },
+    { k: 'four',  en: 'Four legs',    zh: '4 隻腳',   list: ['frog', 'cow', 'horse'] },
+    { k: 'two',   en: 'Two legs',     zh: '2 隻腳',   list: ['bird', 'duck'] },
+    { k: 'zero',  en: 'No legs',      zh: '沒有腳',   list: ['fish'] },
+    { k: 'plant', en: 'Plants',       zh: '植物',     has: (e) => e.kind === 'plant' },
+    { k: 'sky',   en: 'Weather and sky', zh: '天氣和天空', has: (e) => e.kind === 'weather' || e.kind === 'sky' },
+  ];
 
   // 工具列：種子袋（點了選種子、買種子）、澆水壺、鏟子；背包依作物順序排，只顯示有種子的作物
   const TOOL_KEYS = ['seeds', 'water', 'shovel'];
@@ -1802,9 +1814,19 @@
         c.add(card);
         this.libCards.push(slot);
       }
-      const pages = Math.ceil(LIB.length / LIB_PER_PAGE);
-      this.libPrev = makeButton(this, 860, 92, 64, 56, 0x90a4ae, '◀', 24, () => { this.libPage = (this.libPage + pages - 1) % pages; this.refreshLibrary(); });
-      this.libNext = makeButton(this, 1000, 92, 64, 56, 0x90a4ae, '▶', 24, () => { this.libPage = (this.libPage + 1) % pages; this.refreshLibrary(); });
+      const pages = () => Math.max(1, Math.ceil(this.libList().length / LIB_PER_PAGE));
+      this.libPrev = makeButton(this, 860, 92, 64, 56, 0x90a4ae, '◀', 24, () => { this.libPage = (this.libPage + pages() - 1) % pages(); this.refreshLibrary(); });
+      this.libNext = makeButton(this, 1000, 92, 64, 56, 0x90a4ae, '▶', 24, () => { this.libPage = (this.libPage + 1) % pages(); this.refreshLibrary(); });
+      // 篩選鈕：點一下換下一種分類
+      this.libFilter = 0;
+      this.libFilterBtn = makeButton(this, 300, 92, 220, 56, 0x26a69a, '篩選', 20, () => {
+        this.libFilter = (this.libFilter + 1) % LIB_FILTERS.length; this.libPage = 0;
+        const f = LIB_FILTERS[this.libFilter];
+        if (f.k !== 'all') { speak(f.en); this.touch('classify'); this.libDetailEn.setText(f.en); this.libDetailZh.setText(f.zh + '的有這些'); }
+        this.refreshLibrary();
+      });
+      this.libFilterBtn.label = this.libFilterBtn.list.find((o) => o.type === 'Text');
+      c.add(this.libFilterBtn);
       this.libPageText = txt(this, 930, 92, '', 22, '#6b7c8c').setOrigin(0.5);
       c.add([this.libPrev, this.libNext, this.libPageText]);
       this.libDetailEn = txt(this, 640, 510, '', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -6375,12 +6397,21 @@
       b.zh.setX(showPic ? 118 : 24).setText(showZh ? '我想要' + (PARTS[item] ? PARTS[item].zh : zhOf(item)) : '');
     }
 
+    libList() {
+      const f = LIB_FILTERS[this.libFilter || 0];
+      return LIB.filter((e) => (f.list ? f.list.includes(e.k) : f.has(e)));
+    }
+
     refreshLibrary() {
       if (this.navC) this.checkCave();
-      const pages = Math.ceil(LIB.length / LIB_PER_PAGE);
+      const list = this.libList();
+      const pages = Math.max(1, Math.ceil(list.length / LIB_PER_PAGE));
+      if (this.libPage >= pages) this.libPage = 0;
       this.libPageText.setText((this.libPage + 1) + ' / ' + pages);
+      const f = LIB_FILTERS[this.libFilter || 0];
+      if (this.libFilterBtn) this.libFilterBtn.label.setText('篩選：' + f.zh + (f.k === 'all' ? '' : '（' + list.length + '）'));
       this.libCards.forEach((slot, i) => {
-        const e = LIB[this.libPage * LIB_PER_PAGE + i];
+        const e = list[this.libPage * LIB_PER_PAGE + i];
         slot.e = e || null;
         slot.card.setVisible(!!e);
         if (!e) return;
