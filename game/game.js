@@ -70,6 +70,34 @@
   const FOREST_NEED = 5;        // 完成幾個願望後解鎖池塘森林（§5）
   const art = (w) => (/^[aeiou]/.test(w) ? 'an ' : 'a ') + w;
 
+  // 海灘（M4）：在草地左邊一個畫面寬；收成 5 次、圖鑑 5 項後開放（§5）
+  const BOFF = -1280;
+  const BEACH_HARVEST = 5, BEACH_LIB = 5;
+  const STATION_PAID = 2;   // 每個實驗站每天前幾回合給星砂
+  const BEACH = [
+    { k: 'tea',    x: 250,  en: 'Tea',    zh: '甜茶',     icon: 'tea',    color: 0xef6c00 },
+    { k: 'acid',   x: 510,  en: 'Juice',  zh: '紫色花汁', icon: 'flask',  color: 0x8e24aa },
+    { k: 'magnet', x: 770,  en: 'Magnet', zh: '磁鐵',     icon: 'magnet', color: 0xc62828 },
+    { k: 'dig',    x: 1030, en: 'Dig',    zh: '挖挖看',   icon: 'shovel', color: 0x6d4c2f },
+  ];
+  // 紫色花汁（紫甘藍汁之類的指示劑）：酸性變粉紅、中性維持紫色、鹼性變綠（§4.8）
+  const TASTES = ['sour', 'sweet', 'bitter'];
+  const TASTE_COLOR = { sour: 0xf48fb1, sweet: 0x9575cd, bitter: 0x81c784 };
+  // 磁鐵只吸含鐵的東西；metal 標出「是金屬但不會被吸」的（銅幣、鋁罐），用來打破迷思（§4.12）
+  const MAG_ITEMS = [
+    { k: 'nail',   en: 'nail',       zh: '鐵釘',   iron: true,  metal: true },
+    { k: 'clip',   en: 'paper clip', zh: '迴紋針', iron: true,  metal: true },
+    { k: 'screw',  en: 'screw',      zh: '螺絲',   iron: true,  metal: true },
+    { k: 'coin',   en: 'coin',       zh: '銅幣',   iron: false, metal: true },
+    { k: 'can',    en: 'can',        zh: '鋁罐',   iron: false, metal: true },
+    { k: 'eraser', en: 'eraser',     zh: '橡皮擦', iron: false, metal: false },
+    { k: 'pencil', en: 'pencil',     zh: '鉛筆',   iron: false, metal: false },
+    { k: 'marble', en: 'marble',     zh: '玻璃珠', iron: false, metal: false },
+  ];
+  const SOILS = ['rock', 'sand', 'mud'];
+  // 答錯後的提示只描述特徵、不說出答案
+  const SOIL_HINT = { rock: 'It is hard and big. 它硬硬的、一大塊', sand: 'It is small and dry. 它一粒一粒、乾乾的', mud: 'It is wet and soft. 它濕濕軟軟的' };
+
   // 市集與日曆（§4.4、§4.17）：森林住進 TOWN_NEED 隻動物（加上兔子就是第 3 位居民，§5）後開放
   const TOWN_NEED = 2;
   const WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -119,6 +147,7 @@
       wishes: {}, fwho: null, lastWish: null, sched: { n: 0 }, gaveTotal: 0,
       forestOpen: false, lots: LOT_X.map(() => ({ hab: null, animal: null })), lotsOpen: LOTS_START, visitor: null,
       town: false, party: null, lastInvite: 0,
+      harvested: 0, beachOpen: false,
       subs: true, // 中文字幕：英文句子下方的中文翻譯（設定裡可關）
       ev: emptyEvents(), askedDay: 0, diary: [], diaryQ: null,
     };
@@ -152,8 +181,15 @@
     if ('wish' in s) { if (s.wish) s.wishes.rabbit = s.wish; delete s.wish; }
     if (!s.ev.came) s.ev.came = [];
     if (!s.ev.party) s.ev.party = [];
+    // M4 前沒有記錄收成次數：用背包裡的作物＋送出去的願望估計（寧可少算，不憑空給）。
+    // 用 harvestedV 標記是否轉換過（新存檔的預設值 0 會讓「沒有這個欄位」的判斷失效）
+    if (s.harvestedV !== 1) {
+      const est = PLANT_KEYS.reduce((a, k) => a + (s.inv[k] || 0), 0) + (s.gaveTotal || 0);
+      s.harvested = Math.max(s.harvested || 0, est);
+      s.harvestedV = 1;
+    }
     while (s.lots.length < LOT_X.length) s.lots.push({ hab: null, animal: null }); // 森林擴建前的存檔
-    if (params.get('unlock')) s.forestOpen = true; // 偵錯：直接開放池塘森林
+    if (params.get('unlock')) { s.forestOpen = true; s.beachOpen = true; } // 偵錯：直接開放池塘森林與海灘
     return s;
   }
   function saveState(s) {
@@ -341,6 +377,21 @@
         g.fillRoundedRect(2, -2, 24, 14, 6); g.fillRoundedRect(8, -10, 12, 12, 4);
         g.fillStyle(0xffffff, 1); g.fillRect(-26, 9, 24, 3); g.fillRect(2, 9, 24, 3);
         break;
+      case 'tea':
+        g.fillStyle(0xeceff1, 1); g.fillRoundedRect(-18, -14, 36, 34, 8);
+        g.lineStyle(4, 0x90a4ae, 1); g.beginPath(); g.arc(20, 2, 8, -Math.PI / 2, Math.PI / 2, false); g.strokePath();
+        g.fillStyle(0xd38b3c, 1); g.fillRect(-14, -8, 28, 24);
+        g.lineStyle(3, 0xbdbdbd, 1); [-6, 4].forEach((x) => g.lineBetween(x, -20, x + 3, -30));
+        break;
+      case 'flask':
+        g.fillStyle(0xeceff1, 1); g.fillRect(-6, -26, 12, 16); g.fillTriangle(-6, -12, 6, -12, 22, 22); g.fillTriangle(-6, -12, -22, 22, 22, 22);
+        g.fillStyle(0x9575cd, 1); g.fillTriangle(-16, 10, 16, 10, 20, 20); g.fillTriangle(-16, 10, -20, 20, 20, 20);
+        break;
+      case 'magnet':
+        g.lineStyle(12, 0xc62828, 1); g.beginPath(); g.arc(0, -4, 16, Math.PI, 0, false); g.strokePath();
+        g.lineBetween(-16, -4, -16, 14); g.lineBetween(16, -4, 16, 14);
+        g.fillStyle(0xeceff1, 1); g.fillRect(-22, 10, 12, 10); g.fillRect(10, 10, 12, 10);
+        break;
       case 'apple': drawFruit(g, 'apple', 'red'); break;
       case 'grape': drawFruit(g, 'grape', 'purple'); break;
       case 'banana': drawFruit(g, 'banana', 'yellow'); break;
@@ -363,6 +414,39 @@
     } else {
       g.lineStyle(11, c, 1); g.beginPath(); g.arc(0, -20, 26, 0.3 * Math.PI, 0.8 * Math.PI, false); g.strokePath();
       g.fillStyle(0x6d4c2f, 1); g.fillCircle(Math.cos(0.3 * Math.PI) * 26, -20 + Math.sin(0.3 * Math.PI) * 26, 3);
+    }
+  }
+
+  // 磁鐵站的東西
+  function drawMagItem(g, k) {
+    g.clear();
+    switch (k) {
+      case 'nail': g.fillStyle(0x78909c, 1); g.fillRect(-3, -20, 6, 34); g.fillRect(-10, -22, 20, 5); g.fillTriangle(-3, 14, 3, 14, 0, 22); break;
+      case 'clip': g.lineStyle(3, 0x90a4ae, 1); g.strokeRoundedRect(-10, -20, 20, 40, 9); g.strokeRoundedRect(-5, -12, 10, 26, 5); break;
+      case 'screw': g.fillStyle(0x78909c, 1); g.fillRect(-4, -14, 8, 30); g.fillRect(-11, -20, 22, 7);
+        g.lineStyle(2, 0x546e7a, 1); for (let y = -10; y < 14; y += 5) g.lineBetween(-5, y, 5, y + 3); break;
+      case 'coin': g.fillStyle(0xc27c4e, 1); g.fillCircle(0, 0, 18); g.lineStyle(3, 0x9c5a33, 1); g.strokeCircle(0, 0, 13); break;
+      case 'can': g.fillStyle(0xcfd8dc, 1); g.fillRoundedRect(-13, -20, 26, 40, 6); g.fillStyle(0xe53935, 1); g.fillRect(-13, -6, 26, 12); break;
+      case 'eraser': g.fillStyle(0xf8bbd0, 1); g.fillRoundedRect(-20, -10, 40, 20, 5); g.fillStyle(0x64b5f6, 1); g.fillRect(-20, -10, 14, 20); break;
+      case 'pencil': g.fillStyle(0xfdd835, 1); g.fillRect(-20, -5, 32, 10); g.fillStyle(0xf3d2b3, 1); g.fillTriangle(12, -5, 12, 5, 22, 0);
+        g.fillStyle(0x333333, 1); g.fillTriangle(19, -1.5, 19, 1.5, 22, 0); g.fillStyle(0xf48fb1, 1); g.fillRect(-24, -5, 4, 10); break;
+      default: g.fillStyle(0x81d4fa, 0.85); g.fillCircle(0, 0, 15); g.fillStyle(0xffffff, 0.7); g.fillCircle(-5, -5, 4);
+    }
+  }
+  // 石頭、沙子、泥巴；amount 是堆的多寡（0～1），樣本用 1
+  function drawSoil(g, k, amount) {
+    g.clear();
+    if (amount <= 0) { g.lineStyle(2, 0xbcaaa4, 1); g.strokeEllipse(0, 14, 60, 16); return; }
+    const sc = 0.5 + amount * 0.5;
+    if (k === 'rock') {
+      g.fillStyle(0x90a4ae, 1); g.fillPoints([[-26, 14], [-22, -8], [-6, -20], [14, -16], [26, 0], [22, 16]].map(([x, y]) => new Phaser.Geom.Point(x * sc, y * sc + 6)), true);
+      g.fillStyle(0xb0bec5, 1); g.fillTriangle(-10 * sc, -12 * sc + 6, 6 * sc, -12 * sc + 6, -4 * sc, 0 * sc + 6);
+    } else if (k === 'sand') {
+      g.fillStyle(0xe8cf8f, 1); g.fillEllipse(0, 10, 64 * sc, 30 * sc);
+      g.fillStyle(0xc9a85f, 1); for (let i = 0; i < 14; i++) g.fillCircle(((i * 37) % 50 - 25) * sc, (((i * 17) % 18) - 2) * sc + 6, 1.8);
+    } else {
+      g.fillStyle(0x6d4c2f, 1); g.fillEllipse(0, 10, 60 * sc, 30 * sc); g.fillCircle(-12 * sc, 2, 10 * sc); g.fillCircle(10 * sc, 0, 12 * sc);
+      g.fillStyle(0xffffff, 0.35); g.fillEllipse(6 * sc, -2, 12 * sc, 5 * sc);
     }
   }
 
@@ -481,21 +565,23 @@
       this.vq = { tries: 0, peeked: false, reveal: false, recorded: false };
       this.bushT = 8; this.bushReady = false;
       this.tutShown = -1;
-      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
+      this.stats = { wish: {}, weather: { q: 0, first: 0 }, diary: { q: 0, first: 0 }, habitat: { q: 0, first: 0 }, sound: { q: 0, first: 0 }, fruit: { q: 0, first: 0 }, clothes: { q: 0, first: 0 }, invite: { q: 0, first: 0 }, tea: { q: 0, first: 0 }, acid: { q: 0, first: 0 }, magnet: { q: 0, first: 0 }, dig: { q: 0, first: 0 }, harvest: 0, days: 0, planted: 0 };
       this.raindrops = Array.from({ length: 80 }, () => ({ x: Math.random() * W, y: Math.random() * H, v: 700 + Math.random() * 300 }));
       this.windLines = Array.from({ length: 14 }, () => ({ x: Math.random() * W, y: 60 + Math.random() * 420, v: 900 + Math.random() * 500, l: 60 + Math.random() * 100 }));
 
       this.skyG = this.add.graphics().setDepth(0);
       this.buildSun();
       this.buildClouds();
+      // 雨和風畫在三個區域的圖層之上（區域圖層的深度是 4）
       this.fxG = this.add.graphics().setDepth(5);
-      // 這之間建立的是「世界」物件（跟著相機平移）；其餘都是固定在畫面上的介面
+      // 這之間建立的是「世界」物件（跟著相機平移）；其餘都是固定在畫面上的介面。
+      // 每個區域的物件另外記下來，之後放進各自的圖層，只畫目前所在的區域（Graphics 每格都會重畫，畫面外的也一樣）
       const before = new Set(this.children.list);
-      this.buildIsland();
-      this.buildPlots();
-      this.buildRabbit();
-      this.buildPip();
-      this.buildForest();
+      const zoneObjs = {};
+      const grab = (z, fn) => { const b = new Set(this.children.list); fn(); zoneObjs[z] = this.children.list.filter((o) => !b.has(o)); };
+      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); });
+      grab('forest', () => this.buildForest());
+      grab('beach', () => this.buildBeach());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
       this.buildHud();
@@ -509,9 +595,21 @@
       this.buildSoundQ();
       this.buildMarket();
       this.buildInvite();
+      this.buildTea();
+      this.buildAcid();
+      this.buildMagnet();
+      this.buildDig();
       this.buildNav();
       const fix = (o) => { if (o.setScrollFactor) o.setScrollFactor(0); if (o.list) o.list.forEach(fix); };
       this.children.list.forEach((o) => { if (!world.has(o)) fix(o); });
+      // 區域圖層：圖層隱藏時不會改到物件自己的 visible，不影響原本各自的顯示邏輯
+      this.zoneLayers = {};
+      Object.keys(zoneObjs).forEach((z) => {
+        const layer = this.add.layer().setDepth(4);
+        zoneObjs[z].forEach((o) => layer.add(o));
+        this.zoneLayers[z] = layer;
+      });
+      this.showZones([this.zone]);
 
       this.applyWeatherLook();
       this.refreshAll();
@@ -522,6 +620,7 @@
       this.ensureWish('rabbit', 800);
       this.ensureForestWish(1500);
       this.checkTown();
+      this.checkBeach();
       this.renderForest();
       this.renderNav();
 
@@ -1019,7 +1118,7 @@
     // --- 彈出視窗與暫停 ---
     paused() { return !!this.modal; }
     closeModal() {
-      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox].forEach((c) => c.setVisible(false));
+      [this.lib, this.bookBox, this.setBox, this.bmBox, this.mkBox, this.ivBox, this.teaBox, this.acBoxBox, this.mgBox, this.dgBox].forEach((c) => c.setVisible(false));
       this.modal = null;
     }
     openLibrary() {
@@ -1122,12 +1221,14 @@
       this.s.stardust += 1;
       this.s.ev.picked.push(key);
       this.stats.harvest += 1;
+      this.s.harvested = (this.s.harvested || 0) + 1;
       p.plant = null; p.progress = 0;
       L.seen(this.s.words, key, this.s.day);
       speak(key);
       this.floatText(o.x, o.y - 70, '+1 ' + key, '#e65100');
       this.sparkle(o.x, o.y - 40);
       this.markDone('pick');
+      this.checkBeach();
       this.refreshAll();
     }
 
@@ -1251,6 +1352,25 @@
       this.navM = makeButton(this, 54, 400, 92, 92, 0x8d6e4a, '', 0, () => this.goZone('meadow')).setDepth(40);
       this.navM.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
       this.navM.add(txt(this, 0, 22, '草地', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      // 草地 ← 海灘；海灘 → 草地
+      this.navB = makeButton(this, 54, 400, 92, 92, 0xf2b84b, '', 0, () => this.goZone('beach')).setDepth(40);
+      this.navB.add(txt(this, 0, -14, '←', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navBLabel = txt(this, 0, 22, '', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.navB.add(this.navBLabel);
+      this.navMB = makeButton(this, 1226, 400, 92, 92, 0x6bbf59, '', 0, () => this.goZone('meadow')).setDepth(40);
+      this.navMB.add(txt(this, 0, -14, '→', 36, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.navMB.add(txt(this, 0, 22, '草地', 18, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5));
+    }
+
+    libCount() { return Object.keys(this.s.lib).filter((k) => this.s.lib[k]).length; }
+
+    checkBeach() {
+      const s = this.s;
+      if (s.beachOpen || (s.harvested || 0) < BEACH_HARVEST || this.libCount() < BEACH_LIB) return;
+      s.beachOpen = true;
+      this.floatText(180, 320, 'New place!', '#e65100', true);
+      if (this.navB) this.tweens.add({ targets: this.navB, scale: 1.2, yoyo: true, repeat: 5, duration: 300 });
+      this.renderNav();
     }
 
     renderNav() {
@@ -1259,6 +1379,10 @@
       this.navF.setAlpha(s.forestOpen ? 1 : 0.55);
       this.navFLabel.setText(s.forestOpen ? '森林' : Math.min(s.gaveTotal || 0, FOREST_NEED) + '/' + FOREST_NEED);
       this.navM.setVisible(this.zone === 'forest');
+      this.navB.setVisible(this.zone === 'meadow');
+      this.navB.setAlpha(s.beachOpen ? 1 : 0.55);
+      this.navBLabel.setText(s.beachOpen ? '海灘' : '收成 ' + Math.min(s.harvested || 0, BEACH_HARVEST) + '/' + BEACH_HARVEST);
+      this.navMB.setVisible(this.zone === 'beach');
       if (this.mkBtn) this.mkBtn.setVisible(!!s.town);
     }
 
@@ -1268,11 +1392,24 @@
         this.floatText(1130, 330, '再完成 ' + (FOREST_NEED - (this.s.gaveTotal || 0)) + ' 個願望', '#2f5d34', true);
         return;
       }
+      if (z === 'beach' && !this.s.beachOpen) {
+        const need = [];
+        if ((this.s.harvested || 0) < BEACH_HARVEST) need.push('收成 ' + (BEACH_HARVEST - (this.s.harvested || 0)) + ' 次');
+        if (this.libCount() < BEACH_LIB) need.push('圖鑑 ' + (BEACH_LIB - this.libCount()) + ' 項');
+        this.floatText(260, 330, '再' + need.join('、'), '#e65100', true);
+        return;
+      }
+      const from = this.zone;
       this.zone = z;
-      this.tweens.add({ targets: this.cameras.main, scrollX: z === 'forest' ? OFF : 0, duration: BOT ? 1 : 600, ease: 'Sine.easeInOut' });
+      // 平移時兩個區域都要畫，結束後只留目前的區域
+      this.showZones([from, z]);
+      this.tweens.add({ targets: this.cameras.main, scrollX: z === 'forest' ? OFF : (z === 'beach' ? BOFF : 0), duration: BOT ? 1 : 600, ease: 'Sine.easeInOut',
+        onComplete: () => { if (this.zone === z) this.showZones([z]); } });
       this.renderNav();
       if (z === 'forest' && this.s.visitor) this.time.delayedCall(700, () => this.sayVisitor());
     }
+
+    showZones(zs) { Object.keys(this.zoneLayers).forEach((k) => this.zoneLayers[k].setVisible(zs.includes(k))); }
 
     checkUnlock() {
       const s = this.s;
@@ -1822,7 +1959,7 @@
       this.floatText(640, 300, 'Thank you!  +4 ★', '#d81b60', true);
       this.tweens.add({ targets: this.mkWho, y: this.mkWho.y - 30, yoyo: true, duration: 200 });
       this.refreshAll();
-      this.time.delayedCall(BOT ? 50 : 1400, () => { if (this.modal === 'market') this.newOrder(); });
+      this.time.delayedCall(BOT ? 50 : 1400, () => { if (this.modal === 'market' && this.mo === o) this.newOrder(); });
     }
 
     // --- 日曆（§4.17）：居民邀請 Come to my party on Friday!，選出那一天；到了那天就有派對 ---
@@ -1931,6 +2068,484 @@
       this.tweens.add({ targets: c.card, x: c.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => c.card.setX(c.x) });
       this.time.delayedCall(500, () => speak(q.text));
       this.renderInvite();
+    }
+
+    // ---------- 海灘（M4：§4.7 溶解、§4.8 酸鹼、§4.12 磁鐵、§4.15 土石） ----------
+    buildBeach() {
+      const X = BOFF + 640;
+      const g = this.add.graphics().setDepth(3);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
+      g.fillStyle(0xe8cf8f, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0xf1dca6, 1); g.fillEllipse(X, 545, 940, 250);
+      // 貝殼與海星（裝飾）
+      g.fillStyle(0xffccbc, 1); g.fillCircle(X - 470, 590, 9); g.fillCircle(X + 120, 600, 7); g.fillCircle(X + 455, 585, 8);
+      g.fillStyle(0xff8a65, 1);
+      [[X - 120, 598], [X + 330, 602]].forEach(([x, y]) => { for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + k * 2 * Math.PI / 5; g.fillTriangle(x, y, x + Math.cos(a - 0.3) * 6, y + Math.sin(a - 0.3) * 6, x + Math.cos(a) * 14, y + Math.sin(a) * 14); g.fillTriangle(x, y, x + Math.cos(a + 0.3) * 6, y + Math.sin(a + 0.3) * 6, x + Math.cos(a) * 14, y + Math.sin(a) * 14); } });
+      // 四個實驗站
+      this.beachStations = BEACH.map((st, i) => {
+        const x = BOFF + st.x, y = 520;
+        const c = this.add.container(x, y).setDepth(9);
+        const sg = this.add.graphics();
+        sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 52, 150, 30);
+        sg.fillStyle(0xa1887f, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(0x8d6e63, 1); sg.fillRect(-62, -10, 124, 10);
+        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        const icon = makeIcon(this, st.icon, 0, -40, 1.5);
+        const label = txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 74, st.zh, 18, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+        c.add([sg, icon, label, zh]);
+        const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
+        zone.on('pointerdown', () => this.openStation(st.k));
+        return c;
+      });
+    }
+
+    openStation(k) {
+      if (this.paused()) return;
+      this.held = null; this.tool = null; this.redrawTools();
+      if (k === 'tea') this.openTea();
+      else if (k === 'acid') this.openAcid();
+      else if (k === 'magnet') this.openMagnet();
+      else this.openDig();
+    }
+
+    // 共用：實驗站的對話列（客人圖示＋英文句＋中文）
+    talkRow(c, y) {
+      const who = makeIcon(this, 'rabbit', 250, y + 50, 1.8);
+      const bub = this.add.graphics(); drawBubble(bub, 320, y, 620, 100, 350);
+      const say = txt(this, 342, y + 16, '', 30, '#27384a', { fontStyle: 'bold' });
+      const zh = txt(this, 342, y + 60, '', 20, '#6b7c8c');
+      c.add([who, bub, say, zh]);
+      const lis = this.add.container(1010, y + 50);
+      const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
+      lis.add([lg, makeIcon(this, 'speaker', 2, 0, 0.9)]);
+      lis.setSize(66, 66).setInteractive({ useHandCursor: true });
+      lis.on('pointerdown', () => speak(say.text));
+      c.add(lis);
+      return { who, say, zh };
+    }
+
+    // 實驗站開著時時間暫停，為了不讓星砂可以無限刷：每站每天只有前 STATION_PAID 回合給星砂，之後照樣能玩
+    stationDone(key, reward, msg) {
+      const s = this.s;
+      if (!s.paid || s.paid.day !== s.day) s.paid = { day: s.day };
+      const n = s.paid[key] || 0;
+      if (n < STATION_PAID) {
+        s.paid[key] = n + 1;
+        s.stardust += reward;
+        this.floatText(640, 330, msg + '  +' + reward + ' ★', '#d81b60', true);
+      } else {
+        this.floatText(640, 330, msg + (this.subs() ? '  今天的星砂拿完了，明天再來' : ''), '#d81b60', true);
+      }
+      this.refreshAll();
+    }
+
+    // --- 甜茶（§4.7）：選熱水或冷水；熱水糖很快溶化，冷水要攪很多下 ---
+    buildTea() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Tea 甜茶', 28, '#bf360c', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.teaTalk = this.talkRow(c, 130);
+      this.teaPots = ['hot', 'cold'].map((k, i) => {
+        const p = this.add.container(340, 330 + i * 160);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -65, 190, 130, 20);
+        bg.lineStyle(4, k === 'hot' ? 0xef5350 : 0x42a5f5, 1); bg.strokeRoundedRect(-95, -65, 190, 130, 20);
+        const pot = this.add.graphics({ x: -30, y: 0 });
+        pot.fillStyle(k === 'hot' ? 0xef5350 : 0x42a5f5, 1); pot.fillRoundedRect(-26, -22, 52, 46, 12); pot.fillTriangle(24, -10, 44, -24, 26, 6);
+        pot.lineStyle(4, 0x555555, 1); pot.beginPath(); pot.arc(-28, 0, 12, Math.PI * 0.5, Math.PI * 1.5, false); pot.strokePath();
+        if (k === 'hot') { pot.lineStyle(3, 0xbdbdbd, 1); [-10, 0, 10].forEach((x) => pot.lineBetween(x, -30, x + 4, -44)); }
+        else { pot.fillStyle(0xe1f5fe, 1); pot.fillRect(-12, -36, 12, 12); pot.fillRect(4, -40, 12, 12); }
+        const en = txt(this, 45, -12, k, 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 45, 24, '', 18, '#6b7c8c').setOrigin(0.5);
+        p.add([bg, pot, en, zh]);
+        p.setSize(190, 130).setInteractive({ useHandCursor: true });
+        p.on('pointerdown', () => this.pourTea(k));
+        c.add(p);
+        return { p, zh, k };
+      });
+      this.teaCup = this.add.graphics({ x: 640, y: 420 });
+      this.teaMsg = txt(this, 640, 615, '', 24, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add([this.teaCup, this.teaMsg]);
+      this.teaStir = makeButton(this, 930, 370, 200, 70, 0x8d6e63, 'Stir 攪拌', 24, () => this.stirTea());
+      this.teaServe = makeButton(this, 930, 480, 200, 70, 0x43a047, 'Serve 端出去', 24, () => this.serveTea());
+      c.add([this.teaStir, this.teaServe]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.teaBox = c;
+    }
+
+    openTea() {
+      this.modal = 'tea';
+      const who = L.shuffle(['rabbit'].concat(this.residents()))[0];
+      this.tq = { who, water: null, sugar: 1, stirs: 0, tries: 0, recorded: false, done: false };
+      ['sweet', 'tea'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      this.teaBox.setVisible(true);
+      this.renderTea();
+      this.time.delayedCall(250, () => speak('I want sweet tea.'));
+    }
+
+    renderTea() {
+      const q = this.tq, zh = this.subs();
+      drawIcon(this.teaTalk.who, q.who);
+      this.teaTalk.say.setText('I want sweet tea.');
+      this.teaTalk.zh.setText(zh ? '我想要甜甜的茶。' : '');
+      this.teaPots.forEach((p) => p.zh.setText(zh && L.stage(this.s.words, p.k) === 0 ? zhOf(p.k) : ''));
+      const g = this.teaCup; g.clear();
+      g.fillStyle(0xeceff1, 1); g.fillRoundedRect(-80, -90, 160, 180, 18);
+      g.lineStyle(6, 0x90a4ae, 1); g.strokeRoundedRect(-80, -90, 160, 180, 18);
+      g.beginPath(); g.arc(88, 0, 26, -Math.PI / 2, Math.PI / 2, false); g.strokePath();
+      if (q.water) {
+        g.fillStyle(q.water === 'hot' ? 0xd38b3c : 0xe0b07a, 0.9); g.fillRoundedRect(-74, -60, 148, 144, 14);
+        if (q.water === 'hot') { g.lineStyle(4, 0xbdbdbd, 1); [-30, 0, 30].forEach((x) => g.lineBetween(x, -100, x + 8, -130)); }
+        else { g.fillStyle(0xe1f5fe, 0.9); g.fillRect(-50, -56, 24, 24); g.fillRect(20, -52, 24, 24); }
+      }
+      // 還沒溶化的糖：沉在杯底的方糖
+      const cubes = Math.ceil(q.sugar * 3 - 0.01);
+      g.fillStyle(0xffffff, 1);
+      for (let i = 0; i < cubes; i++) g.fillRect(-48 + i * 34, 52, 26, 26);
+      this.teaMsg.setText(q.done ? '' : (!q.water ? 'Pick hot or cold water. 選熱水或冷水' : (q.sugar > 0.01 ? 'The sugar is at the bottom. 糖還沉在杯底' : 'The sugar is gone! 糖溶化了')));
+    }
+
+    pourTea(k) {
+      const q = this.tq;
+      if (this.modal !== 'tea' || q.done) return;
+      speak(k);
+      if (!q.water) {
+        // 第一次選的水就是這題的決策：選熱水算對（只有 2 個選項，不算單字 ok，只記科學統計）
+        this.stats.tea.q += 1; if (k === 'hot') this.stats.tea.first += 1;
+        if (!q.recorded) { L.answer(this.s.words, 'hot', { day: this.s.day, options: 2, firstTry: k === 'hot', peeked: false }); q.recorded = true; }
+        q.water = k;
+      } else if (k === 'hot') {
+        q.water = 'hot'; // 補救：倒熱水進去
+      }
+      this.renderTea();
+      if (q.water === 'hot' && q.sugar > 0) {
+        this.tweens.addCounter({ from: q.sugar, to: 0, duration: BOT ? 10 : 1200, onUpdate: (tw) => { q.sugar = tw.getValue(); this.renderTea(); }, onComplete: () => { q.sugar = 0; this.renderTea(); } });
+      }
+    }
+
+    stirTea() {
+      const q = this.tq;
+      if (this.modal !== 'tea' || q.done || !q.water) return;
+      q.stirs += 1;
+      // 冷水要攪 4 下才溶完，熱水一攪就好
+      q.sugar = q.water === 'hot' ? 0 : Math.max(0, q.sugar - 0.25);
+      this.tweens.add({ targets: this.teaCup, angle: 6, yoyo: true, repeat: 1, duration: 80, onComplete: () => this.teaCup.setAngle(0) });
+      this.renderTea();
+    }
+
+    serveTea() {
+      const q = this.tq;
+      if (this.modal !== 'tea' || q.done) return;
+      if (!q.water) { this.tweens.add({ targets: this.teaPots.map((p) => p.p), scale: 1.08, yoyo: true, duration: 140 }); return; }
+      if (q.sugar > 0.01) {
+        q.tries += 1;
+        this.tweens.add({ targets: this.teaTalk.who, angle: 10, yoyo: true, repeat: 2, duration: 90, onComplete: () => this.teaTalk.who.setAngle(0) });
+        speak('It is not sweet.');
+        this.teaMsg.setText('It is not sweet. 不甜！可以再攪拌，或加熱水');
+        return;
+      }
+      q.done = true;
+      speak('Yummy! Thank you!');
+      this.renderTea();
+      this.stationDone('tea', 3, 'Yummy!');
+      // 延遲換下一位客人前，先確認還是同一回合（玩家可能已經關掉又重開）
+      this.time.delayedCall(BOT ? 30 : 1300, () => { if (this.modal === 'tea' && this.tq === q) this.openTea(); });
+    }
+
+    // --- 紫色花汁（§4.8）：滴下去看顏色，粉紅＝酸、紫＝甜、綠＝苦 ---
+    buildAcid() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Flower Juice 紫色花汁', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.acTalk = this.talkRow(c, 130);
+      this.acCup = this.add.graphics({ x: 360, y: 400 });
+      this.acQ = txt(this, 360, 400, '?', 54, '#90a4ae', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.acDrop = makeButton(this, 360, 560, 260, 64, 0x8e24aa, 'Add purple juice', 22, () => this.dropAcid());
+      this.acKey = this.add.container(640, 300);
+      const kg = this.add.graphics();
+      [[0xf48fb1, 'sour'], [0x9575cd, 'sweet'], [0x81c784, 'bitter']].forEach(([col, w], i) => {
+        kg.fillStyle(col, 1); kg.fillCircle(-110 + i * 110, 0, 16);
+        this.acKey.add(txt(this, -110 + i * 110, 30, w, 18, '#6b7c8c').setOrigin(0.5));
+      });
+      this.acKey.addAt(kg, 0);
+      this.acMsg = txt(this, 640, 615, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.acProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      c.add([this.acCup, this.acQ, this.acDrop, this.acKey, this.acMsg, this.acProg]);
+      this.acBoxes = TASTES.map((w, i) => {
+        const b = this.add.container(640 + i * 150, 460);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xd7b98e, 1); bg.fillRoundedRect(-65, -60, 130, 120, 16);
+        bg.fillStyle(0xbf9a68, 1); bg.fillRect(-65, -60, 130, 20);
+        const en = txt(this, 0, 4, w, 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 38, '', 18, '#5d4037').setOrigin(0.5);
+        b.add([bg, en, zh]);
+        b.setSize(130, 120).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => this.sortAcid(i));
+        c.add(b);
+        return { b, zh, x: b.x, w };
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.acBoxBox = c;
+    }
+
+    openAcid() {
+      this.modal = 'acid';
+      this.aq = { who: L.shuffle(['rabbit'].concat(this.residents()))[0], round: 0, n: 3 };
+      this.acBoxBox.setVisible(true);
+      this.nextCup();
+    }
+
+    nextCup() {
+      const q = this.aq;
+      q.answer = TASTES[Math.floor(Math.random() * TASTES.length)];
+      q.tested = false; q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.done = false;
+      this.renderAcid();
+      this.time.delayedCall(250, () => speak('Is it sour, sweet, or bitter?'));
+    }
+
+    renderAcid() {
+      const q = this.aq, zh = this.subs(), st = L.stage(this.s.words, q.answer);
+      drawIcon(this.acTalk.who, q.who);
+      this.acTalk.say.setText('Is it sour, sweet, or bitter?');
+      this.acTalk.zh.setText(zh ? '它是酸的、甜的，還是苦的？' : '');
+      const g = this.acCup; g.clear();
+      g.fillStyle(0xeceff1, 1); g.fillRoundedRect(-70, -90, 140, 170, 16);
+      g.lineStyle(5, 0x90a4ae, 1); g.strokeRoundedRect(-70, -90, 140, 170, 16);
+      g.fillStyle(q.tested ? TASTE_COLOR[q.answer] : 0xe3f2fd, 1); g.fillRoundedRect(-64, -50, 128, 124, 12);
+      this.acQ.setVisible(!q.tested);
+      this.acDrop.setVisible(!q.tested);
+      // 顏色對照：剛開始（答案字還在階段 0）或答錯後才顯示，熟了就要自己記
+      this.acKey.setVisible(st === 0 || q.reveal);
+      this.acBoxes.forEach((b) => {
+        b.zh.setText(zh && (st === 0 || q.reveal) ? zhOf(b.w) : '');
+        b.b.setAlpha(q.wrong[b.w] ? 0.35 : 1);
+      });
+      this.acProg.setText((q.round + 1) + ' / ' + q.n);
+      this.acMsg.setText(q.tested ? '' : 'Add purple juice and look at the color. 滴紫色花汁看看顏色');
+    }
+
+    dropAcid() {
+      const q = this.aq;
+      if (this.modal !== 'acid' || q.tested) return;
+      q.tested = true;
+      speak('Look at the color!');
+      this.renderAcid();
+    }
+
+    sortAcid(i) {
+      const s = this.s, q = this.aq, w = TASTES[i], b = this.acBoxes[i];
+      if (this.modal !== 'acid' || q.done || q.wrong[w]) return;
+      const right = w === q.answer;
+      if (q.tries === 0) { this.stats.acid.q += 1; if (right) this.stats.acid.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.answer, { day: s.day, options: TASTES.length, firstTry: right, peeked: false }); q.recorded = true; }
+      speak(w);
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[w] = true;
+        if (!q.tested) q.tested = true; // 放錯就幫忙滴花汁，讓玩家看到顏色
+        this.tweens.add({ targets: b.b, x: b.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => b.b.setX(b.x) });
+        this.renderAcid();
+        this.acMsg.setText('Oh no! Look at the color. 看看顏色再試一次');
+        return;
+      }
+      q.done = true;
+      this.tweens.add({ targets: b.b, scale: 1.1, yoyo: true, duration: 160 });
+      q.round += 1;
+      if (q.round >= q.n) {
+        this.stationDone('acid', 3, 'Great!');
+        this.time.delayedCall(BOT ? 30 : 1200, () => { if (this.modal === 'acid' && this.aq === q) this.openAcid(); });
+      } else {
+        this.time.delayedCall(BOT ? 30 : 700, () => { if (this.modal === 'acid' && this.aq === q && q.done) this.nextCup(); });
+      }
+    }
+
+    // --- 磁鐵（§4.12）：先猜會不會被吸，再用磁鐵驗證；銅幣、鋁罐是「不會被吸的金屬」 ---
+    buildMagnet() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Magnet 磁鐵', 28, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.mgTitle = txt(this, 640, 150, 'Will the magnet pull it?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.mgZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.mgMsg = txt(this, 640, 470, '', 22, '#6d4c2f', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
+      c.add([this.mgTitle, this.mgZh, this.mgMsg]);
+      this.mgCards = [0, 1, 2, 3, 4].map((i) => {
+        const card = this.add.container(330 + i * 155, 300);
+        const bg = this.add.graphics();
+        const icon = this.add.graphics({ y: -12 }).setScale(1.5);
+        const name = txt(this, 0, 42, '', 18, '#6b7c8c').setOrigin(0.5);
+        const tag = txt(this, 0, -66, '', 20, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
+        card.add([bg, icon, name, tag]);
+        card.setSize(140, 130).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => this.pickMag(i));
+        c.add(card);
+        return { card, bg, icon, name, tag, y: card.y };
+      });
+      this.mgYes = makeButton(this, 470, 545, 240, 72, 0x43a047, 'Yes 會被吸', 24, () => this.sortMag(true));
+      this.mgNo = makeButton(this, 760, 545, 240, 72, 0x78909c, 'No 不會', 24, () => this.sortMag(false));
+      this.mgCheck = makeButton(this, 1000, 545, 170, 72, 0xc62828, 'Check 驗證', 24, () => this.checkMag());
+      c.add([this.mgYes, this.mgNo, this.mgCheck]);
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.mgBox = c;
+    }
+
+    openMagnet() {
+      this.modal = 'magnet';
+      // 每回合 5 樣：至少 2 樣會被吸、至少 1 樣是不會被吸的金屬（打破迷思）
+      const yes = L.shuffle(MAG_ITEMS.filter((m) => m.iron)), noMetal = L.shuffle(MAG_ITEMS.filter((m) => !m.iron && m.metal)), other = L.shuffle(MAG_ITEMS.filter((m) => !m.iron && !m.metal));
+      const items = L.shuffle([yes[0], yes[1], noMetal[0], other[0], L.shuffle([yes[2], noMetal[1], other[1]])[0]]);
+      this.mq = { items, guess: items.map(() => null), sel: 0, checked: false, rounds: 0, firstDone: false, done: false };
+      L.seen(this.s.words, 'magnet', this.s.day);
+      this.mgBox.setVisible(true);
+      this.renderMagnet();
+      this.time.delayedCall(250, () => speak('Will the magnet pull it?'));
+    }
+
+    renderMagnet() {
+      const q = this.mq;
+      this.mgZh.setText(this.subs() ? '磁鐵會吸住它嗎？先猜，再用磁鐵試試看' : '');
+      this.mgCards.forEach((c, i) => {
+        const it = q.items[i], gs = q.guess[i];
+        c.bg.clear();
+        const ring = i === q.sel && !q.done ? 0xff9800 : (gs === true ? 0x43a047 : gs === false ? 0x78909c : 0xd7ccc8);
+        c.bg.fillStyle(0xffffff, 1); c.bg.fillRoundedRect(-70, -65, 140, 130, 18);
+        c.bg.lineStyle(i === q.sel && !q.done ? 6 : 4, ring, 1); c.bg.strokeRoundedRect(-70, -65, 140, 130, 18);
+        if (gs !== null) { c.bg.fillStyle(ring, 1); c.bg.fillRoundedRect(-44, -80, 88, 28, 14); }
+        drawMagItem(c.icon, it.k);
+        c.name.setText(it.zh);
+        c.tag.setText(gs === true ? 'Yes' : gs === false ? 'No' : '');
+        if (q.checked) {
+          const ok = gs === it.iron;
+          c.bg.lineStyle(6, ok ? 0x43a047 : 0xe53935, 1); c.bg.strokeRoundedRect(-70, -65, 140, 130, 18);
+        }
+      });
+      const all = q.guess.every((g) => g !== null);
+      this.mgCheck.setAlpha(all ? 1 : 0.45);
+      if (!q.checked) this.mgMsg.setText(all ? 'Now check with the magnet! 用磁鐵試試看' : 'Tap a thing, then Yes or No. 先點東西，再選 Yes 或 No');
+    }
+
+    pickMag(i) {
+      const q = this.mq;
+      if (this.modal !== 'magnet' || q.done) return;
+      q.sel = i;
+      speak(q.items[i].en);
+      this.renderMagnet();
+    }
+
+    sortMag(yes) {
+      const q = this.mq;
+      if (this.modal !== 'magnet' || q.done) return;
+      q.guess[q.sel] = yes;
+      q.checked = false;
+      // 自動跳到下一個還沒猜的
+      const next = q.guess.findIndex((g) => g === null);
+      if (next >= 0) q.sel = next;
+      this.renderMagnet();
+    }
+
+    checkMag() {
+      const s = this.s, q = this.mq;
+      if (this.modal !== 'magnet' || q.done || !q.guess.every((g) => g !== null)) return;
+      q.checked = true;
+      // 驗證前的第一次猜測才算數（2 選 1：只記科學統計）
+      if (!q.firstDone) {
+        q.items.forEach((it, i) => { this.stats.magnet.q += 1; if (q.guess[i] === it.iron) this.stats.magnet.first += 1; });
+        q.firstDone = true;
+      }
+      // 被吸的東西跳一下
+      this.mgCards.forEach((c, i) => { if (q.items[i].iron) this.tweens.add({ targets: c.card, y: c.y - 30, yoyo: true, duration: 220 }); });
+      speak('Magnet!');
+      const wrong = q.items.filter((it, i) => q.guess[i] !== it.iron);
+      if (!wrong.length) {
+        q.done = true;
+        this.mgMsg.setText('All right! Iron is pulled by the magnet. 都對了！磁鐵會吸鐵');
+        this.renderMagnet();
+        this.stationDone('magnet', 3, 'Great!');
+        this.time.delayedCall(BOT ? 30 : 1600, () => { if (this.modal === 'magnet' && this.mq === q) this.openMagnet(); });
+        return;
+      }
+      const myth = wrong.some((it) => it.metal && !it.iron);
+      this.mgMsg.setText(myth ? 'Not all metal is pulled! 不是所有金屬都會被吸，紅框的再改改看' : 'Look at the red ones and try again. 紅框的再改改看');
+      this.renderMagnet();
+      this.mgMsg.setText(this.mgMsg.text);
+    }
+
+    // --- 挖掘分類（§4.15）：挖到的東西放進 rock、sand、mud ---
+    buildDig() {
+      const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
+      c.add(txt(this, 640, 98, 'Dig 挖挖看', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
+      this.dgTitle = txt(this, 640, 150, 'Rock, sand, or mud?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.dgZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.dgSample = this.add.graphics({ x: 640, y: 300 }).setScale(1.6);
+      this.dgHint = txt(this, 640, 380, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.dgProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      c.add([this.dgTitle, this.dgZh, this.dgSample, this.dgHint, this.dgProg]);
+      this.dgPiles = SOILS.map((w, i) => {
+        const b = this.add.container(640 + (i - 1) * 230, 510);
+        const bg = this.add.graphics();
+        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -70, 190, 140, 18);
+        bg.lineStyle(4, 0xbcaaa4, 1); bg.strokeRoundedRect(-95, -70, 190, 140, 18);
+        const pile = this.add.graphics({ y: -16 }).setScale(1.1);
+        const en = txt(this, 0, 34, w, 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 60, '', 16, '#6b7c8c').setOrigin(0.5);
+        b.add([bg, pile, en, zh]);
+        b.setSize(190, 140).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => this.sortDig(i));
+        c.add(b);
+        return { b, pile, zh, x: b.x, w };
+      });
+      this.closeButton(c, 1080, 100, () => this.closeModal());
+      this.dgBox = c;
+    }
+
+    openDig() {
+      this.modal = 'dig';
+      this.dq = { round: 0, n: 5, count: { rock: 0, sand: 0, mud: 0 } };
+      this.dgBox.setVisible(true);
+      this.nextDig();
+    }
+
+    nextDig() {
+      const q = this.dq;
+      q.answer = SOILS[Math.floor(Math.random() * SOILS.length)];
+      q.tries = 0; q.recorded = false; q.reveal = false; q.wrong = {}; q.done = false;
+      this.renderDig();
+      this.time.delayedCall(200, () => speak('Rock, sand, or mud?'));
+    }
+
+    renderDig() {
+      const q = this.dq, zh = this.subs(), st = L.stage(this.s.words, q.answer);
+      this.dgZh.setText(zh ? '是石頭、沙子，還是泥巴？' : '');
+      drawSoil(this.dgSample, q.answer, 1);
+      this.dgHint.setText(q.reveal && !q.done ? SOIL_HINT[q.answer] : '');
+      this.dgPiles.forEach((p) => {
+        drawSoil(p.pile, p.w, Math.min(3, q.count[p.w]) / 3);
+        p.zh.setText(zh && (st === 0 || q.reveal) ? zhOf(p.w) : '');
+        p.b.setAlpha(q.wrong[p.w] ? 0.35 : 1);
+      });
+      this.dgProg.setText(Math.min(q.round + 1, q.n) + ' / ' + q.n);
+    }
+
+    sortDig(i) {
+      const s = this.s, q = this.dq, w = SOILS[i], p = this.dgPiles[i];
+      if (this.modal !== 'dig' || q.done || q.wrong[w]) return;
+      const right = w === q.answer;
+      if (q.tries === 0) { this.stats.dig.q += 1; if (right) this.stats.dig.first += 1; }
+      if (!q.recorded) { L.answer(s.words, q.answer, { day: s.day, options: SOILS.length, firstTry: right, peeked: false }); q.recorded = true; }
+      speak(w);
+      if (!right) {
+        q.tries += 1; q.reveal = true; q.wrong[w] = true;
+        this.tweens.add({ targets: p.b, x: p.x + 8, yoyo: true, repeat: 2, duration: 60, onComplete: () => p.b.setX(p.x) });
+        this.renderDig();
+        return;
+      }
+      q.done = true;
+      q.count[w] += 1;
+      q.round += 1;
+      this.renderDig();
+      if (q.round >= q.n) {
+        this.stationDone('dig', 3, 'Great digging!');
+        this.time.delayedCall(BOT ? 30 : 1200, () => { if (this.modal === 'dig' && this.dq === q) this.openDig(); });
+      } else {
+        this.time.delayedCall(BOT ? 30 : 600, () => { if (this.modal === 'dig' && this.dq === q && q.done) this.nextDig(); });
+      }
     }
 
     // --- 天氣題 ---
@@ -2305,6 +2920,15 @@
       }
       if (this.modal === 'sound') { if (!this.sq.done) this.pickSound(Math.floor(Math.random() * 4)); return; }
       if (this.modal === 'invite') { if (!this.iq.done) this.pickDay(Math.floor(Math.random() * 7)); return; }
+      if (['tea', 'acid', 'magnet', 'dig'].includes(this.modal)) {
+        if (Math.random() < 0.03) { this.closeModal(); return; }
+        const r = Math.random();
+        if (this.modal === 'tea') { if (r < 0.35) this.pourTea(r < 0.175 ? 'hot' : 'cold'); else if (r < 0.7) this.stirTea(); else this.serveTea(); }
+        else if (this.modal === 'acid') { if (r < 0.3) this.dropAcid(); else this.sortAcid(Math.floor(Math.random() * 3)); }
+        else if (this.modal === 'magnet') { if (r < 0.35) this.pickMag(Math.floor(Math.random() * 5)); else if (r < 0.85) this.sortMag(Math.random() < 0.5); else this.checkMag(); }
+        else this.sortDig(Math.floor(Math.random() * 3));
+        return;
+      }
       if (this.modal === 'market') {
         const o = this.mo;
         if (!o || o.done) { if (Math.random() < 0.05) this.closeModal(); return; }
@@ -2319,7 +2943,11 @@
       TOOL_KEYS.forEach((k) => acts.push(() => this.selectTool(k)));
       PLANT_KEYS.forEach((k) => acts.push(() => this.selectBag(k)));
       if (this.s.town) acts.push(() => this.openMarket());
-      if (this.zone === 'meadow') {
+      if (this.zone === 'beach') {
+        BEACH.forEach((b) => acts.push(() => this.openStation(b.k)));
+        acts.push(() => this.goZone('meadow'));
+      } else if (this.zone === 'meadow') {
+        acts.push(() => this.goZone('beach'));
         for (let i = 0; i < 6; i++) acts.push(() => this.onPlot(i));
         acts.push(() => this.giveTo('rabbit'));
         acts.push(() => this.onBubble('rabbit'));
@@ -2351,6 +2979,10 @@
         水果訂單全對: pct(this.stats.fruit),
         衣物第一次就對: pct(this.stats.clothes),
         星期第一次就對: pct(this.stats.invite),
+        甜茶第一次選熱水: pct(this.stats.tea),
+        酸甜苦第一次就對: pct(this.stats.acid),
+        磁鐵猜對的件數: pct(this.stats.magnet),
+        土石第一次就對: pct(this.stats.dig),
         每天收成: this.stats.days ? (this.stats.harvest / this.stats.days).toFixed(2) : '—',
         每天種下: this.stats.days ? (this.stats.planted / this.stats.days).toFixed(2) : '—',
       };
