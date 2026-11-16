@@ -264,7 +264,8 @@
   const FESTIVALS = { 10: { k: 'Halloween', zh: '萬聖節', pic: 'pumpkin' }, 20: { k: 'birthday', zh: '生日', pic: 'cake' }, 0: { k: 'Christmas', zh: '聖誕節', pic: 'xtree' } };
   const festivalOf = (d) => FESTIVALS[d % 30] || null;
 
-  // 各機制的延伸題（§4.7、4.9、4.12、4.13、4.14、4.15、4.22、4.23）：掛在原本的站，每 3 回合有 1 回合
+  // 各機制的延伸題（§4.7、4.9、4.12、4.13、4.14、4.15、4.22、4.23、4.25）：掛在原本的站，每 3 回合有 1 回合
+  // 同一站有好幾種延伸題時（陣列），依序輪流
   const EXTRAS = {
     tea:     { lab: 'ice',     title: 'Ice 冰塊' },
     magnet:  { lab: 'poles',   title: 'Magnet Boat 磁鐵推船' },
@@ -273,7 +274,8 @@
     push:    { lab: 'mill',    title: 'Wind and Water 風車與水車' },
     circuit: { lab: 'series',  title: 'Two Lamps 兩盞燈' },
     pitch:   { lab: 'noise',   title: 'Noise 隔音牆' },
-    fossil:  { lab: 'mineral', title: 'Minerals 礦物' },
+    fossil:  [{ lab: 'mineral', title: 'Minerals 礦物' }, { lab: 'levee', title: 'River Bend 河流彎道' }],
+    typhoon: { lab: 'storm',   title: 'Typhoon Day 颱風天' },
   };
 
   // 地圖（主畫面）：6 座島左右的順序和實際位置一致（燈塔在最左、研究島在最右）
@@ -4581,7 +4583,8 @@
       s.alt = s.alt || {};
       s.alt[k] = (s.alt[k] || 0) + 1;
       if (s.alt[k] % 3 !== 0) return false;
-      this.openExtra(ex.lab, k, ex.title);
+      const list = [].concat(ex), e = list[(s.alt[k] / 3 - 1) % list.length];
+      this.openExtra(e.lab, k, e.title);
       return true;
     }
 
@@ -4658,7 +4661,26 @@
       this.runQuiz('ice', [
         { say: 'Where will the ice melt last?', zh: '冰塊放在哪裡，會最晚融化？', opts, answer: 2, why: '想想哪裡最不會被熱到。保冷箱可以擋住外面的熱', after: 'The cooler keeps the heat out. 保冷箱擋住外面的熱，冰最慢融化' },
         { say: 'Where will the ice melt first?', zh: '冰塊放在哪裡，會最早融化？', opts, answer: 0, why: '想想哪裡最熱', after: 'The sun is hot! 太陽的熱讓冰融化得最快' },
+        this.pondQ(),
       ], 'Cool!');
+    }
+
+    // 冷天池塘結冰（§4.7）：很冷的晚上，池塘的水會變成什麼？3 選 1，記在 ice
+    pondQ() {
+      L.seen(this.s.words, 'steam', this.s.day);
+      const pond = (g, c) => { g.fillStyle(0x8d6e63, 1); g.fillEllipse(0, 10, 120, 50); g.fillStyle(c, 1); g.fillEllipse(0, 6, 104, 38); };
+      const opts = L.shuffle([
+        { k: 'ice', label: 'ice 冰', draw: (g) => { pond(g, 0xe1f5fe); g.lineStyle(2, 0x90caf9, 1); g.lineBetween(-30, 0, -6, 12); g.lineBetween(-6, 12, 14, 2); g.lineBetween(14, 2, 34, 14); } },
+        { k: 'steam', label: 'steam 水蒸氣', draw: (g) => { pond(g, 0x64b5f6); g.lineStyle(3, 0xffffff, 0.9); [-20, 0, 20].forEach((x) => { g.beginPath(); g.moveTo(x, -6); g.lineTo(x - 6, -20); g.lineTo(x + 4, -32); g.lineTo(x - 4, -46); g.strokePath(); }); } },
+        { k: 'water', label: 'water 還是水', draw: (g) => { pond(g, 0x42a5f5); g.lineStyle(2, 0xbbdefb, 1); g.strokeEllipse(-14, 6, 30, 10); g.strokeEllipse(18, 10, 22, 8); } },
+      ]);
+      const scene = (g) => {
+        g.fillStyle(0x1a237e, 1); g.fillRoundedRect(500, 250, 280, 120, 16);
+        g.fillStyle(0xfff9c4, 1); g.fillCircle(560, 290, 18); g.fillStyle(0x1a237e, 1); g.fillCircle(570, 284, 16);
+        g.fillStyle(0xffffff, 1); [[620, 280], [660, 300], [700, 270], [740, 310], [690, 340]].forEach(([x, y]) => g.fillCircle(x, y, 3));
+      };
+      return { say: 'It is very cold tonight. What will the pond water become?', zh: '今晚非常冷，池塘的水會變成什麼？', scene, opts, answer: opts.findIndex((o) => o.k === 'ice'), word: 'ice', y: 500,
+        why: '很冷的時候，水會變硬；加熱時才會冒水蒸氣', after: 'Water turns into ice when it is very cold. 很冷的時候，水會結成冰' };
     }
 
     // --- §4.12 磁鐵推船：一樣的極互相推開，不一樣的極互相吸引 ---
@@ -4808,6 +4830,72 @@
         const opts = L.shuffle(ms);
         return { say: u.say, zh: u.zh, opts, answer: opts.findIndex((m) => m.k === u.ans), word: u.ans === 'graphite' ? null : u.ans, why: '想想看它的特性：透明的、黑黑滑滑的、硬硬的、鹹鹹的', after: u.after };
       }), 'Great!');
+    }
+
+    // --- §4.23 河流彎道：彎道外側水流最快、沖刷最強，堤防蓋在那裡；內側水流慢，沙子堆積 ---
+    lab_levee() {
+      ['river', 'house', 'sand'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const flip = Math.random() < 0.5;
+      const X = (x) => (flip ? 1280 - x : x);
+      const pts = [[480, 240], [590, 262], [680, 300], [720, 350], [680, 400], [590, 438], [480, 460]].map(([x, y]) => [X(x), y]);
+      const spots = L.shuffle([
+        { k: 'out', x: X(790), y: 350 },   // 彎道外側，房子就在旁邊
+        { k: 'in', x: X(610), y: 350 },    // 彎道內側
+        { k: 'up', x: X(420), y: 290 },    // 上游直直的地方
+      ]);
+      const names = ['A', 'B', 'C'];
+      const scene = (g) => {
+        g.fillStyle(0xa5d6a7, 1); g.fillRoundedRect(380, 228, 520, 250, 20);
+        g.lineStyle(30, 0x4fc3f7, 1);
+        for (let i = 0; i < pts.length - 1; i++) g.lineBetween(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
+        g.fillStyle(0x4fc3f7, 1); pts.forEach(([x, y]) => g.fillCircle(x, y, 15));
+        // 水流方向的小箭頭
+        g.fillStyle(0xffffff, 1);
+        [1, 3, 5].forEach((i) => {
+          const [x0, y0] = pts[i], [x1, y1] = pts[i + 1], a = Math.atan2(y1 - y0, x1 - x0), cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+          g.fillTriangle(cx + Math.cos(a) * 9, cy + Math.sin(a) * 9, cx + Math.cos(a + 2.4) * 8, cy + Math.sin(a + 2.4) * 8, cx + Math.cos(a - 2.4) * 8, cy + Math.sin(a - 2.4) * 8);
+        });
+        // 彎道外側的房子
+        const hx = X(860);
+        g.fillStyle(0xffcc80, 1); g.fillRect(hx - 22, 336, 44, 34); g.fillStyle(0xd84315, 1); g.fillTriangle(hx - 28, 338, hx + 28, 338, hx, 312);
+        spots.forEach((p) => { g.lineStyle(3, 0xffffff, 1); g.strokeRect(p.x - 22, p.y - 16, 44, 32); g.fillStyle(0x37474f, 0.35); g.fillRect(p.x - 22, p.y - 16, 44, 32); });
+        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#27384a', strokeThickness: 4 }).setOrigin(0.5)));
+      };
+      const card = (draw) => spots.map((p, i) => ({ draw, label: '在 ' + names[i] }));
+      const wall = (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-30, -6, 60, 16); g.lineStyle(2, 0x616161, 1); for (let x = -30; x < 30; x += 12) g.strokeRect(x, -6, 12, 8); };
+      const sandPile = (g) => { g.fillStyle(0xe8cf8f, 1); g.fillEllipse(0, 6, 70, 26); g.fillStyle(0xd7b56d, 1); g.fillCircle(-12, 4, 3); g.fillCircle(10, 8, 3); };
+      this.runQuiz('levee', [
+        { say: 'The river turns here. Where should we build the wall?', zh: '河流在這裡轉彎。大水來時，堤防要蓋在哪裡才能保護房子？', scene, opts: card(wall), answer: spots.findIndex((p) => p.k === 'out'), y: 570,
+          why: '河流轉彎時，水會衝向彎道的外側', after: 'The water is fast on the outside. 彎道外側水流最快、沖得最兇，堤防擋住了大水' },
+        { say: 'Where will the sand stay?', zh: '河水帶來的沙子，會在哪裡慢慢堆起來？', scene, opts: card(sandPile), answer: spots.findIndex((p) => p.k === 'in'), y: 570,
+          why: '水流慢的地方，沙子才停得下來', after: 'The water is slow on the inside. 彎道內側水流慢，沙子堆成小沙灘' },
+      ], 'Safe house!');
+    }
+
+    // --- §4.25 颱風天：颱風來前先修好有裂縫的設施；颱風來時待在屋子裡最安全 ---
+    lab_storm() {
+      ['typhoon', 'safe', 'house', 'wind'].forEach((w) => L.seen(this.s.words, w, this.s.day));
+      const fix = L.shuffle([
+        { k: 'crack', label: '有裂縫的橋', draw: (g) => { g.fillStyle(0x8d6e63, 1); g.fillRect(-50, -6, 100, 14); g.fillRect(-46, 8, 8, 26); g.fillRect(38, 8, 8, 26); g.lineStyle(3, 0x3e2723, 1); g.lineBetween(-4, -6, 4, 2); g.lineBetween(4, 2, -2, 8); } },
+        { k: 'well', label: '好好的水井', draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-26, -4, 52, 36); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -36, 6, 34); g.fillRect(24, -36, 6, 34); g.fillRect(-32, -40, 64, 8); } },
+        { k: 'kite', label: '天上的風箏', draw: (g) => { prepIcon(g, 'kite'); } },
+      ]);
+      const where = L.shuffle([
+        { k: 'house', label: '屋子裡 in the house', draw: (g) => { g.fillStyle(0xffcc80, 1); g.fillRect(-28, -6, 56, 40); g.fillStyle(0xd84315, 1); g.fillTriangle(-36, -4, 36, -4, 0, -36); g.fillStyle(0x6d4c41, 1); g.fillRect(-8, 12, 16, 22); } },
+        { k: 'beach', label: '海邊 on the beach', draw: (g) => { g.fillStyle(0xe8cf8f, 1); g.fillRect(-40, 14, 80, 20); g.fillStyle(0x4fc3f7, 1); g.fillRect(-40, -10, 80, 24); g.lineStyle(3, 0xffffff, 1); g.lineBetween(-30, -2, -10, -8); g.lineBetween(4, -2, 24, -8); } },
+        { k: 'tree', label: '大樹下 under a tree', draw: (g) => { g.fillStyle(0x6d4c41, 1); g.fillRect(-6, -4, 12, 38); g.fillStyle(0x2e8b3a, 1); g.fillCircle(0, -18, 28); } },
+      ]);
+      const cloud = (g) => {
+        g.fillStyle(0x546e7a, 1); g.fillCircle(600, 280, 30); g.fillCircle(640, 268, 38); g.fillCircle(682, 280, 30);
+        g.lineStyle(3, 0x1e88e5, 1); [590, 620, 650, 680].forEach((x) => g.lineBetween(x, 316, x - 8, 340));
+        g.lineStyle(4, 0xb0bec5, 1); g.lineBetween(720, 300, 800, 290); g.lineBetween(720, 320, 790, 318);
+      };
+      this.runQuiz('storm', [
+        { say: 'A typhoon is coming. What should we fix first?', zh: '颱風要來了！要先修好哪一個？', scene: cloud, opts: fix, answer: fix.findIndex((o) => o.k === 'crack'), y: 480,
+          why: '強風大雨會把有裂縫的地方弄得更壞', after: 'Fix it before the typhoon comes. 颱風來之前先補好裂縫，橋就不會被吹壞' },
+        { say: 'The wind is very strong. Where is safe?', zh: '風好大！颱風來的時候，待在哪裡最安全？', scene: cloud, opts: where, answer: where.findIndex((o) => o.k === 'house'), y: 480,
+          why: '海邊有大浪，大樹可能被吹倒', after: 'Stay in the house. 颱風天待在屋子裡最安全' },
+      ], 'Safe!');
     }
 
     // ---------- 研究島（M6 延伸層，5～6 年級）：氣象站、生態研究所、地質洞窟 ----------
