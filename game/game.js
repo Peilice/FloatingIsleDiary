@@ -1456,6 +1456,7 @@
       window.addEventListener('pagehide', () => saveState(this.s));
       document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(this.s); });
       window.__ci = { scene: this, state: this.s, stats: this.stats, report: () => this.report() };
+      this.dailyGift();
       if (BOT) this.time.addEvent({ delay: 120, loop: true, callback: () => this.botStep() });
     }
 
@@ -6576,6 +6577,39 @@
 
     // --- 特效 ---
     // fixed：座標是畫面座標（介面上的提示），不跟著相機平移
+    // 每日小驚喜（遊戲企劃「每日登入」）：每個真實日期第一次打開，右上角出現禮物盒，點開得到星砂或一個收成物。
+    // 沒有連續登入的獎勵，也不會因為中斷而失去什麼
+    dailyGift() {
+      const s = this.s, d = new Date();
+      const today = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      if (s.giftDate === today || s.day < 2) return;   // 第 1 天還在教學，先不打擾
+      const box = this.add.container(1200, 150).setScrollFactor(0).setDepth(60);
+      const g = this.add.graphics();
+      g.fillStyle(0x000000, 0.15); g.fillEllipse(0, 30, 60, 12);
+      g.fillStyle(0xe53935, 1); g.fillRoundedRect(-26, -10, 52, 38, 6);
+      g.fillStyle(0xef5350, 1); g.fillRoundedRect(-30, -20, 60, 14, 5);
+      g.fillStyle(0xffd54a, 1); g.fillRect(-5, -20, 10, 48);
+      g.fillEllipse(-10, -26, 18, 10); g.fillEllipse(10, -26, 18, 10);
+      box.add([g, txt(this, 0, 46, 'Gift 禮物', 16, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 4 }).setOrigin(0.5)]);
+      box.setSize(80, 90).setInteractive({ useHandCursor: true });
+      this.tweens.add({ targets: box, angle: 6, yoyo: true, repeat: -1, duration: 380, ease: 'Sine.easeInOut' });
+      box.on('pointerdown', () => {
+        if (this.modal) return;
+        s.giftDate = today;
+        const crops = s.seeds.filter((k) => PLANTS[k]);
+        let msg;
+        if (Math.random() < 0.6 || !crops.length) { s.stardust += 3; msg = 'A gift for you!  +3 ★'; }
+        else { const k = crops[Math.floor(Math.random() * crops.length)]; s.inv[k] = (s.inv[k] || 0) + 1; msg = 'A gift for you!  +1 ' + k; L.seen(s.words, k, s.day); }
+        speak('A gift for you!');
+        this.floatText(1120, 220, msg, '#d81b60', true);
+        this.tweens.killTweensOf(box);
+        this.tweens.add({ targets: box, scale: 1.4, alpha: 0, duration: 400, onComplete: () => box.destroy() });
+        this.refreshAll();
+        saveState(s);
+      });
+      this.giftBox = box;
+    }
+
     floatText(x, y, str, color, fixed) {
       const t = txt(this, x, y, str, 30, color, { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5).setDepth(fixed ? 120 : 50);
       if (fixed) t.setScrollFactor(0);
