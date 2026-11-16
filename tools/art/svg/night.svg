@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#1f2f6b" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <circle cx="150" cy="82" r="24" fill="#fff3b0" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="162" cy="74" r="22" fill="#1f2f6b" />
+    <circle cx="60" cy="60" r="3.5" fill="#ffffff" />
+    <circle cx="90" cy="100" r="3.5" fill="#ffffff" />
+    <circle cx="70" cy="130" r="3.5" fill="#ffffff" />
+    <circle cx="184" cy="140" r="3.5" fill="#ffffff" />
+    <circle cx="120" cy="56" r="3.5" fill="#ffffff" />
+    <rect x="30" y="166" width="180" height="44" fill="#33582a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

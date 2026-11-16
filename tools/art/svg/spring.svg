@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#d8f0ff" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <rect x="30" y="150" width="180" height="60" fill="#8bc66a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="66" cy="62" r="16" fill="#ffffff" opacity=".8"/>
+    <circle cx="84" cy="58" r="20" fill="#ffffff" opacity=".8"/>
+    <path d="M80 150 L80 112 M120 150 L120 100 M160 150 L160 116" fill="none" stroke="#3f8f3a" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="80" cy="99" r="6.75" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="88.55940556725614" cy="105.21852982485439" r="6.75" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="85.2906069560663" cy="115.28076081439454" r="6.75" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.71074231201416" cy="115.28174107683614" r="6.75" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="71.44007915331319" cy="105.22011599190601" r="6.75" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="80" cy="108" r="4.95" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="120" cy="85" r="8.25" fill="#fdd835" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="130.46149569331305" cy="92.60042534148869" r="8.25" fill="#fdd835" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="126.4662973907477" cy="104.89870766203776" r="8.25" fill="#fdd835" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="113.53535171468397" cy="104.8999057605775" r="8.25" fill="#fdd835" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="109.53787452071613" cy="92.60236399010735" r="8.25" fill="#fdd835" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="120" cy="96" r="6.050000000000001" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="160" cy="103" r="6.75" fill="#ce93d8" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="168.55940556725614" cy="109.21852982485439" r="6.75" fill="#ce93d8" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="165.29060695606628" cy="119.28076081439454" r="6.75" fill="#ce93d8" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="154.71074231201416" cy="119.28174107683614" r="6.75" fill="#ce93d8" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="151.4400791533132" cy="109.22011599190601" r="6.75" fill="#ce93d8" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="160" cy="112" r="4.95" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M150 70 Q160 60 170 70 Q160 66 150 70Z M170 70 Q180 60 190 70" fill="none" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

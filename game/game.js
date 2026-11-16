@@ -301,7 +301,7 @@
     way:    { list: PLACES, draw: (g, k) => drawPlace(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'This is the ' + k + '. Thank you!' },
     job:    { list: JOBS, draw: (g, k) => drawJob(g, k), say: (k) => 'Who is the ' + (k === 'police' ? 'police officer' : k) + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Thank you for your help!' },
     school: { list: SCHOOL, draw: (g, k) => drawSchool(g, k), say: (k) => 'I need ' + (k === 'eraser' ? 'an ' : 'a ') + k + ' for school.', zh: (k) => '上學要用' + zhOf(k) + '，是哪一個？', thanks: () => 'Thank you! I am ready for school.' },
-    color:  { list: Object.keys(BALLOON), draw: (g, k) => drawBalloon(g, k), say: (k) => 'Which balloon is ' + k + '?', zh: (k) => '哪一顆氣球是' + zhOf(k) + '？', thanks: (k) => 'Yes, it is ' + k + '. Thank you!' },
+    color:  { list: Object.keys(BALLOON), art: (k) => 'balloon-' + k, draw: (g, k) => drawBalloon(g, k), say: (k) => 'Which balloon is ' + k + '?', zh: (k) => '哪一顆氣球是' + zhOf(k) + '？', thanks: (k) => 'Yes, it is ' + k + '. Thank you!' },
     meal:   { list: FOODS, draw: (g, k) => drawFood(g, k), say: (k) => 'Can I have the ' + k + ', please?', zh: (k) => '可以給我' + zhOf(k) + '嗎？', thanks: () => 'Yummy! Thank you!' },
     season: { list: SEASONS, draw: (g, k) => drawSeason(g, k), say: (k) => 'Which one is ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: (k) => 'I like ' + k + '! Thank you!' },
     count:  { list: COUNT, draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
@@ -3166,7 +3166,7 @@
         // 指路：縮小排在十字路口的四個方向；其他：4 張貼紙排一排
         const pos = road ? [[640, 330], [452, 450], [828, 450], [640, 572]][i] : [640 + (i - 1.5) * 222, 470];
         c.x = pos[0]; c.card.setPosition(pos[0], pos[1]).setScale(road ? 0.56 : 1).setAngle(road ? 0 : c.tilt);
-        const tex = 'st-' + k, useImg = this.textures.exists(tex);   // 有貼紙就用貼紙，還沒畫的用程式繪圖
+        const tex = 'st-' + (P.art ? P.art(k) : k), useImg = this.textures.exists(tex);   // 有貼紙就用貼紙，還沒畫的用程式繪圖
         c.img.setVisible(useImg); c.pic.setVisible(!useImg);
         if (useImg) c.img.setTexture(tex).setDisplaySize(158, 158);
         // 身體部位的小人比較細，放大一點才看得清楚五官
@@ -3174,7 +3174,7 @@
         P.draw(c.pic, k);
         c.en.setText(P.label ? P.label(k) : '');
         c.zh.setFontSize(road ? 30 : 20);
-        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? zhOf(k) : '');
+        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? (o.type === 'color' ? zhOf(k).split('；')[0] : zhOf(k)) : '');   // 顏色題的 orange 只寫「橘色」
         c.stamp.setVisible(!!o.done && k === o.answer);
         c.card.setAlpha(o.wrong[k] ? 0.35 : 1);
       });

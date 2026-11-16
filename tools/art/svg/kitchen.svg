@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#ffffff"/><stop offset="1" stop-color="#d6d7db"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#d1d9dd"/><stop offset="0.55" stop-color="#b0bec5"/><stop offset="1" stop-color="#96a2ac"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#fff3df" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <rect x="30" y="140" width="180" height="70" fill="url(#g0)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="80" cy="140" r="14" fill="#455a64" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="150" cy="140" r="14" fill="#455a64" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="52" y="92" width="56" height="44" rx="8" fill="url(#g1)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="44" y="88" width="72" height="8" fill="#90a4ae" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M66 82 Q62 70 70 60 M86 82 Q82 70 90 60" fill="none" stroke="#90a4ae" stroke-width="3" stroke-linecap="round"/>
+    <rect x="60" y="160" width="120" height="34" rx="6" fill="#ffe08a" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="120" cy="177" r="4" fill="#8a5a36" />
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

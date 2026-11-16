@@ -95,6 +95,31 @@ function person(o) {
   ].join('');
 }
 
+// 場景小卡（季節、時段、湖海山路）：圓角方框當背景
+function scene(sky, inner) {
+  return [`<clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>`,
+    RR(30, 34, 180, 172, 26, sky, ink()), `<g clip-path="url(#sc)">`, ...inner, `</g>`, RR(30, 34, 180, 172, 26, 'none', ink())];
+}
+function sunRays(cx, cy, r, c = '#ffb300') {
+  let d = '';
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; d += `M${(cx + Math.cos(a) * (r + 6)).toFixed(1)} ${(cy + Math.sin(a) * (r + 6)).toFixed(1)} L${(cx + Math.cos(a) * (r + 16)).toFixed(1)} ${(cy + Math.sin(a) * (r + 16)).toFixed(1)} `; }
+  return P(d, 'none', `stroke="${c}" stroke-width="6" stroke-linecap="round"`) + C(cx, cy, r, G('#ffd54a'), ink(3.5));
+}
+function flower(x, y, c, r = 9) {
+  let o = '';
+  for (let i = 0; i < 5; i++) { const a = i * 1.2566 - Math.PI / 2; o += C(x + Math.cos(a) * r, y + Math.sin(a) * r, r * 0.75, c, ink(2.4)); }
+  return o + C(x, y, r * 0.55, '#fff3b0', ink(2.4));
+}
+// 氣球（顏色訂單）
+function balloon(c) {
+  return [
+    P('M120 170 Q112 190 124 204 Q134 216 124 230', 'none', `stroke="${INK}" stroke-width="3" stroke-linecap="round"`),
+    P('M120 30 Q176 30 180 92 Q182 146 120 172 Q58 146 60 92 Q64 30 120 30Z', G(c), ink()),
+    P('M110 170 L130 170 L124 182 L116 182Z', G(c), ink(3)),
+    c === '#ffffff' ? '' : E(94, 74, 12, 22, '#ffffff', 'opacity=".45" transform="rotate(20 94 74)"'),
+  ];
+}
+
 // 一隻球鞋
 function shoe(x, y) {
   const t = (d) => d.replace(/(-?\d+(\.\d+)?) (-?\d+(\.\d+)?)/g, (m, a, _, b) => (Number(a) + x) + ' ' + (Number(b) + y));
@@ -469,6 +494,91 @@ const ART = {
     RR(60, 146, 120, 22, 8, G('#e8852c'), ink()),
     R(68, 168, 12, 44, G('#8a5a36'), ink(3.5)), R(160, 168, 12, 44, G('#8a5a36'), ink(3.5)),
   ],
+  // ---- 季節 ----
+  spring: () => scene('#d8f0ff', [R(30, 150, 180, 60, '#8bc66a', ink(3)), C(66, 62, 16, '#ffffff', 'opacity=".8"'), C(84, 58, 20, '#ffffff', 'opacity=".8"'),
+    P('M80 150 L80 112 M120 150 L120 100 M160 150 L160 116', 'none', 'stroke="#3f8f3a" stroke-width="5" stroke-linecap="round"'),
+    flower(80, 108, '#f48fb1'), flower(120, 96, '#fdd835', 11), flower(160, 112, '#ce93d8'),
+    P('M150 70 Q160 60 170 70 Q160 66 150 70Z M170 70 Q180 60 190 70', 'none', ink(3))]),
+  summer: () => scene('#7fd0f5', [R(30, 136, 180, 40, '#3d9be0', ink(3)), R(30, 170, 180, 40, '#f3dca0', ink(3)), sunRays(150, 82, 22),
+    P('M44 150 Q56 142 68 150 Q80 158 92 150', 'none', 'stroke="#ffffff" stroke-width="4" stroke-linecap="round"'),
+    P('M70 190 L70 140', 'none', ink(4)), P('M40 146 Q70 116 100 146Z', G('#e5484d'), ink(3)), P('M70 120 L70 146', 'none', ink(2))]),
+  autumn: () => scene('#ffe7c2', [R(30, 168, 180, 40, '#d9b26a', ink(3)), R(112, 104, 16, 70, G('#8a5a36'), ink(3.5)),
+    C(120, 92, 40, G('#ef7d2c'), ink()), C(98, 80, 14, '#f6c43a', 'opacity=".6"'),
+    ...[[56, 118, '#d84315', 20], [176, 140, '#f6c43a', -30], [70, 170, '#ef7d2c', 40], [168, 182, '#d84315', 10]].map(([x, y, c, r]) =>
+      P(`M${x} ${y - 10} Q${x + 10} ${y} ${x} ${y + 10} Q${x - 10} ${y} ${x} ${y - 10}Z`, c, ink(2.4) + ` transform="rotate(${r} ${x} ${y})"`))]),
+  winter: () => scene('#cfe3f5', [R(30, 160, 180, 50, '#ffffff', ink(3)),
+    C(120, 150, 34, G('#ffffff'), ink()), C(120, 100, 24, G('#ffffff'), ink()), eye(112, 96, 4), eye(128, 96, 4),
+    P('M120 104 L140 108 L120 110Z', '#f08a3a', ink(2)), R(96, 116, 48, 10, '#e5484d', ink(2.5)), P('M134 120 L142 140 L132 140Z', '#e5484d', ink(2)),
+    ...[[50, 60], [180, 70], [64, 120], [184, 128], [150, 50], [90, 56]].map(([x, y]) => C(x, y, 4.5, '#ffffff', ink(1.6)))]),
+  // ---- 時段 ----
+  morning: () => scene('#bfe6f6', [C(78, 160, 24, G('#ffd54a'), ink(3.5)), P('M78 122 L78 110 M50 134 L42 126 M106 134 L114 126', 'none', 'stroke="#ffb300" stroke-width="6" stroke-linecap="round"'), R(30, 160, 180, 50, '#8bc66a', ink(3)), C(160, 76, 14, '#ffffff', 'opacity=".9"'), C(176, 72, 18, '#ffffff', 'opacity=".9"')]),
+  afternoon: () => scene('#6fc6f2', [sunRays(120, 80, 24), R(30, 160, 180, 50, '#8bc66a', ink(3))]),
+  evening: () => scene('#ffb08a', [R(30, 30, 180, 70, '#ff9a76'), C(160, 160, 26, G('#ff7043'), ink(3.5)), R(30, 160, 180, 50, '#6fa83c', ink(3)), C(70, 70, 3, '#ffffff', 'opacity=".7"')]),
+  night: () => scene('#1f2f6b', [C(150, 82, 24, '#fff3b0', ink(3)), C(162, 74, 22, '#1f2f6b'), ...[[60, 60], [90, 100], [70, 130], [184, 140], [120, 56]].map(([x, y]) => C(x, y, 3.5, '#ffffff')), R(30, 166, 180, 44, '#33582a', ink(3))]),
+  // ---- 地點（看圖認地方）----
+  lake: () => scene('#d8f0ff', [R(30, 96, 180, 120, '#8bc66a'), E(120, 156, 70, 30, G('#4fb0e6'), ink(3.5)), P('M96 154 Q106 148 116 154 M128 162 Q138 156 148 162', 'none', 'stroke="#ffffff" stroke-width="3" stroke-linecap="round"'),
+    ...[[52, 116], [188, 120], [60, 196]].map(([x, y]) => P(`M${x - 14} ${y + 14} L${x} ${y - 20} L${x + 14} ${y + 14}Z`, G('#3f8f3a'), ink(3)))]),
+  sea: () => scene('#bfe6f6', [R(30, 116, 180, 100, G('#2f86d6'), ink(3)), ...[[54, 140], [110, 168], [160, 136], [70, 192]].map(([x, y]) => P(`M${x} ${y} Q${x + 10} ${y - 10} ${x + 20} ${y} Q${x + 30} ${y - 10} ${x + 40} ${y}`, 'none', 'stroke="#ffffff" stroke-width="4" stroke-linecap="round"')),
+    P('M130 112 L178 112 L170 124 L138 124Z', G('#8a5a36'), ink(3)), P('M152 112 L152 70 L178 108Z', '#ffffff', ink(3)), sunRays(66, 70, 14)]),
+  mountain: () => scene('#d8f0ff', [P('M20 210 L90 80 L160 210Z', G('#78909c'), ink()), P('M90 210 L160 60 L230 210Z', G('#607d8b'), ink()),
+    P('M146 90 L160 60 L174 90 L166 84 L160 92 L152 84Z', '#ffffff', ink(3)), P('M78 102 L90 80 L102 102 L94 98 L90 104 L86 98Z', '#ffffff', ink(3)), R(30, 196, 180, 14, '#8bc66a', ink(3))]),
+  road: () => scene('#d8f0ff', [R(30, 110, 180, 100, '#8bc66a'), P('M40 210 L108 110 L132 110 L200 210Z', G('#7d8b96'), ink(3.5)),
+    P('M120 120 L120 134 M120 150 L120 170 M120 186 L120 208', 'none', 'stroke="#ffffff" stroke-width="5" stroke-linecap="round"'), C(60, 90, 16, '#ffffff', 'opacity=".8"'), C(76, 86, 20, '#ffffff', 'opacity=".8"')]),
+  kitchen: () => scene('#fff3df', [R(30, 140, 180, 70, G('#ffffff'), ink(3)), C(80, 140, 14, '#455a64', ink(3)), C(150, 140, 14, '#455a64', ink(3)),
+    RR(52, 92, 56, 44, 8, G('#b0bec5'), ink(3)), R(44, 88, 72, 8, '#90a4ae', ink(2.5)), P('M66 82 Q62 70 70 60 M86 82 Q82 70 90 60', 'none', 'stroke="#90a4ae" stroke-width="3" stroke-linecap="round"'),
+    RR(60, 160, 120, 34, 6, '#ffe08a', ink(2.5)), C(120, 177, 4, '#8a5a36')]),
+  bedroom: () => scene('#fde8ef', [RR(150, 56, 40, 40, 6, '#bfe6f6', ink(3)), P('M170 56 L170 96', 'none', ink(2.5)),
+    R(44, 112, 12, 84, G('#8a5a36'), ink(3)), RR(56, 136, 140, 40, 8, G('#f48fb1'), ink(3.5)), RR(62, 122, 44, 22, 10, '#ffffff', ink(3)), R(186, 150, 10, 46, G('#8a5a36'), ink(3))]),
+  classroom: () => scene('#fff8e6', [RR(52, 50, 136, 70, 6, G('#2e7d4f'), ink(3.5)), P('M66 70 L130 70 M66 90 L110 90', 'none', 'stroke="#ffffff" stroke-width="4" stroke-linecap="round"'),
+    ...[60, 104, 148].map((x) => RR(x, 150, 34, 10, 3, G('#c8935f'), ink(2.5)) + R(x + 4, 160, 6, 28, '#8a5a36', ink(2)) + R(x + 24, 160, 6, 28, '#8a5a36', ink(2)))]),
+  farm: () => scene('#d8f0ff', [R(30, 160, 180, 50, '#8bc66a', ink(3)), R(52, 104, 72, 72, G('#c4473d'), ink(3.5)), P('M44 108 L88 72 L132 108Z', G('#a63a31'), ink(3.5)),
+    RR(74, 140, 28, 36, 3, '#ffffff', ink(2.5)), P('M74 140 L102 176 M102 140 L74 176', 'none', ink(2)),
+    P('M136 150 L204 150 M136 166 L204 166', 'none', 'stroke="#8a5a36" stroke-width="5" stroke-linecap="round"'), ...[146, 170, 194].map((x) => R(x - 3, 142, 6, 34, '#a9805a', ink(2)))]),
+  // ---- 食物 ----
+  lemon: () => [P('M40 124 Q40 72 120 70 Q200 72 200 124 Q200 176 120 178 Q40 176 40 124Z', G('#f6d83a'), ink()), P('M32 124 L44 116 L44 132Z M208 124 L196 116 L196 132Z', G('#f6d83a'), ink(3)), P('M128 68 Q150 46 176 54 Q160 76 128 68Z', G('#5aa83f'), ink(3.5)), shine(84, 98, 18, 10)],
+  rice: () => [E(120, 120, 82, 24, '#ffffff', ink()), ...[[90, 112], [110, 104], [130, 110], [150, 116], [100, 124], [140, 124], [120, 118]].map(([x, y]) => E(x, y, 6, 4, '#f3efe6', ink(1.5))),
+    P('M38 122 Q42 196 120 200 Q198 196 202 122Z', G('#e8f1f8'), ink()), P('M60 150 Q120 168 180 150', 'none', 'stroke="#7fc4dc" stroke-width="6" stroke-linecap="round"'),
+    P('M150 40 L196 110 M170 36 L206 104', 'none', ink(5)), P('M150 40 L196 110 M170 36 L206 104', 'none', 'stroke="#c8935f" stroke-width="2.5" stroke-linecap="round"')],
+  bread: () => [P('M34 150 Q30 80 120 78 Q210 80 206 150 Q206 186 120 188 Q34 186 34 150Z', G('#d9a05a'), ink()), P('M50 150 Q50 100 120 98 Q190 100 190 150 Q186 172 120 172 Q54 172 50 150Z', '#f6dcac', ink(3)),
+    P('M80 90 Q92 104 86 118 M120 84 Q132 100 126 114 M160 90 Q172 104 166 118', 'none', `stroke="${dark('#d9a05a', 0.2)}" stroke-width="4" stroke-linecap="round"`)],
+  egg: () => [P('M120 36 Q178 40 184 128 Q186 198 120 200 Q54 198 56 128 Q62 40 120 36Z', G('#fff6e8'), ink()), shine(96, 84, 14, 26, 15)],
+  milk: () => [P('M76 70 L120 36 L164 70Z', G('#e8f1f8'), ink()), R(76, 70, 88, 130, G('#ffffff'), ink()), R(76, 112, 88, 46, '#3d7fd6', ink(3)), R(108, 24, 24, 14, '#3d7fd6', ink(2.5)), C(104, 135, 9, '#ffffff', 'opacity=".9"'), E(140, 135, 12, 8, '#ffffff', 'opacity=".9"')],   // 不寫 MILK，避免字直接洩漏答案
+  soup: () => [P('M40 112 Q44 196 120 198 Q196 196 200 112Z', G('#f6efe1'), ink()), E(120, 112, 80, 20, G('#f08a4a'), ink()), C(96, 110, 7, '#8bc66a', ink(1.6)), C(134, 114, 6, '#f6d36b', ink(1.6)),
+    P('M90 84 Q80 66 92 50 M120 82 Q110 62 124 44 M150 84 Q140 66 152 50', 'none', 'stroke="#b0bec5" stroke-width="5" stroke-linecap="round"')],
+  // ---- 物品 ----
+  robot: () => [P('M120 42 L120 26', 'none', ink(4)), C(120, 22, 7, '#e5484d', ink(3)), RR(76, 42, 88, 66, 14, G('#a9bdcc'), ink()), C(102, 74, 11, '#7fd0f5', ink(3)), C(138, 74, 11, '#7fd0f5', ink(3)), RR(104, 92, 32, 8, 3, '#455a64'),
+    RR(64, 114, 112, 76, 14, G('#90a4ae'), ink()), C(120, 146, 12, '#f6c43a', ink(3)), RR(38, 120, 24, 56, 10, G('#a9bdcc'), ink(3.5)), RR(178, 120, 24, 56, 10, G('#a9bdcc'), ink(3.5)), RR(84, 190, 24, 22, 6, '#607d8b', ink(3)), RR(132, 190, 24, 22, 6, '#607d8b', ink(3))],
+  clock: () => [C(120, 124, 82, G('#e8852c'), ink()), C(120, 124, 66, '#ffffff', ink(3.5)), ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => { const a = i * Math.PI / 6; return C(120 + Math.cos(a) * 54, 124 + Math.sin(a) * 54, i % 3 ? 2.5 : 4.5, INK); }),
+    P('M120 124 L120 80 M120 124 L150 124', 'none', ink(6)), C(120, 124, 6, '#e5484d', ink(2))],
+  fan: () => [P('M120 128 L120 196', 'none', ink(10)), P('M120 128 L120 196', 'none', 'stroke="#90a4ae" stroke-width="5"'), E(120, 200, 50, 14, G('#78909c'), ink()),
+    C(120, 98, 68, '#ffffff', ink()), ...[0, 1, 2].map((i) => `<ellipse cx="120" cy="66" rx="18" ry="30" fill="${'#7fc4dc'}" ${ink(3)} transform="rotate(${i * 120} 120 98)"/>`), C(120, 98, 11, '#607d8b', ink(3)),
+    P('M70 58 L170 58 M56 98 L184 98 M70 138 L170 138', 'none', 'stroke="#cfd8dc" stroke-width="2" opacity=".7"')],
+  computer: () => [RR(40, 44, 160, 110, 12, G('#455a64'), ink()), RR(52, 56, 136, 86, 6, G('#7fd0f5'), ink(2.5)), P('M70 80 L120 80 M70 100 L150 100 M70 120 L110 120', 'none', 'stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"'),
+    R(108, 154, 24, 22, '#607d8b', ink(3)), RR(70, 176, 100, 12, 6, '#607d8b', ink(3)), RR(48, 196, 144, 18, 6, '#cfd8dc', ink(3))],
+  bike: () => [C(64, 156, 40, 'none', `stroke="${INK}" stroke-width="10"`), C(176, 156, 40, 'none', `stroke="${INK}" stroke-width="10"`), C(64, 156, 40, 'none', 'stroke="#455a64" stroke-width="5"'), C(176, 156, 40, 'none', 'stroke="#455a64" stroke-width="5"'),
+    P('M64 156 L104 100 L164 100 L176 156 M104 100 L120 156 L64 156 M164 100 L158 76 M120 156 L164 100', 'none', `stroke="${INK}" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"`),
+    P('M64 156 L104 100 L164 100 L176 156 M104 100 L120 156 L64 156 M164 100 L158 76 M120 156 L164 100', 'none', 'stroke="#e5484d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"'),
+    RR(84, 84, 36, 12, 6, '#455a64', ink(2.5)), RR(144, 66, 34, 10, 5, '#455a64', ink(2.5)), C(120, 156, 8, '#90a4ae', ink(2.5))],
+  ball: () => [C(120, 122, 80, G('#ffffff'), ink()), P('M120 82 L148 102 L138 134 L102 134 L92 102Z', INK),
+    ...[[120, 46, 120, 82], [190, 104, 148, 102], [166, 186, 138, 134], [74, 186, 102, 134], [50, 104, 92, 102]].map(([a, b, c, d]) => P(`M${a} ${b} L${c} ${d}`, 'none', ink(3.5))), shine(92, 84, 14, 8)],
+  rope: () => [C(110, 120, 66, 'none', `stroke="${INK}" stroke-width="22"`), C(110, 120, 66, 'none', 'stroke="#c8935f" stroke-width="15"'), C(110, 120, 66, 'none', 'stroke="#8a5a36" stroke-width="4" stroke-dasharray="6 9"'),
+    C(110, 120, 38, 'none', `stroke="${INK}" stroke-width="20"`), C(110, 120, 38, 'none', 'stroke="#d9a76a" stroke-width="13"'),
+    P('M170 150 Q200 180 214 210', 'none', `stroke="${INK}" stroke-width="20" stroke-linecap="round"`), P('M170 150 Q200 180 214 210', 'none', 'stroke="#c8935f" stroke-width="13" stroke-linecap="round"')],
+  flute: () => [`<g transform="rotate(-25 120 120)">`, RR(20, 104, 200, 32, 14, G('#cfd8dc'), ink()), ...[64, 92, 120, 148, 176].map((x) => C(x, 120, 6.5, '#37474f', ink(2))), R(40, 104, 10, 32, '#90a4ae'), `</g>`],
+  mirror: () => [R(112, 172, 16, 40, G('#8a5a36'), ink(3.5)), E(120, 100, 64, 80, G('#c8935f'), ink()), E(120, 100, 50, 66, G('#d6f1fb'), ink(3)),
+    P('M92 76 L118 52 M92 100 L132 62', 'none', 'stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity=".8"')],
+  shirt: () => [P('M84 44 L40 72 L56 114 L76 106 L76 204 L164 204 L164 106 L184 114 L200 72 L156 44 Q140 64 120 64 Q100 64 84 44Z', G('#4aa0c6'), ink()),
+    P('M84 44 L104 74 L120 64 L136 74 L156 44 Q140 56 120 56 Q100 56 84 44Z', '#ffffff', ink(3)), C(120, 104, 4, '#ffffff', ink(2)), C(120, 134, 4, '#ffffff', ink(2)), C(120, 164, 4, '#ffffff', ink(2)), P('M120 70 L120 204', 'none', ink(2.5))],
+  pants: () => [P('M64 44 L176 44 L184 210 L136 210 L120 104 L104 210 L56 210Z', G('#3949ab'), ink()), R(64, 44, 112, 22, '#2c3a8c', ink(3)), C(120, 55, 4, '#f6d36b', ink(2)),
+    P('M80 80 Q92 88 104 80', 'none', 'stroke="#7986cb" stroke-width="3" stroke-linecap="round"')],
+  dress: () => [P('M96 36 L104 72 M144 36 L136 72', 'none', ink(5)), P('M96 70 L144 70 L148 104 L92 104Z', G('#ec5f8f'), ink()),
+    P('M92 104 L148 104 L196 204 Q120 218 44 204Z', G('#f27ba3'), ink()), R(92, 98, 56, 12, '#ffffff', ink(2.5)),
+    ...[[90, 150], [130, 140], [150, 180], [100, 186]].map(([x, y]) => C(x, y, 5, '#ffffff', 'opacity=".75"'))],
+  // ---- 顏色（氣球）----
+  'balloon-red': () => balloon('#e8443a'), 'balloon-blue': () => balloon('#3d7fd6'), 'balloon-green': () => balloon('#4caf50'),
+  'balloon-yellow': () => balloon('#f6d83a'), 'balloon-orange': () => balloon('#f08a2a'), 'balloon-purple': () => balloon('#8e4fb5'),
+  'balloon-pink': () => balloon('#f48fb1'), 'balloon-black': () => balloon('#2b2f36'), 'balloon-white': () => balloon('#ffffff'),
+  'balloon-brown': () => balloon('#8a5a36'), 'balloon-gray': () => balloon('#9aa5ad'),
   // 印章：選對時蓋在卡片上
   stamp: () => [
     `<g transform="rotate(-14 120 120)">`,

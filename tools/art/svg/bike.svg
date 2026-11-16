@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <circle cx="64" cy="156" r="40" fill="none" stroke="#2b3a55" stroke-width="10"/>
+    <circle cx="176" cy="156" r="40" fill="none" stroke="#2b3a55" stroke-width="10"/>
+    <circle cx="64" cy="156" r="40" fill="none" stroke="#455a64" stroke-width="5"/>
+    <circle cx="176" cy="156" r="40" fill="none" stroke="#455a64" stroke-width="5"/>
+    <path d="M64 156 L104 100 L164 100 L176 156 M104 100 L120 156 L64 156 M164 100 L158 76 M120 156 L164 100" fill="none" stroke="#2b3a55" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M64 156 L104 100 L164 100 L176 156 M104 100 L120 156 L64 156 M164 100 L158 76 M120 156 L164 100" fill="none" stroke="#e5484d" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="84" y="84" width="36" height="12" rx="6" fill="#455a64" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="144" y="66" width="34" height="10" rx="5" fill="#455a64" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="120" cy="156" r="8" fill="#90a4ae" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

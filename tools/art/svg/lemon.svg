@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae88d"/><stop offset="0.55" stop-color="#f6d83a"/><stop offset="1" stop-color="#cfb73a"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae88d"/><stop offset="0.55" stop-color="#f6d83a"/><stop offset="1" stop-color="#cfb73a"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#9fcd90"/><stop offset="0.55" stop-color="#5aa83f"/><stop offset="1" stop-color="#4f903e"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M40 124 Q40 72 120 70 Q200 72 200 124 Q200 176 120 178 Q40 176 40 124Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M32 124 L44 116 L44 132Z M208 124 L196 116 L196 132Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M128 68 Q150 46 176 54 Q160 76 128 68Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="84" cy="98" rx="18" ry="10" fill="#ffffff" opacity=".45" transform="rotate(-30 84 98)"/>
+  </g>
+</svg>

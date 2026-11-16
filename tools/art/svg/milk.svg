@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f2f7fb"/><stop offset="0.55" stop-color="#e8f1f8"/><stop offset="1" stop-color="#c3ccd5"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#ffffff"/><stop offset="1" stop-color="#d6d7db"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M76 70 L120 36 L164 70Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="76" y="70" width="88" height="130" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="76" y="112" width="88" height="46" fill="#3d7fd6" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="108" y="24" width="24" height="14" fill="#3d7fd6" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="104" cy="135" r="9" fill="#ffffff" opacity=".9"/>
+    <ellipse cx="140" cy="135" rx="12" ry="8" fill="#ffffff" opacity=".9"/>
+  </g>
+</svg>

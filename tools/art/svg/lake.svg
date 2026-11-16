@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99d1f1"/><stop offset="0.55" stop-color="#4fb0e6"/><stop offset="1" stop-color="#4696c7"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90be8d"/><stop offset="0.55" stop-color="#3f8f3a"/><stop offset="1" stop-color="#397b3a"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90be8d"/><stop offset="0.55" stop-color="#3f8f3a"/><stop offset="1" stop-color="#397b3a"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#90be8d"/><stop offset="0.55" stop-color="#3f8f3a"/><stop offset="1" stop-color="#397b3a"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#d8f0ff" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <rect x="30" y="96" width="180" height="120" fill="#8bc66a" />
+    <ellipse cx="120" cy="156" rx="70" ry="30" fill="url(#g0)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M96 154 Q106 148 116 154 M128 162 Q138 156 148 162" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+    <path d="M38 130 L52 96 L66 130Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M174 134 L188 100 L202 134Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M46 210 L60 176 L74 210Z" fill="url(#g3)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>
