@@ -11,11 +11,9 @@
     </filter>
   </defs>
   <g filter="url(#sticker)">
-    <path d="M64 70 Q40 140 96 186 Q150 214 196 176 Q150 186 118 156 Q84 124 84 72Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M60 64 L84 72 L80 56Z" fill="#6d5233" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M80 66 Q66 140 120 176 Q166 200 206 162 Q206 152 196 150 Q160 176 126 150 Q96 120 100 70Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M96 64 L100 74 L82 70Z" fill="#6d5233" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M206 162 L214 160 L208 150Z" fill="#6d5233" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
-    <path d="M98 92 Q96 136 132 160" fill="none" stroke="#fcefb8" stroke-width="6" stroke-linecap="round"/>
+    <path d="M211.7 147.5 Q215.9 168.3 201.0 171.9 A128 128 0 0 1 51.9 67.9 L58.9 56.9 L84.0 54.6 L93.3 60.7 A86 86 0 0 0 193.5 130.6 Q203.5 128.1 211.7 147.5Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M211.7 147.5 L206.6 149.1" fill="none" stroke="#2b3a55" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M192.8 172.0 Q189.5 193.8 173.8 192.1 A132 132 0 0 1 67.2 91.0 L74.0 79.4 L100.2 75.7 L110.2 81.3 A88 88 0 0 0 181.2 148.7 Q191.7 149.9 192.8 172.0Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M192.8 172.0 L187.3 171.7" fill="none" stroke="#2b3a55" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M44 52 L66 46 L72 72 L52 78Z" fill="#6d5233" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M100 96 Q98 144 140 176" fill="none" stroke="#fcefb8" stroke-width="7" stroke-linecap="round"/>
   </g>
 </svg>

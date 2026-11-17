@@ -245,6 +245,14 @@ function stars(n) {
   return out;
 }
 
+// 一根香蕉：以 (cx, cy) 為圓心的月牙，外半徑 R、厚 t，角度 a0（尖端）到 a1（蒂頭）
+function bananaPiece(cx, cy, R, t, a0, a1, c) {
+  const pt = (a, r) => (cx + Math.cos(a) * r).toFixed(1) + ' ' + (cy + Math.sin(a) * r).toFixed(1);
+  const r = R - t;
+  const d = `M${pt(a0, R - t * 0.5)} Q${pt(a0 + 0.02, R)} ${pt(a0 + 0.14, R)} A${R} ${R} 0 0 1 ${pt(a1 - 0.08, R)} L${pt(a1, R - t * 0.2)} L${pt(a1, r + t * 0.2)} L${pt(a1 - 0.08, r)} A${r} ${r} 0 0 0 ${pt(a0 + 0.14, r)} Q${pt(a0 + 0.02, r)} ${pt(a0, R - t * 0.5)}Z`;
+  return P(d, G(c), ink()) + P(`M${pt(a0, R - t * 0.5)} L${pt(a0 + 0.05, R - t * 0.5)}`, 'none', ink(7));
+}
+
 const ART = {
   panda: () => [
     C(66, 64, 24, G('#2f333b'), ink()), C(174, 64, 24, G('#2f333b'), ink()),
@@ -445,14 +453,10 @@ const ART = {
   'apple-yellow': () => apple('#f5cf3a'),
   'grape-purple': () => grape('#8e4fb5'),
   'grape-green': () => grape('#a4cf55'),
-  banana: () => [
-    P('M64 70 Q40 140 96 186 Q150 214 196 176 Q150 186 118 156 Q84 124 84 72Z', G('#eebb2c'), ink()),
-    P('M60 64 L84 72 L80 56Z', '#6d5233', ink(3)),
-    P('M80 66 Q66 140 120 176 Q166 200 206 162 Q206 152 196 150 Q160 176 126 150 Q96 120 100 70Z', G('#f8d84e'), ink()),
-    P('M96 64 L100 74 L82 70Z', '#6d5233', ink(3)),
-    P('M206 162 L214 160 L208 150Z', '#6d5233', ink(3)),
-    P('M98 92 Q96 136 132 160', 'none', `stroke="${light('#f8d84e', 0.6)}" stroke-width="6" stroke-linecap="round"`),
-  ],
+  // 香蕉：兩根胖胖的月牙形（舊版太細長）
+  banana: () => [bananaPiece(178, 46, 128, 42, 1.25, 3.05, '#eebb2c'), bananaPiece(196, 62, 132, 44, 1.6, 3.0, '#f8d84e'),
+    P('M44 52 L66 46 L72 72 L52 78Z', '#6d5233', ink(3.5)),
+    P('M100 96 Q98 144 140 176', 'none', `stroke="${light('#f8d84e', 0.6)}" stroke-width="7" stroke-linecap="round"`)],
   // ---- 衣物（市集衣物訂單）----
   hat: () => [
     E(120, 150, 100, 34, G('#e9c46a'), ink()),
