@@ -708,7 +708,7 @@
         g.fillStyle(0xffeb3b, 1); g.fillCircle(0, -6, 16); g.fillStyle(0x90a4ae, 1); g.fillRect(-8, 8, 16, 12);
         g.lineStyle(2, 0xf9a825, 1); g.lineBetween(-5, -6, 0, 2); g.lineBetween(5, -6, 0, 2);
         break;
-      case 'bell': drawInstr(g, 'bell'); break;
+      case 'bell': drawInstrRaw(g, 'bell'); break;
       case 'waves':
         g.lineStyle(4, 0x546e7a, 1);
         [8, 16, 24].forEach((r) => { g.beginPath(); g.arc(-10, 0, r, -0.7, 0.7, false); g.strokePath(); });
@@ -745,9 +745,9 @@
       case 'rainbow':
         [0xe53935, 0xfb8c00, 0xfdd835, 0x43a047, 0x1e88e5, 0x5e35b1].forEach((c, i) => { g.lineStyle(4, c, 0.9); g.beginPath(); g.arc(0, 14, 36 - i * 4, Math.PI, 0, false); g.strokePath(); });
         break;
-      case 'apple': drawFruit(g, 'apple', 'red'); break;
-      case 'grape': drawFruit(g, 'grape', 'purple'); break;
-      case 'banana': drawFruit(g, 'banana', 'yellow'); break;
+      case 'apple': drawFruitRaw(g, 'apple', 'red'); break;
+      case 'grape': drawFruitRaw(g, 'grape', 'purple'); break;
+      case 'banana': drawFruitRaw(g, 'banana', 'yellow'); break;
       default:
         g.fillStyle(0x999999, 1); g.fillCircle(0, 0, 10);
     }
@@ -786,7 +786,8 @@
   }
 
   // 推與拉的卡片：推＝人在箱子後面用手推；拉＝人在前面用繩子拖。只有圖，沒有字
-  function drawPushCard(g, verb, dir) {
+  function drawPushCard(g, verb, dir) { inked(g, (g2) => drawPushCardRaw(g2, verb, dir), 2); }
+  function drawPushCardRaw(g, verb, dir) {
     g.clear();
     const s = dir === 'left' ? -1 : 1;           // 箱子要移動的方向
     const behind = verb === 'push';              // 推：人在箱子後面（和移動方向相反那側）
@@ -818,7 +819,8 @@
     else { g.fillStyle(0x81d4fa, 1); g.fillRect(-26, -5, 52, 10); g.fillStyle(0xffffff, 0.6); g.fillRect(-26, -5, 52, 3); g.fillStyle(0xe57373, 1); g.fillRect(-6, -5, 4, 10); g.fillRect(8, -5, 4, 10); }
   }
   // 樂器
-  function drawInstr(g, k) {
+  function drawInstr(g, k) { inked(g, (g2) => drawInstrRaw(g2, k), 2); }
+  function drawInstrRaw(g, k) {
     g.clear();
     if (k === 'bell') { g.fillStyle(0xffca28, 1); g.fillTriangle(-20, 16, 20, 16, 0, -22); g.fillCircle(0, -10, 14); g.fillRect(-22, 12, 44, 6); g.fillStyle(0x8d6e63, 1); g.fillCircle(0, 22, 5); g.fillRect(-3, -30, 6, 8); }
     else if (k === 'drum') { g.fillStyle(0xe53935, 1); g.fillRect(-24, -10, 48, 30); g.fillStyle(0xeceff1, 1); g.fillEllipse(0, -10, 48, 16); g.lineStyle(2, 0xffffff, 1); g.lineBetween(-24, -4, 24, 20); g.lineBetween(24, -4, -24, 20); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(14, -26, 4, -14); }
@@ -827,7 +829,8 @@
   }
 
   // 防災包的東西
-  function drawBagItem(g, k) {
+  function drawBagItem(g, k) { inked(g, (g2) => drawBagItemRaw(g2, k), 2); }
+  function drawBagItemRaw(g, k) {
     g.clear();
     switch (k) {
       case 'water': g.fillStyle(0x81d4fa, 1); g.fillRoundedRect(-10, -16, 20, 34, 6); g.fillStyle(0x1e88e5, 1); g.fillRect(-6, -22, 12, 7); break;
@@ -841,7 +844,8 @@
     }
   }
   // 演練動作：只有圖、沒有字
-  function drawDrill(g, k) {
+  function drawDrill(g, k) { inked(g, (g2) => drawDrillRaw(g2, k), 2); }
+  function drawDrillRaw(g, k) {
     g.clear();
     const desk = () => { g.fillStyle(0x8d6e63, 1); g.fillRect(-34, -16, 68, 8); g.fillRect(-30, -8, 6, 34); g.fillRect(24, -8, 6, 34); };
     g.fillStyle(0xbcaaa4, 1); g.fillRect(-40, 26, 80, 4);
@@ -866,19 +870,21 @@
     }
   }
   // 回收的東西
-  function drawTrash(g, k) {
+  function drawTrash(g, k) { inked(g, (g2) => drawTrashRaw(g2, k), 2); }
+  function drawTrashRaw(g, k) {
     g.clear();
     switch (k) {
       case 'newspaper': g.fillStyle(0xeceff1, 1); g.fillRect(-20, -16, 40, 32); g.lineStyle(2, 0x90a4ae, 1); [-8, -2, 4, 10].forEach((y) => g.lineBetween(-16, y, 16, y)); g.fillStyle(0x90a4ae, 1); g.fillRect(-16, -13, 14, 3); break;
       case 'paperbox': g.fillStyle(0xd7a35a, 1); g.fillRect(-18, -12, 36, 28); g.fillStyle(0xbf8a40, 1); g.fillTriangle(-18, -12, 18, -12, 0, -22); break;
-      case 'pbottle': g.fillStyle(0xb3e5fc, 0.9); g.fillRoundedRect(-9, -14, 18, 32, 6); g.fillRect(-5, -20, 10, 7); g.fillStyle(0x1e88e5, 1); g.fillRect(-5, -24, 10, 4); g.fillRect(-9, 0, 18, 6); break;
-      case 'gbottle': g.fillStyle(0x43a047, 0.85); g.fillRoundedRect(-9, -10, 18, 28, 5); g.fillRect(-4, -22, 8, 13); g.fillStyle(0xffffff, 0.4); g.fillRect(-6, -6, 3, 18); break;
+      case 'pbottle': g.fillStyle(0xb3e5fc, 1); g.fillRoundedRect(-9, -14, 18, 32, 6); g.fillRect(-5, -20, 10, 7); g.fillStyle(0x1e88e5, 1); g.fillRect(-5, -24, 10, 4); g.fillRect(-9, 0, 18, 6); break;
+      case 'gbottle': g.fillStyle(0x43a047, 1); g.fillRoundedRect(-9, -10, 18, 28, 5); g.fillRect(-4, -22, 8, 13); g.fillStyle(0xffffff, 0.4); g.fillRect(-6, -6, 3, 18); break;
       case 'tissue': g.fillStyle(0xffffff, 1); g.fillCircle(-6, 0, 10); g.fillCircle(6, 2, 9); g.fillCircle(0, -6, 8); g.lineStyle(1.5, 0xbdbdbd, 1); g.strokeCircle(-6, 0, 10); break;
       default: g.fillStyle(0xf48fb1, 1); g.fillEllipse(0, 0, 26, 18); g.fillStyle(0xf8bbd0, 1); g.fillEllipse(-4, -3, 10, 6);
     }
   }
   // 池塘汙染的嫌疑者
-  function drawPolluter(g, k) {
+  function drawPolluter(g, k) { inked(g, (g2) => drawPolluterRaw(g2, k), 2); }
+  function drawPolluterRaw(g, k) {
     g.clear();
     if (k === 'pipe') { g.fillStyle(0x78909c, 1); g.fillRect(-26, -10, 40, 16); g.fillRect(12, -14, 10, 24); g.fillStyle(0x546e7a, 1); g.fillRect(-26, -10, 40, 4); }
     else if (k === 'trashpile') { g.fillStyle(0x616161, 1); g.fillCircle(-10, 6, 12); g.fillCircle(8, 4, 13); g.fillCircle(0, -6, 10); g.fillStyle(0xffca28, 1); g.fillRect(-4, -2, 8, 8); }
@@ -886,13 +892,15 @@
   }
 
   // 研究島的圖
-  function waterPart(g, k) {
+  function waterPart(g, k) { inked(g, (g2) => waterPartRaw(g2, k), 2); }
+  function waterPartRaw(g, k) {
     g.clear();
     if (k === 'heater') { g.fillStyle(0x37474f, 1); g.fillRoundedRect(-36, -8, 72, 16, 4); g.fillStyle(0x4fc3f7, 0.7); g.fillRect(-30, -6, 60, 6); }
     else if (k === 'cold') { g.fillStyle(0xb0bec5, 1); g.fillRect(-40, -6, 80, 12); g.fillStyle(0xffffff, 0.7); g.fillRect(-40, -6, 80, 3); }
     else { g.fillStyle(0x90caf9, 1); g.fillRoundedRect(-18, -12, 36, 26, 6); g.fillStyle(0x1e88e5, 1); g.fillRect(-14, 4, 28, 6); }
   }
-  function mapSymbol(g, sym) {
+  function mapSymbol(g, sym) { inked(g, (g2) => mapSymbolRaw(g2, sym), 2); }
+  function mapSymbolRaw(g, sym) {
     g.clear();
     if (sym === 'T') {
       g.lineStyle(6, 0xe53935, 1); g.strokeCircle(0, 0, 18);
@@ -905,19 +913,22 @@
       else { g.lineBetween(-8, -14, -8, 14); g.lineBetween(-8, 14, 10, 14); }
     }
   }
-  function prepIcon(g, k) {
+  function prepIcon(g, k) { inked(g, (g2) => prepIconRaw(g2, k), 2); }
+  function prepIconRaw(g, k) {
     g.clear();
-    if (k === 'boat') { drawPolluter(g, 'oilboat'); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(-26, 4, -40, 20); }
+    if (k === 'boat') { drawPolluterRaw(g, 'oilboat'); g.lineStyle(3, 0x6d4c41, 1); g.lineBetween(-26, 4, -40, 20); }
     else if (k === 'pots') { g.fillStyle(0xbf6c3a, 1); g.fillRect(-14, 0, 28, 20); g.fillStyle(0xe53956, 1); g.fillCircle(0, -10, 9); g.fillStyle(0x6d4c41, 1); g.fillRect(-30, -24, 6, 48); g.fillTriangle(-34, -24, -20, -24, -27, -34); }
     else if (k === 'kite') { g.fillStyle(0xff7043, 1); g.fillTriangle(0, -26, -16, 0, 16, 0); g.fillTriangle(0, 22, -16, 0, 16, 0); g.lineStyle(2, 0x424242, 1); g.lineBetween(0, 22, 12, 34); }
     else { g.fillStyle(0x4fc3f7, 1); g.fillRect(-30, 6, 60, 12); g.fillStyle(0xf2994a, 1); g.fillCircle(0, 0, 8); g.lineStyle(4, 0xf2994a, 1); g.lineBetween(-14, 2, 14, 2); }
   }
-  function foxIcon(g) {
+  function foxIcon(g) { inked(g, (g2) => foxIconRaw(g2), 2); }
+  function foxIconRaw(g) {
     g.clear();
     g.fillStyle(0xf2994a, 1); g.fillTriangle(-16, -12, -6, -26, -2, -10); g.fillTriangle(16, -12, 6, -26, 2, -10); g.fillCircle(0, 0, 14);
     g.fillStyle(0xfff4e6, 1); g.fillEllipse(0, 6, 18, 10); g.fillStyle(0x333333, 1); g.fillCircle(-5, -2, 2); g.fillCircle(5, -2, 2); g.fillCircle(0, 6, 2.5);
   }
-  function fossilIcon(g, i) {
+  function fossilIcon(g, i) { inked(g, (g2) => fossilIconRaw(g2, i), 2); }
+  function fossilIconRaw(g, i) {
     if (i === 0) { g.lineStyle(3, 0x5d4037, 1); g.beginPath(); g.arc(-120, 0, 16, Math.PI, 0, false); g.strokePath(); for (let k = -2; k <= 2; k++) g.lineBetween(-120, 0, -120 + k * 7, -14); }
     else if (i === 1) { g.lineStyle(3, 0xefebe9, 1); g.lineBetween(-140, 0, -100, 0); for (let k = 0; k < 5; k++) g.lineBetween(-134 + k * 8, -8, -134 + k * 8, 8); g.fillStyle(0xefebe9, 1); g.fillTriangle(-100, 0, -88, -8, -88, 8); }
     else { g.fillStyle(0x4e342e, 1); g.fillEllipse(-120, 0, 30, 40); g.lineStyle(2, 0xbcaaa4, 1); for (let k = -12; k <= 12; k += 6) g.lineBetween(-133, k, -107, k); }
@@ -926,24 +937,25 @@
   function labIconRaw(g, k) {
     g.clear();
     if (k === 'water') drawIconRaw(g, 'rainy');
-    else if (k === 'typhoon') { mapSymbol(g, 'T'); g.setScale(0.8 * g.scaleX); }
-    else if (k === 'food') foxIcon(g);
+    else if (k === 'typhoon') { mapSymbolRaw(g, 'T'); g.setScale(0.8 * g.scaleX); }
+    else if (k === 'food') foxIconRaw(g);
     else if (k === 'photo') drawIconRaw(g, 'sun');
     else if (k === 'spell') { g.fillStyle(0x00897b, 1); [-18, 0, 18].forEach((x) => g.fillRoundedRect(x - 8, -8, 16, 16, 3)); }
     else if (k === 'pitch') { g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, -18, 8, 30, 3); g.fillRoundedRect(4, -6, 8, 18, 3); }
     else { g.fillStyle(0x8d6e63, 1); g.fillRect(-24, -14, 48, 10); g.fillStyle(0xbcaaa4, 1); g.fillRect(-24, -4, 48, 10); g.fillStyle(0x5d4037, 1); g.fillRect(-24, 6, 48, 10); }
   }
-  function spellIcon(g, w) {
+  function spellIcon(g, w) { inked(g, (g2) => spellIconRaw(g2, w), 2); }
+  function spellIconRaw(g, w) {
     g.clear();
-    if (['rock', 'mud'].includes(w)) drawSoil(g, w, 1);
-    else if (w === 'moon') drawMoon(g, 4);
+    if (['rock', 'mud'].includes(w)) drawSoilRaw(g, w, 1);
+    else if (w === 'moon') drawMoonRaw(g, 4);
     else if (w === 'star') { g.fillStyle(0xffd54a, 1); const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? 8 : 20; const a = -Math.PI / 2 + i * Math.PI / 5; pts.push(new Phaser.Geom.Point(Math.cos(a) * r, Math.sin(a) * r)); } g.fillPoints(pts, true); }
-    else if (['bell', 'drum'].includes(w)) drawInstr(g, w);
-    else if (w === 'paper') drawTrash(g, 'newspaper');
-    else if (w === 'bottle') drawTrash(g, 'pbottle');
-    else if (w === 'water') drawBagItem(g, 'water');
-    else if (w === 'rain') drawIcon(g, 'rainy');
-    else drawIcon(g, w);
+    else if (['bell', 'drum'].includes(w)) drawInstrRaw(g, w);
+    else if (w === 'paper') drawTrashRaw(g, 'newspaper');
+    else if (w === 'bottle') drawTrashRaw(g, 'pbottle');
+    else if (w === 'water') drawBagItemRaw(g, 'water');
+    else if (w === 'rain') drawIconRaw(g, 'rainy');
+    else drawIconRaw(g, w);
   }
 
   // 植物部位的示意圖（不畫出是哪一種作物）
@@ -958,7 +970,8 @@
   }
 
   // 地點（指路用）：只有圖，靠英文判斷是哪裡
-  function drawPlace(g, k) {
+  function drawPlace(g, k) { inked(g, (g2) => drawPlaceRaw(g2, k), 2); }
+  function drawPlaceRaw(g, k) {
     g.clear();
     const house = (c, roof) => { g.fillStyle(c, 1); g.fillRect(-26, -10, 52, 34); g.fillStyle(roof, 1); g.fillTriangle(-32, -10, 32, -10, 0, -32); g.fillStyle(0x6d4c41, 1); g.fillRect(-6, 8, 12, 16); };
     if (k === 'zoo') { g.lineStyle(3, 0x8d6e63, 1); for (let x = -28; x <= 28; x += 8) g.lineBetween(x, -8, x, 22); g.lineBetween(-30, -6, 30, -6); g.fillStyle(0xfdd835, 1); g.fillCircle(-8, 6, 9); g.fillStyle(0x8d6e63, 1); g.fillCircle(-12, 0, 3); g.fillCircle(-4, 0, 3); g.fillStyle(0x9e9e9e, 1); g.fillEllipse(14, 10, 18, 14); g.fillRect(20, 2, 4, 14); }
@@ -970,7 +983,8 @@
   }
   // 家人：兔子造型，靠配件分辨（祖父母灰毛戴眼鏡、爸爸領帶、媽媽蝴蝶結、哥哥帽子、妹妹髮帶、寶寶奶嘴）
   // 職業：同一個人形，靠衣服顏色和配件分辨
-  function drawJob(g, k) {
+  function drawJob(g, k) { inked(g, (g2) => drawJobRaw(g2, k), 2); }
+  function drawJobRaw(g, k) {
     g.clear();
     const coat = { doctor: 0xffffff, nurse: 0xf8bbd0, police: 0x1a237e, driver: 0x546e7a, teacher: 0x8e24aa, farmer: 0x689f38, cook: 0xffffff, student: 0xffb300 }[k];
     g.fillStyle(coat, 1); g.fillRoundedRect(-16, -2, 32, 30, 6);
@@ -987,7 +1001,8 @@
     else if (k === 'student') { g.fillStyle(0xe53935, 1); g.fillRoundedRect(14, -2, 14, 24, 4); g.fillStyle(0x5d4037, 1); g.fillRect(-12, -27, 24, 6); }
   }
   // 學校用品
-  function drawSchool(g, k) {
+  function drawSchool(g, k) { inked(g, (g2) => drawSchoolRaw(g2, k), 2); }
+  function drawSchoolRaw(g, k) {
     g.clear();
     if (k === 'book') { g.fillStyle(0x1e88e5, 1); g.fillRect(-24, -18, 22, 32); g.fillStyle(0x43a047, 1); g.fillRect(2, -18, 22, 32); g.fillStyle(0xffffff, 1); g.fillRect(-2, -18, 4, 32); }
     else if (k === 'pen') { g.fillStyle(0x1e88e5, 1); g.fillRect(-28, -4, 46, 8); g.fillStyle(0x0d47a1, 1); g.fillRect(-28, -6, 12, 12); g.fillStyle(0x90a4ae, 1); g.fillTriangle(18, -4, 18, 4, 30, 0); }
@@ -999,7 +1014,8 @@
     else if (k === 'chair') { g.fillStyle(0x6d4c41, 1); g.fillRect(-14, -26, 6, 50); g.fillRect(-14, -26, 26, 6); g.fillRect(-14, 0, 30, 6); g.fillRect(10, 0, 6, 24); g.fillRect(-14, -14, 26, 4); }
   }
   // 氣球（顏色訂單）
-  function drawBalloon(g, k) {
+  function drawBalloon(g, k) { inked(g, (g2) => drawBalloonRaw(g2, k), 2); }
+  function drawBalloonRaw(g, k) {
     g.clear();
     g.lineStyle(2, 0x78909c, 1); g.lineBetween(0, 10, 2, 26);
     g.fillStyle(BALLOON[k], 1); g.fillEllipse(0, -10, 34, 40);
@@ -1008,7 +1024,8 @@
     g.fillStyle(0xffffff, k === 'white' ? 0 : 0.45); g.fillEllipse(-7, -18, 8, 12);
   }
   // 食物
-  function drawFood(g, k) {
+  function drawFood(g, k) { inked(g, (g2) => drawFoodRaw(g2, k), 2); }
+  function drawFoodRaw(g, k) {
     g.clear();
     const bowl = (c) => { g.fillStyle(c, 1); g.fillEllipse(0, 0, 56, 14); g.fillStyle(0xeceff1, 1); g.beginPath(); g.arc(0, 0, 28, 0, Math.PI, false); g.fillPath(); g.lineStyle(2, 0x90a4ae, 1); g.beginPath(); g.arc(0, 0, 28, 0, Math.PI, false); g.strokePath(); };
     if (k === 'lemon') { g.fillStyle(0xfdd835, 1); g.fillEllipse(0, 0, 50, 34); g.fillTriangle(22, -6, 22, 6, 32, 0); g.fillTriangle(-22, -6, -22, 6, -32, 0); g.fillStyle(0x7cb342, 1); g.fillEllipse(8, -18, 14, 7); }
@@ -1019,7 +1036,8 @@
     else if (k === 'soup') { bowl(0xff8a65); g.lineStyle(2, 0xb0bec5, 1); [-10, 0, 10].forEach((x) => { g.beginPath(); g.moveTo(x, -6); g.lineTo(x - 4, -16); g.lineTo(x + 2, -26); g.strokePath(); }); }
   }
   // 季節：春天開花、夏天大太陽和海、秋天落葉、冬天雪人
-  function drawSeason(g, k) {
+  function drawSeason(g, k) { inked(g, (g2) => drawSeasonRaw(g2, k), 2); }
+  function drawSeasonRaw(g, k) {
     g.clear();
     if (k === 'spring') { g.fillStyle(0x7cb342, 1); g.fillRect(-36, 10, 72, 14); [[-20, 0, 0xf48fb1], [0, -6, 0xfdd835], [20, 0, 0xce93d8]].forEach(([x, y, c]) => { g.lineStyle(2, 0x388e3c, 1); g.lineBetween(x, y, x, 12); g.fillStyle(c, 1); [0, 1, 2, 3, 4].forEach((i) => { const a = i * 1.2566; g.fillCircle(x + Math.cos(a) * 6, y + Math.sin(a) * 6, 5); }); g.fillStyle(0xffffff, 1); g.fillCircle(x, y, 3); }); }
     else if (k === 'summer') { g.fillStyle(0x4fc3f7, 1); g.fillRect(-36, 6, 72, 18); g.fillStyle(0xffd54a, 1); g.fillCircle(0, -14, 14); g.lineStyle(3, 0xffb300, 1); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.lineBetween(Math.cos(a) * 18, -14 + Math.sin(a) * 18, Math.cos(a) * 24, -14 + Math.sin(a) * 24); } }
@@ -1027,7 +1045,8 @@
     else { g.fillStyle(0xffffff, 1); g.fillCircle(0, 10, 16); g.fillCircle(0, -14, 11); g.lineStyle(2, 0xb0bec5, 1); g.strokeCircle(0, 10, 16); g.strokeCircle(0, -14, 11); g.fillStyle(0xfb8c00, 1); g.fillTriangle(0, -14, 0, -10, 9, -12); g.fillStyle(0x37474f, 1); g.fillCircle(-4, -17, 1.6); g.fillCircle(4, -17, 1.6); g.fillStyle(0x90caf9, 1); [[-30, -20], [26, -24], [-24, 6], [30, 8]].forEach(([x, y]) => g.fillCircle(x, y, 2.5)); }
   }
   // 數星星：每排 4 顆
-  function drawStars(g, n) {
+  function drawStars(g, n) { inked(g, (g2) => drawStarsRaw(g2, n), 2); }
+  function drawStarsRaw(g, n) {
     g.clear();
     g.fillStyle(0xffc107, 1);
     const rows = Math.ceil(n / 4);
@@ -1039,7 +1058,8 @@
     }
   }
   // 動物園的動物（頭像或全身的簡單圖）
-  function drawZoo(g, k) {
+  function drawZoo(g, k) { inked(g, (g2) => drawZooRaw(g2, k), 2); }
+  function drawZooRaw(g, k) {
     g.clear();
     const eyes = (y, dx, c) => { g.fillStyle(c || 0x212121, 1); g.fillCircle(-dx, y, 2.2); g.fillCircle(dx, y, 2.2); };
     if (k === 'dog') { g.fillStyle(0xbcaaa4, 1); g.fillCircle(0, 0, 18); g.fillStyle(0x6d4c41, 1); g.fillEllipse(-18, 2, 10, 24); g.fillEllipse(18, 2, 10, 24); eyes(-4, 7); g.fillStyle(0x212121, 1); g.fillEllipse(0, 7, 9, 6); }
@@ -1056,7 +1076,8 @@
     else if (k === 'whale') { g.fillStyle(0x1565c0, 1); g.fillEllipse(-2, 4, 62, 34); g.fillTriangle(-28, 2, -38, -10, -38, 14); g.fillStyle(0x90caf9, 1); g.fillEllipse(2, 14, 44, 10); g.lineStyle(2, 0x4fc3f7, 1); g.lineBetween(4, -14, 0, -28); g.lineBetween(4, -14, 10, -26); g.fillStyle(0xffffff, 1); g.fillCircle(18, -2, 2.5); }
   }
   // 身體部位：同一個小朋友，紅圈圈出一個部位
-  function drawBody(g, k) {
+  function drawBody(g, k) { inked(g, (g2) => drawBodyRaw(g2, k), 2); }
+  function drawBodyRaw(g, k) {
     g.clear();
     g.fillStyle(0xffcc99, 1);
     g.fillEllipse(-15, -26, 6, 9); g.fillEllipse(15, -26, 6, 9);   // ear
@@ -1084,7 +1105,8 @@
     g.lineStyle(2, c, 1); g.strokeCircle(o.head[0], o.head[1], 8);
   }
   function note(g, x, y) { g.fillStyle(0x7e57c2, 1); g.fillCircle(x, y, 3); g.lineStyle(2, 0x7e57c2, 1); g.lineBetween(x + 3, y, x + 3, y - 10); g.lineBetween(x + 3, y - 10, x + 7, y - 7); }
-  function drawAct(g, k) {
+  function drawAct(g, k) { inked(g, (g2) => drawActRaw(g2, k), 2); }
+  function drawActRaw(g, k) {
     g.clear();
     const std = { head: [0, -26], sh: [0, -16], hip: [0, 4], arms: [[[-10, -2]], [[10, -2]]], legs: [[[-6, 22]], [[6, 22]]] };
     const P = (o) => stick(g, Object.assign({}, std, o));
@@ -1104,7 +1126,8 @@
     else if (k === 'throw') { P({ head: [-6, -24], sh: [-6, -14], hip: [-6, 4], arms: [[[-16, -4]], [[2, -26], [8, -32]]] }); g.fillStyle(0xe53935, 1); g.fillCircle(26, -30, 6); g.lineStyle(1.5, 0xb0bec5, 1); g.lineBetween(12, -32, 18, -31); }
   }
   // 感覺：臉的表情加一個小提示
-  function drawFeel(g, k) {
+  function drawFeel(g, k) { inked(g, (g2) => drawFeelRaw(g2, k), 2); }
+  function drawFeelRaw(g, k) {
     g.clear();
     g.fillStyle(0xffe0b2, 1); g.fillCircle(-6, 0, 22); g.lineStyle(2, 0xffb74d, 1); g.strokeCircle(-6, 0, 22);
     g.fillStyle(0x37474f, 1); g.lineStyle(2.5, 0x37474f, 1);
@@ -1117,7 +1140,8 @@
     if (k === 'hungry') { g.strokeCircle(-6, 10, 4); g.fillStyle(0xffffff, 1); g.fillCircle(28, -14, 13); g.lineStyle(1, 0xbdbdbd, 1); g.strokeCircle(28, -14, 13); g.fillStyle(0xbf6c3a, 1); g.fillEllipse(28, -14, 16, 10); g.fillStyle(0xffffff, 1); g.fillCircle(17, 4, 3); g.fillCircle(13, 10, 2); }
   }
   // 時段：太陽的位置和天空的顏色
-  function drawDaytime(g, k) {
+  function drawDaytime(g, k) { inked(g, (g2) => drawDaytimeRaw(g2, k), 2); }
+  function drawDaytimeRaw(g, k) {
     g.clear();
     const sky = { morning: 0xb3e5fc, afternoon: 0x4fc3f7, evening: 0xffab91, night: 0x1a237e }[k];
     g.fillStyle(sky, 1); g.fillRect(-40, -34, 80, 50);
@@ -1128,7 +1152,8 @@
     else { g.fillStyle(0xfff9c4, 1); g.fillCircle(18, -20, 9); g.fillStyle(0x1a237e, 1); g.fillCircle(23, -23, 8); g.fillStyle(0xffffff, 1); [[-28, -26], [-14, -16], [-30, -6], [0, -28]].forEach(([x, y]) => g.fillCircle(x, y, 1.6)); g.fillStyle(0x33691e, 1); g.fillRect(-40, 10, 80, 12); }
   }
   // 地點
-  function drawSpot(g, k) {
+  function drawSpot(g, k) { inked(g, (g2) => drawSpotRaw(g2, k), 2); }
+  function drawSpotRaw(g, k) {
     g.clear();
     if (k === 'lake') { g.fillStyle(0x7cb342, 1); g.fillRect(-40, -20, 80, 44); g.fillStyle(0x4fc3f7, 1); g.fillEllipse(0, 6, 54, 24); g.fillStyle(0x2e7d32, 1); [[-30, -10], [30, -12], [-34, 14], [32, 14]].forEach(([x, y]) => g.fillTriangle(x - 7, y + 8, x + 7, y + 8, x, y - 10)); }
     else if (k === 'sea') { g.fillStyle(0xb3e5fc, 1); g.fillRect(-40, -30, 80, 24); g.fillStyle(0x1e88e5, 1); g.fillRect(-40, -6, 80, 30); g.lineStyle(2, 0xffffff, 1); [[-30, 4], [-6, 12], [18, 2]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 6, Math.PI, 0, false); g.strokePath(); }); g.fillStyle(0x8d6e63, 1); g.fillTriangle(10, -10, 30, -10, 26, -4); g.fillStyle(0xffffff, 1); g.fillTriangle(20, -11, 20, -26, 30, -11); }
@@ -1140,7 +1165,8 @@
     else if (k === 'farm') { g.fillStyle(0x7cb342, 1); g.fillRect(-40, 6, 80, 18); g.fillStyle(0xc62828, 1); g.fillRect(-30, -14, 30, 26); g.fillTriangle(-34, -14, 4, -14, -15, -32); g.fillStyle(0xffffff, 1); g.fillRect(-20, -2, 10, 14); g.lineStyle(2, 0x8d6e63, 1); g.lineBetween(8, 6, 38, 6); g.lineBetween(8, 14, 38, 14); [10, 20, 30].forEach((x) => g.lineBetween(x, 2, x, 20)); }
   }
   // 物品
-  function drawThing(g, k) {
+  function drawThing(g, k) { inked(g, (g2) => drawThingRaw(g2, k), 2); }
+  function drawThingRaw(g, k) {
     g.clear();
     if (k === 'robot') { g.fillStyle(0x90a4ae, 1); g.fillRect(-14, -30, 28, 20); g.fillRect(-18, -8, 36, 26); g.fillRect(-28, -6, 8, 18); g.fillRect(20, -6, 8, 18); g.fillRect(-12, 18, 8, 8); g.fillRect(4, 18, 8, 8); g.fillStyle(0x4fc3f7, 1); g.fillCircle(-6, -20, 4); g.fillCircle(6, -20, 4); g.lineStyle(2, 0x607d8b, 1); g.lineBetween(0, -30, 0, -38); g.fillStyle(0xe53935, 1); g.fillCircle(0, -38, 3); }
     else if (k === 'clock') { g.fillStyle(0xffffff, 1); g.fillCircle(0, -4, 24); g.lineStyle(3, 0x8d6e63, 1); g.strokeCircle(0, -4, 24); g.lineStyle(3, 0x37474f, 1); g.lineBetween(0, -4, 0, -20); g.lineBetween(0, -4, 12, -4); g.fillStyle(0x37474f, 1); [0, 1, 2, 3].forEach((i) => { const a = i * Math.PI / 2; g.fillCircle(Math.cos(a) * 19, -4 + Math.sin(a) * 19, 2); }); }
@@ -1156,7 +1182,8 @@
     else if (k === 'dress') { g.fillStyle(0xec407a, 1); g.fillRect(-10, -26, 20, 16); g.fillTriangle(-10, -10, 10, -10, 0, -10); g.fillTriangle(-28, 24, 28, 24, 0, -12); g.fillRect(-10, -12, 20, 4); g.lineStyle(3, 0xec407a, 1); g.lineBetween(-8, -26, -10, -34); g.lineBetween(8, -26, 10, -34); g.fillStyle(0xffffff, 1); g.fillRect(-12, -10, 24, 3); }
   }
   // 月曆頁（上面的月份名稱是另外放的文字）
-  function drawMonth(g) {
+  function drawMonth(g) { inked(g, (g2) => drawMonthRaw(g2), 2); }
+  function drawMonthRaw(g) {
     g.clear();
     g.fillStyle(0xffffff, 1); g.fillRect(-34, -30, 68, 54); g.lineStyle(2, 0xb0bec5, 1); g.strokeRect(-34, -30, 68, 54);
     g.fillStyle(0xe53935, 1); g.fillRect(-34, -30, 68, 12);
@@ -1481,12 +1508,23 @@
     t.fillStyle(0x000000, 0.06); t.fillRect(-w / 2, 14, w, 4);
     return t;
   }
-  // 視窗標題：寫在芥末紙膠帶上（粉圓、墨線色、跟著膠帶轉 -2°），膠帶寬度依字數
-  function tapeTitle(scene, x, y, label) {
-    const wide = [...label].reduce((a, ch) => a + (/[\u0000-\u00ff]/.test(ch) ? 12 : 23), 0);
+  // 視窗標題：寫在芥末紙膠帶上（粉圓、墨線色、跟著膠帶轉 -2 度），膠帶寬度跟著字寬
+  // 回傳容器；標題會換的用 c.setText(新字)，膠帶會一起重畫
+  function tapeTitle(scene, x, y, label, size) {
+    size = size || 23;
     const c = scene.add.container(x, y).setAngle(-2);
-    c.add([washiTape(scene, 0, 0, wide + 64, 0xf2b84b, 0), txt(scene, 0, -1, label, 23, '#2b3a55').setOrigin(0.5)]);
-    return c;
+    const t = txt(scene, 0, -1, '', size, '#2b3a55').setOrigin(0.5);
+    let tape = null;
+    c.setText = (s) => {
+      t.setText(s);
+      if (tape) tape.destroy();
+      tape = washiTape(scene, 0, 0, t.width + 56, 0xf2b84b, 0);
+      if (size > 23) tape.setScale(1, size / 23 * 0.9);
+      c.addAt(tape, 0);
+      return c;
+    };
+    c.add(t);
+    return c.setText(label);
   }
   // 手帳內頁：米白紙、淡褐點格、珊瑚色裝訂線
   function notebookPage(scene, x0, y0, w, h) {
@@ -2059,7 +2097,7 @@
 
     buildLibrary() {
       const c = this.modalBase(100, 120, 50, 1040, 620, 0xfff8ec);
-      c.add(txt(this, 640, 92, '圖鑑 Book', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 92, '圖鑑 Book', 30));
       this.libPage = 0;
       this.libCards = [];
       for (let i = 0; i < LIB_PER_PAGE; i++) {
@@ -2171,7 +2209,7 @@
     // 日記本：可以翻回前面的頁面
     buildBook() {
       const c = this.modalBase(90, 160, 60, 960, 600, 0xfffaf0);
-      c.add(txt(this, 640, 110, '日記本 Diary', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 110, '日記本 Diary', 30));
       this.bookRows = [0, 1, 2, 3, 4].map((i) => {
         const y = 200 + i * 78;
         const row = this.add.container(640, y);
@@ -3725,10 +3763,12 @@
         const bg = this.add.graphics();
         paperCard(bg, -95, -65, 190, 130, 20, 0xffffff, k === 'hot' ? 0xef5350 : 0x42a5f5);
         const pot = this.add.graphics({ x: -30, y: 0 });
+        inked(pot, (pot) => {
         pot.fillStyle(k === 'hot' ? 0xef5350 : 0x42a5f5, 1); pot.fillRoundedRect(-26, -22, 52, 46, 12); pot.fillTriangle(24, -10, 44, -24, 26, 6);
         pot.lineStyle(4, 0x555555, 1); pot.beginPath(); pot.arc(-28, 0, 12, Math.PI * 0.5, Math.PI * 1.5, false); pot.strokePath();
         if (k === 'hot') { pot.lineStyle(3, 0xbdbdbd, 1); [-10, 0, 10].forEach((x) => pot.lineBetween(x, -30, x + 4, -44)); }
         else { pot.fillStyle(0xe1f5fe, 1); pot.fillRect(-12, -36, 12, 12); pot.fillRect(4, -40, 12, 12); }
+        }, 2);
         const en = txt(this, 45, -12, k, 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 45, 24, '', 18, '#4f5a6b').setOrigin(0.5);
         p.add([bg, pot, en, zh]);
@@ -3763,7 +3803,7 @@
       this.teaTalk.say.setText('I want sweet tea.');
       this.teaTalk.zh.setText(zh ? '我想要甜甜的茶。' : '');
       this.teaPots.forEach((p) => p.zh.setText(zh && L.stage(this.s.words, p.k) === 0 ? zhOf(p.k) : ''));
-      const g = this.teaCup; g.clear();
+      inked(this.teaCup, (g) => {
       g.fillStyle(0xeceff1, 1); g.fillRoundedRect(-80, -90, 160, 180, 18);
       g.lineStyle(6, 0x90a4ae, 1); g.strokeRoundedRect(-80, -90, 160, 180, 18);
       g.beginPath(); g.arc(88, 0, 26, -Math.PI / 2, Math.PI / 2, false); g.strokePath();
@@ -3776,6 +3816,7 @@
       const cubes = Math.ceil(q.sugar * 3 - 0.01);
       g.fillStyle(0xffffff, 1);
       for (let i = 0; i < cubes; i++) g.fillRect(-48 + i * 34, 52, 26, 26);
+      }, 2);
       this.teaMsg.setText(q.done ? '' : (!q.water ? 'Pick hot or cold water. 選熱水或冷水' : (q.sugar > 0.01 ? 'The sugar is at the bottom. 糖還沉在杯底' : 'The sugar is gone! 糖溶化了')));
     }
 
@@ -4588,25 +4629,30 @@
       this.ciZh.setText(this.subs() ? (q.done ? '做得好！' : (q.step === 'on' ? '把燈打開。' : '把燈關掉。')) : '');
       // 導線（迴路的四邊），檢查模式時不通的那段標紅
       const chk = L.circuitCheck(q.gaps, q.sw);
-      const w = this.ciWire; w.clear();
-      w.lineStyle(6, lit ? 0xffb300 : 0x78909c, 1);
       const { x0, y0, x1, y1 } = CIRC.loop;
-      w.strokeRect(x0, y0, x1 - x0, y1 - y0);
-      if (lit) { w.lineStyle(14, 0xffe082, 0.35); w.strokeRect(x0, y0, x1 - x0, y1 - y0); }
+      inked(this.ciWire, (w) => {
+        w.lineStyle(6, lit ? 0xffb300 : 0x78909c, 1);
+        w.strokeRect(x0, y0, x1 - x0, y1 - y0);
+        if (lit) { w.lineStyle(14, 0xffe082, 0.35); w.strokeRect(x0, y0, x1 - x0, y1 - y0); }
+      }, 2);
       // 電池、燈泡
-      const b = this.ciBatt; b.clear();
-      b.fillStyle(0x455a64, 1); b.fillRoundedRect(-22, -40, 44, 80, 8); b.fillStyle(0xffca28, 1); b.fillRoundedRect(-22, -40, 44, 30, 8);
-      b.fillStyle(0x90a4ae, 1); b.fillRect(-8, -48, 16, 8);
-      const u = this.ciBulb; u.clear();
-      if (lit) { u.fillStyle(0xfff59d, 0.6); u.fillCircle(0, -6, 40); }
-      u.fillStyle(lit ? 0xffeb3b : 0xeceff1, 1); u.fillCircle(0, -6, 24);
-      u.lineStyle(3, 0x90a4ae, 1); u.strokeCircle(0, -6, 24);
-      u.fillStyle(0x90a4ae, 1); u.fillRect(-12, 14, 24, 14);
+      inked(this.ciBatt, (b) => {
+        b.fillStyle(0x455a64, 1); b.fillRoundedRect(-22, -40, 44, 80, 8); b.fillStyle(0xffca28, 1); b.fillRoundedRect(-22, -40, 44, 30, 8);
+        b.fillStyle(0x90a4ae, 1); b.fillRect(-8, -48, 16, 8);
+      }, 2);
+      inked(this.ciBulb, (u) => {
+        if (lit) { u.fillStyle(0xfff59d, 0.6); u.fillCircle(0, -6, 40); }
+        u.fillStyle(0x90a4ae, 1); u.fillRect(-12, 14, 24, 14);
+        u.fillStyle(lit ? 0xffeb3b : 0xeceff1, 1); u.fillCircle(0, -6, 24);
+      }, 2);
       // 開關
       const sg = this.ciSwG; sg.clear();
       paperCard(sg, -50, -24, 100, 48, 12, 0xffffff, q.check && !q.sw ? 0xe53935 : 0x90a4ae);
-      sg.fillStyle(0x546e7a, 1); sg.fillCircle(-30, 0, 6); sg.fillCircle(30, 0, 6);
-      sg.lineStyle(6, 0x546e7a, 1);
+      sg.fillStyle(INK, 1); sg.fillCircle(-30, 0, 7); sg.fillCircle(30, 0, 7);
+      sg.lineStyle(9, INK, 1);
+      if (q.sw) sg.lineBetween(-30, 0, 30, 0); else sg.lineBetween(-30, 0, 22, -20);
+      sg.fillStyle(0x90a4ae, 1); sg.fillCircle(-30, 0, 5); sg.fillCircle(30, 0, 5);
+      sg.lineStyle(5, 0x90a4ae, 1);
       if (q.sw) sg.lineBetween(-30, 0, 30, 0); else sg.lineBetween(-30, 0, 22, -20);
       this.ciSwT.setText(q.sw ? 'on' : 'off');
       // 缺口
@@ -5815,10 +5861,10 @@
       this.rxSet('Which plant will grow well?', '一株蓋住、一株晒太陽，哪一株會長得好？', 'Make a guess, then wait 3 days. 先猜，再等 3 天看看');
       q.pots = [0, 1].map((i) => this.rxCard(500 + i * 280, 400, 220, 260, (card) => {
         const covered = (i === 0) === q.coverLeft;
-        const g = this.add.graphics({ y: 60 }); drawPlant(g, 'bean', 0.45, false); card.add(g); card.plant = g;
-        const pot = this.add.graphics(); pot.fillStyle(0xbf6c3a, 1); pot.fillRect(-36, 60, 72, 50); card.add(pot);
+        const g = this.add.graphics({ y: 60 }); inked(g, (g2) => drawPlant(g2, 'bean', 0.45, false), 2); card.add(g); card.plant = g;
+        const pot = this.add.graphics(); pot.fillStyle(0xbf6c3a, 1); pot.fillRect(-36, 60, 72, 50); pot.lineStyle(3, INK, 1); pot.strokeRect(-36, 60, 72, 50); card.add(pot);
         if (covered) { const cov = this.add.graphics(); cov.fillStyle(0x37474f, 0.92); cov.fillRoundedRect(-60, -80, 120, 140, 16); card.add(cov); card.cov = cov; }
-        else { const sun = this.add.graphics(); sun.fillStyle(0xffd54a, 1); sun.fillCircle(70, -90, 16); card.add(sun); }
+        else { const sun = this.add.graphics(); sun.fillStyle(0xffd54a, 1); sun.fillCircle(70, -90, 16); sun.lineStyle(3, INK, 1); sun.strokeCircle(70, -90, 16); card.add(sun); }
         card.add(txt(this, 0, 122, covered ? '蓋起來' : '晒太陽', 18, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
         card.covered = covered;
       }, () => this.pickPhoto(i)));
@@ -5832,7 +5878,7 @@
       q.tries += 1;
       q.done = true;
       // 3 天後：晒太陽的長大變綠，蓋起來的又細又黃
-      q.pots.forEach((p) => { if (p.cov) p.cov.setAlpha(0.15); drawPlant(p.plant, 'bean', p.covered ? 0.3 : 1, p.covered); });
+      q.pots.forEach((p) => { if (p.cov) p.cov.setAlpha(0.15); inked(p.plant, (g2) => drawPlant(g2, 'bean', p.covered ? 0.3 : 1, p.covered), 2); });
       this.rxSet('3 days later...', '3 天後……', right ? 'Yes! Plants need light to make food. 植物要有光才能製造養分' : 'Look! The plant in the sun grows well. 晒太陽的那株長得好：植物要有光才能製造養分');
       speak(right ? 'Yes! Plants need light.' : 'Look! Plants need light.');
       this.labDone('photo', 'Sunlight!');
@@ -5881,7 +5927,7 @@
       const pic = this.add.graphics({ x: 640, y: 250 }).setScale(1.5); drawIcon(pic, target); this.rx(pic);
       q.cards = q.order.map((p, i) => this.rxCard(520 + i * 240, 440, 200, 200, (card) => {
         const g = this.add.graphics(); const len = p === 'high' ? 50 : 130;
-        g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, 60 - len, 28, len, 8); g.fillStyle(0x3e2723, 1); g.fillCircle(0, 70 - len, 5);
+        inked(g, (g) => { g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, 60 - len, 28, len, 8); g.fillStyle(0x3e2723, 1); g.fillCircle(0, 70 - len, 5); }, 2);
         card.add(g); card.add(txt(this, 0, 80, p === 'high' ? '短管子' : '長管子', 18, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
       }, () => this.pickPipe(i)));
       this.time.delayedCall(200, () => speak('Call the ' + target + '!'));
@@ -5908,7 +5954,7 @@
         const y = 270 + i * 95;   // i=0 最上面（最新），i=2 最下面（最古老）
         return this.rxCard(560, y, 520, 90, (card) => {
           const g = this.add.graphics(); g.fillStyle([0xd7ccc8, 0xbcaaa4, 0x8d6e63][i], 1); g.fillRect(-256, -41, 512, 82);
-          fossilIcon(g, i); card.add(g);
+          const fg = this.add.graphics(); fossilIcon(fg, i); card.add([g, fg]);
           card.num = txt(this, 220, 0, '', 34, '#ffffff', { fontStyle: 'bold', stroke: '#3e2723', strokeThickness: 5 }).setOrigin(0.5); card.add(card.num);
         }, () => this.pickLayer(i));
       });
@@ -5941,7 +5987,7 @@
 
     buildParent() {
       const c = this.modalBase(110, 120, 40, 1040, 640, 0xffffff);
-      this.paTitle = txt(this, 640, 78, '家長端', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.paTitle = tapeTitle(this, 640, 78, '家長端', 26);
       c.add(this.paTitle);
       this.paContent = this.add.container(0, 0);
       c.add(this.paContent);
@@ -6060,7 +6106,7 @@
     // ---------- 家人日與節慶：共用一個選圖視窗（題目＋最多 4 張圖卡） ----------
     buildPick() {
       const c = this.modalBase(80, 200, 100, 880, 520, 0xfffaf0);
-      this.pkTitle = txt(this, 640, 140, '', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pkTitle = tapeTitle(this, 640, 140, ' ');
       this.pkSay = txt(this, 640, 190, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.pkZh = txt(this, 640, 228, '', 20, '#4f5a6b').setOrigin(0.5);
       this.pkMsg = txt(this, 640, 585, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -6179,7 +6225,7 @@
 
     buildDecorShop() {
       const c = this.modalBase(80, 200, 90, 880, 540, 0xfffaf0);
-      c.add(txt(this, 640, 128, 'Decor 裝飾', 30, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 128, 'Decor 裝飾'));
       this.dcSub = txt(this, 640, 170, '', 19, '#4f5a6b').setOrigin(0.5);
       this.dcMsg = txt(this, 640, 600, '', 20, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.dcSub, this.dcMsg]);
@@ -6267,7 +6313,7 @@
 
     buildFix() {
       const c = this.modalBase(80, 230, 110, 820, 500, 0xfffaf0);
-      this.fxTitle = txt(this, 640, 140, '', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fxTitle = tapeTitle(this, 640, 140, ' ');
       this.fxSay = txt(this, 640, 190, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.fxZh = txt(this, 640, 228, '', 20, '#4f5a6b').setOrigin(0.5);
       this.fxPic = this.add.graphics({ x: 640, y: 300 }).setScale(1.2);
