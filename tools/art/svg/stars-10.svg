@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g4" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g5" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g6" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g7" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g8" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <radialGradient id="g9" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffdf8d"/><stop offset="0.55" stop-color="#ffc83a"/><stop offset="1" stop-color="#d6aa3a"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="26" y="30" width="188" height="180" rx="26" fill="#fff8e6" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M54.0 48.0 L59.6 60.2 L73.0 61.8 L63.1 71.0 L65.8 84.2 L54.0 77.6 L42.2 84.2 L44.9 71.0 L35.0 61.8 L48.4 60.2Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M98.0 48.0 L103.6 60.2 L117.0 61.8 L107.1 71.0 L109.8 84.2 L98.0 77.6 L86.2 84.2 L88.9 71.0 L79.0 61.8 L92.4 60.2Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M142.0 48.0 L147.6 60.2 L161.0 61.8 L151.1 71.0 L153.8 84.2 L142.0 77.6 L130.2 84.2 L132.9 71.0 L123.0 61.8 L136.4 60.2Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M186.0 48.0 L191.6 60.2 L205.0 61.8 L195.1 71.0 L197.8 84.2 L186.0 77.6 L174.2 84.2 L176.9 71.0 L167.0 61.8 L180.4 60.2Z" fill="url(#g3)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M76.0 100.0 L81.6 112.2 L95.0 113.8 L85.1 123.0 L87.8 136.2 L76.0 129.6 L64.2 136.2 L66.9 123.0 L57.0 113.8 L70.4 112.2Z" fill="url(#g4)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M120.0 100.0 L125.6 112.2 L139.0 113.8 L129.1 123.0 L131.8 136.2 L120.0 129.6 L108.2 136.2 L110.9 123.0 L101.0 113.8 L114.4 112.2Z" fill="url(#g5)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M164.0 100.0 L169.6 112.2 L183.0 113.8 L173.1 123.0 L175.8 136.2 L164.0 129.6 L152.2 136.2 L154.9 123.0 L145.0 113.8 L158.4 112.2Z" fill="url(#g6)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M76.0 152.0 L81.6 164.2 L95.0 165.8 L85.1 175.0 L87.8 188.2 L76.0 181.6 L64.2 188.2 L66.9 175.0 L57.0 165.8 L70.4 164.2Z" fill="url(#g7)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M120.0 152.0 L125.6 164.2 L139.0 165.8 L129.1 175.0 L131.8 188.2 L120.0 181.6 L108.2 188.2 L110.9 175.0 L101.0 165.8 L114.4 164.2Z" fill="url(#g8)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M164.0 152.0 L169.6 164.2 L183.0 165.8 L173.1 175.0 L175.8 188.2 L164.0 181.6 L152.2 188.2 L154.9 175.0 L145.0 165.8 L158.4 164.2Z" fill="url(#g9)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

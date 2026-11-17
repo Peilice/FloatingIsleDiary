@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f6bb96"/><stop offset="0.55" stop-color="#f08a4a"/><stop offset="1" stop-color="#ca7747"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae0c8"/><stop offset="0.55" stop-color="#f6c9a0"/><stop offset="1" stop-color="#cfab8d"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae0c8"/><stop offset="0.55" stop-color="#f6c9a0"/><stop offset="1" stop-color="#cfab8d"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae0c8"/><stop offset="0.55" stop-color="#f6c9a0"/><stop offset="1" stop-color="#cfab8d"/></radialGradient>
+    <radialGradient id="g4" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#a08d81"/><stop offset="0.55" stop-color="#5b3a26"/><stop offset="1" stop-color="#503629"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M108 156 L106 198" fill="none" stroke="#2b3a55" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><path d="M108 156 L106 198" fill="none" stroke="#3d6fb5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M132 156 L134 198" fill="none" stroke="#2b3a55" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><path d="M132 156 L134 198" fill="none" stroke="#3d6fb5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+    <ellipse cx="98" cy="206" rx="15" ry="8" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="142" cy="206" rx="15" ry="8" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M96 116 L66 158" fill="none" stroke="#2b3a55" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/><path d="M96 116 L66 158" fill="none" stroke="#f08a4a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M144 116 L174 158" fill="none" stroke="#2b3a55" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/><path d="M144 116 L174 158" fill="none" stroke="#f08a4a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="60" cy="166" r="9" fill="#f6c9a0" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="180" cy="166" r="9" fill="#f6c9a0" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="92" y="104" width="56" height="60" rx="18" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="83" cy="66" rx="8" ry="11" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="157" cy="66" rx="8" ry="11" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="120" cy="62" r="36" fill="url(#g3)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M84 58 Q82 22 120 22 Q158 22 156 58 Q140 40 120 40 Q100 40 84 58Z" fill="url(#g4)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="106" cy="62" rx="5.16" ry="6" fill="#2b3a55" /><circle cx="104.2" cy="59.72" r="2.04" fill="#fff" /><circle cx="107.68" cy="63.8" r="0.8400000000000001" fill="#fff" />
+    <ellipse cx="134" cy="62" rx="5.16" ry="6" fill="#2b3a55" /><circle cx="132.2" cy="59.72" r="2.04" fill="#fff" /><circle cx="135.68" cy="63.8" r="0.8400000000000001" fill="#fff" />
+    <path d="M116 72 Q120 79 124 72" fill="none" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M110 84 Q120 94 130 84" fill="#c94a5a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="96" cy="78" rx="6" ry="3.7199999999999998" fill="#f48fa6" opacity=".55"/>
+    <ellipse cx="144" cy="78" rx="6" ry="3.7199999999999998" fill="#f48fa6" opacity=".55"/>
+    <circle cx="157" cy="66" r="15" fill="none" stroke="#ffffff" stroke-width="11"/>
+    <circle cx="157" cy="66" r="15" fill="none" stroke="#e5484d" stroke-width="5.5"/>
+  </g>
+</svg>

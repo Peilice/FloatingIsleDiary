@@ -131,6 +131,120 @@ function shoe(x, y) {
   ].join('');
 }
 
+// ---- 小朋友全身（動作訂單）：沿用遊戲裡火柴人的關節座標（頭 -26、腳 22），放大 3 倍置中 ----
+const KS = 3, KX = 120, KY = 134, SKIN = '#f6c9a0';
+const KT = (x, y) => [KX + KS * x, KY + KS * y];
+const kpath = (pts) => 'M' + pts.map((p) => KT(p[0], p[1]).map((v) => v.toFixed(1)).join(' ')).join(' L');
+// 粗線條四肢：先畫墨線再畫顏色，接頭自然圓滑
+function stroke2(d, color, w) {
+  return P(d, 'none', `stroke="${INK}" stroke-width="${w + 8}" stroke-linecap="round" stroke-linejoin="round"`)
+    + P(d, 'none', `stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`);
+}
+// 頭：頭髮、眼睛、嘴巴（mouth：smile 笑、open 張嘴唱歌、o 小圓嘴）
+function kidHead(hx, hy, r, o = {}) {
+  const hair = o.hair || '#5b3a26';
+  let s = C(hx, hy, r, G(SKIN), ink());
+  s += P(`M${hx - r} ${hy - 1} Q${hx - r - 1} ${hy - r * 1.18} ${hx} ${hy - r * 1.12} Q${hx + r + 1} ${hy - r * 1.18} ${hx + r} ${hy - 1} Q${hx + r * 0.55} ${hy - r * 0.62} ${hx} ${hy - r * 0.6} Q${hx - r * 0.55} ${hy - r * 0.62} ${hx - r} ${hy - 1}Z`, G(hair), ink(3.5));
+  const ex = r * 0.38, ey = hy + r * 0.12, er = r * 0.17;
+  if (o.closed) s += P(`M${hx - ex - er} ${ey} Q${hx - ex} ${ey + er} ${hx - ex + er} ${ey} M${hx + ex - er} ${ey} Q${hx + ex} ${ey + er} ${hx + ex + er} ${ey}`, 'none', ink(3));
+  else s += eye(hx - ex, ey, er) + eye(hx + ex, ey, er);
+  s += cheek(hx - r * 0.62, hy + r * 0.45, r * 0.2) + cheek(hx + r * 0.62, hy + r * 0.45, r * 0.2);
+  const my = hy + r * 0.5;
+  if (o.mouth === 'open') s += E(hx, my + 2, r * 0.18, r * 0.22, '#c94a5a', ink(3));
+  else if (o.mouth === 'o') s += C(hx, my + 2, r * 0.1, '#c94a5a', ink(2.5));
+  else if (!o.closed) s += smile(hx, my, r * 0.22);
+  return s;
+}
+// 全身：pose 用遊戲座標（head、sh 肩、hip 臀、arms／legs 是兩條折線）；behind／front 是道具
+function kid(pose) {
+  const o = pose;
+  const shirt = o.shirt || '#f08a4a', pants = o.pants || '#3d6fb5';
+  const p = Object.assign({ head: [0, -26], sh: [0, -16], hip: [0, 4], arms: [[[-10, -2]], [[10, -2]]], legs: [[[-6, 22]], [[6, 22]]] }, pose);
+  let s = o.behind || '';
+  p.legs.forEach((l) => { s += stroke2(kpath([p.hip, ...l]), pants, 13); });
+  p.legs.forEach((l) => { const [x, y] = KT(...l[l.length - 1]); s += E(x, y + 2, 11, 7, '#3b4a5f', ink(3)); });
+  s += stroke2(kpath([p.sh, p.hip]), shirt, 30);
+  p.arms.forEach((a) => { s += stroke2(kpath([p.sh, ...a]), shirt, 11); const [x, y] = KT(...a[a.length - 1]); s += C(x, y, 7, SKIN, ink(3)); });
+  const [hx, hy] = KT(...p.head);
+  s += kidHead(hx, hy, 26, o);
+  return s + (o.front || '');
+}
+// 小道具
+const zzz = (x, y, c = '#5c6bc0') => P(`M${x} ${y} L${x + 14} ${y} L${x} ${y + 14} L${x + 14} ${y + 14} M${x + 20} ${y - 22} L${x + 30} ${y - 22} L${x + 20} ${y - 12} L${x + 30} ${y - 12}`, 'none', `stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"`);
+const musicNote = (x, y, c = '#7e57c2') => E(x, y, 8, 6, c, ink(2.5) + ` transform="rotate(-20 ${x} ${y})"`) + P(`M${x + 7} ${y - 2} L${x + 7} ${y - 30} Q${x + 16} ${y - 24} ${x + 20} ${y - 16}`, 'none', ink(3.5));
+const speedLines = (x, ys) => P(ys.map((y, i) => `M${x - i * 6} ${y} L${x + 26 - i * 6} ${y}`).join(' '), 'none', 'stroke="#90a4ae" stroke-width="4" stroke-linecap="round"');
+const smallBall = (x, y, r, c) => C(x, y, r, G(c), ink(3.5)) + shine(x - r * 0.35, y - r * 0.35, r * 0.3, r * 0.18);
+
+// ---- 大臉（感覺訂單）----
+function feelFace(k) {
+  const hx = 112, hy = 126, r = 70;
+  const parts = [C(hx, hy, r, G(SKIN), ink()),
+    P(`M${hx - r} ${hy - 2} Q${hx - r - 2} ${hy - r * 1.2} ${hx} ${hy - r * 1.12} Q${hx + r + 2} ${hy - r * 1.2} ${hx + r} ${hy - 2} Q${hx + r * 0.55} ${hy - r * 0.6} ${hx} ${hy - r * 0.58} Q${hx - r * 0.55} ${hy - r * 0.6} ${hx - r} ${hy - 2}Z`, G('#5b3a26'), ink())];
+  const ey = hy + 6, ex = 26;
+  const brows = (tilt) => P(`M${hx - ex - 11} ${ey - 20 - tilt} L${hx - ex + 9} ${ey - 20 + tilt} M${hx + ex + 11} ${ey - 20 - tilt} L${hx + ex - 9} ${ey - 20 + tilt}`, 'none', ink(4));
+  if (k === 'tired') {
+    // 半閉的眼睛＋打哈欠
+    parts.push(P(`M${hx - ex - 12} ${ey} L${hx - ex + 12} ${ey} M${hx + ex - 12} ${ey} L${hx + ex + 12} ${ey}`, 'none', ink(4.5)),
+      P(`M${hx - ex - 11} ${ey} Q${hx - ex} ${ey + 9} ${hx - ex + 11} ${ey} M${hx + ex - 11} ${ey} Q${hx + ex} ${ey + 9} ${hx + ex + 11} ${ey}`, INK),
+      E(hx, hy + 40, 13, 17, '#c94a5a', ink(3.5)), zzz(178, 54));
+  } else {
+    parts.push(eye(hx - ex, ey, 11), eye(hx + ex, ey, 11));
+  }
+  if (k === 'happy') parts.push(P(`M${hx - 26} ${hy + 30} Q${hx} ${hy + 62} ${hx + 26} ${hy + 30}Z`, '#c94a5a', ink(4)), P(`M${hx - 14} ${hy + 46} Q${hx} ${hy + 38} ${hx + 14} ${hy + 46} Q${hx} ${hy + 56} ${hx - 14} ${hy + 46}Z`, '#f48fa6'),
+    cheek(hx - 46, hy + 26, 13), cheek(hx + 46, hy + 26, 13), P('M186 60 L196 44 M200 76 L218 70 M172 46 L172 28', 'none', 'stroke="#f6c43a" stroke-width="5" stroke-linecap="round"'));
+  if (k === 'sad') parts.push(brows(-6), P(`M${hx - 22} ${hy + 46} Q${hx} ${hy + 28} ${hx + 22} ${hy + 46}`, 'none', ink(4.5)),
+    P(`M${hx - ex - 4} ${ey + 14} Q${hx - ex - 14} ${ey + 34} ${hx - ex - 4} ${ey + 40} Q${hx - ex + 6} ${ey + 34} ${hx - ex - 4} ${ey + 14}Z`, G('#5ab4e6'), ink(3)));
+  if (k === 'thirsty') parts.push(brows(4), E(hx, hy + 40, 12, 9, '#c94a5a', ink(3.5)), E(hx, hy + 47, 8, 7, '#f06b8a', ink(2.5)),
+    // 一杯水
+    P('M178 92 L222 92 L216 170 L184 170Z', '#e8f6fd', ink()), P('M181 120 L219 120 L216 170 L184 170Z', G('#5ab4e6')), P('M178 92 L222 92 L216 170 L184 170Z', 'none', ink()),
+    P('M190 104 L190 150', 'none', 'stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity=".8"'));
+  if (k === 'hungry') parts.push(C(hx, hy + 40, 11, '#c94a5a', ink(3.5)), P(`M${hx + 10} ${hy + 46} Q${hx + 16} ${hy + 60} ${hx + 10} ${hy + 64} Q${hx + 4} ${hy + 58} ${hx + 10} ${hy + 46}Z`, '#bfe6f6', ink(2.5)),
+    // 一碗飯
+    E(196, 150, 34, 10, '#ffffff', ink(3.5)), P('M162 152 Q164 196 196 198 Q228 196 230 152Z', G('#e8f1f8'), ink(3.5)), P('M172 172 Q196 180 220 172', 'none', 'stroke="#7fc4dc" stroke-width="4" stroke-linecap="round"'),
+    P('M184 100 Q178 116 186 130 M204 98 Q198 116 206 130', 'none', 'stroke="#b0bec5" stroke-width="4" stroke-linecap="round"'));
+  return parts;
+}
+
+// ---- 身體部位：正面站好的小朋友，紅圈圈出問的部位 ----
+const BODY_SPOT = { head: [120, 60, 50], eye: [134, 62, 12], ear: [157, 66, 15], nose: [120, 75, 9], mouth: [120, 87, 11], arm: [80, 134, 18], hand: [60, 166, 15], leg: [134, 178, 18], foot: [142, 208, 17] };
+function bodyKid(part) {
+  const s = [
+    // 腿、腳
+    stroke2('M108 156 L106 198', '#3d6fb5', 14), stroke2('M132 156 L134 198', '#3d6fb5', 14),
+    E(98, 206, 15, 8, '#3b4a5f', ink(3)), E(142, 206, 15, 8, '#3b4a5f', ink(3)),
+    // 手臂、手
+    stroke2('M96 116 L66 158', '#f08a4a', 12), stroke2('M144 116 L174 158', '#f08a4a', 12),
+    C(60, 166, 9, SKIN, ink(3)), C(180, 166, 9, SKIN, ink(3)),
+    // 身體
+    RR(92, 104, 56, 60, 18, G('#f08a4a'), ink()),
+    // 耳朵、頭、頭髮
+    E(83, 66, 8, 11, G(SKIN), ink(3.5)), E(157, 66, 8, 11, G(SKIN), ink(3.5)),
+    C(120, 62, 36, G(SKIN), ink()),
+    P('M84 58 Q82 22 120 22 Q158 22 156 58 Q140 40 120 40 Q100 40 84 58Z', G('#5b3a26'), ink(3.5)),
+    eye(106, 62, 6), eye(134, 62, 6),
+    P('M116 72 Q120 79 124 72', 'none', ink(3)),
+    P('M110 84 Q120 94 130 84', '#c94a5a', ink(3)),
+    cheek(96, 78, 6), cheek(144, 78, 6),
+  ];
+  const [x, y, r] = BODY_SPOT[part];
+  s.push(C(x, y, r, 'none', 'stroke="#ffffff" stroke-width="11"'), C(x, y, r, 'none', 'stroke="#e5484d" stroke-width="5.5"'));
+  return s;
+}
+
+// ---- 數星星：淺色卡片上一排最多 4 顆，方便數 ----
+const STAR_ROWS = { 6: [3, 3], 7: [4, 3], 8: [4, 4], 9: [3, 3, 3], 10: [4, 3, 3], 11: [4, 4, 3], 12: [4, 4, 4] };
+function starShape(cx, cy, r) {
+  let d = '';
+  for (let j = 0; j < 10; j++) { const a = -Math.PI / 2 + j * Math.PI / 5, rad = j % 2 ? r * 0.48 : r; d += (j ? ' L' : 'M') + (cx + Math.cos(a) * rad).toFixed(1) + ' ' + (cy + Math.sin(a) * rad).toFixed(1); }
+  return P(d + 'Z', G('#ffc83a'), ink(3.5));
+}
+function stars(n) {
+  const rows = STAR_ROWS[n], out = [RR(26, 30, 188, 180, 26, '#fff8e6', ink())];
+  const y0 = 120 - (rows.length - 1) * 26;
+  rows.forEach((m, ri) => { for (let i = 0; i < m; i++) out.push(starShape(120 + (i - (m - 1) / 2) * 44, y0 + ri * 52, 20)); });
+  return out;
+}
+
 const ART = {
   panda: () => [
     C(66, 64, 24, G('#2f333b'), ink()), C(174, 64, 24, G('#2f333b'), ink()),
@@ -579,6 +693,57 @@ const ART = {
   'balloon-yellow': () => balloon('#f6d83a'), 'balloon-orange': () => balloon('#f08a2a'), 'balloon-purple': () => balloon('#8e4fb5'),
   'balloon-pink': () => balloon('#f48fb1'), 'balloon-black': () => balloon('#2b2f36'), 'balloon-white': () => balloon('#ffffff'),
   'balloon-brown': () => balloon('#8a5a36'), 'balloon-gray': () => balloon('#9aa5ad'),
+  // ---- 數星星（Find eight stars.）----
+  ...Object.fromEntries([6, 7, 8, 9, 10, 11, 12].map((n) => ['stars-' + n, () => stars(n)])),
+  // ---- 身體部位（Point to the nose.）----
+  ...Object.fromEntries(Object.keys(BODY_SPOT).map((k) => ['body-' + k, () => bodyKid(k)])),
+  // ---- 感覺（Who is tired?）----
+  ...Object.fromEntries(['happy', 'sad', 'tired', 'thirsty', 'hungry'].map((k) => ['feel-' + k, () => feelFace(k)])),
+  // ---- 動作（Who is jumping?）：關節座標取自遊戲的 drawAct ----
+  'act-stand': () => [kid({})],
+  'act-walk': () => [kid({ arms: [[[-8, -2]], [[8, -4]]], legs: [[[-4, 13], [-9, 22]], [[5, 13], [9, 22]]],
+    behind: E(48, 206, 9, 5, '#b0bec5') + E(20, 198, 9, 5, '#b0bec5') })],
+  'act-run': () => [kid({ head: [6, -24], sh: [4, -14], hip: [-2, 4], arms: [[[-10, -18], [-16, -10]], [[14, -6], [20, -14]]], legs: [[[-14, 10], [-22, 6]], [[8, 12], [6, 24]]],
+    behind: speedLines(22, [96, 120, 144]) })],
+  'act-jump': () => [kid({ head: [0, -27], sh: [0, -17], hip: [0, 1], arms: [[[-12, -31]], [[12, -31]]], legs: [[[-8, 9], [-6, 17]], [[8, 9], [6, 17]]],
+    behind: E(120, 212, 46, 8, '#2b3a55', 'opacity=".18"') + P('M60 150 L48 162 M180 150 L192 162 M66 176 L52 182 M174 176 L188 182', 'none', 'stroke="#90a4ae" stroke-width="4" stroke-linecap="round"') })],
+  'act-sit': () => [kid({ head: [-2, -24], sh: [-2, -14], hip: [-2, 4], arms: [[[8, 0]], [[10, -2]]], legs: [[[14, 4], [16, 22]], [[16, 6], [18, 22]]], shirt: '#5aa83f',
+    behind: RR(70, 90, 16, 120, 6, G('#a9805a'), ink()) + RR(70, 150, 96, 16, 6, G('#c8935f'), ink()) + R(148, 166, 12, 44, G('#8a5a36'), ink(3.5)) })],
+  'act-sleep': () => [
+    RR(18, 104, 16, 104, 6, G('#a9805a'), ink()), R(204, 160, 14, 48, G('#8a5a36'), ink(3.5)),
+    RR(24, 144, 196, 30, 8, G('#bfe6f6'), ink()),
+    E(66, 136, 32, 14, '#ffffff', ink()),
+    kidHead(66, 116, 26, { closed: true }),
+    RR(90, 118, 128, 38, 16, G('#7986cb'), ink()), P('M106 128 L206 128', 'none', 'stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity=".5"'),
+    zzz(112, 64)],
+  'act-read': () => [kid({ arms: [[[-6, -4], [4, -10]], [[8, -4], [12, -10]]], shirt: '#8e4fb5',
+    front: P('M144 86 Q126 80 108 86 L108 120 Q126 114 144 120Z', G('#3d7fd6'), ink(3.5)) + P('M144 86 Q162 80 180 86 L180 120 Q162 114 144 120Z', G('#43a047'), ink(3.5))
+      + P('M114 96 L138 94 M114 106 L138 104 M150 94 L174 96 M150 104 L174 106', 'none', 'stroke="#ffffff" stroke-width="3" stroke-linecap="round"') })],
+  'act-write': () => [kid({ head: [-14, -24], sh: [-14, -14], hip: [-14, 4], arms: [[[-24, -2]], [[-4, -6], [10, -6]]], legs: [[[-18, 22]], [[-10, 22]]], shirt: '#5ab4e6',
+    behind: R(196, 130, 12, 76, G('#8a5a36'), ink(3.5)) + R(118, 130, 12, 76, G('#8a5a36'), ink(3.5)) + RR(108, 120, 112, 14, 5, G('#c8935f'), ink())
+      + R(132, 112, 56, 10, '#ffffff', ink(3)),
+    front: P('M150 116 L172 82', 'none', `stroke="${INK}" stroke-width="10" stroke-linecap="round"`) + P('M150 116 L172 82', 'none', 'stroke="#f6c43a" stroke-width="5" stroke-linecap="round"') })],
+  'act-sing': () => [kid({ arms: [[[-12, -10]], [[12, -10]]], shirt: '#f48fb1', mouth: 'open',
+    front: musicNote(178, 56) + musicNote(206, 96, '#3d7fd6') })],
+  'act-dance': () => [kid({ arms: [[[-14, -30]], [[14, -6], [20, 0]]], legs: [[[-6, 22]], [[12, 12], [20, 16]]], shirt: '#ef6a5e',
+    front: musicNote(38, 70) + musicNote(206, 56, '#3d7fd6') })],
+  'act-wash': () => [kid({ head: [-14, -24], sh: [-14, -14], hip: [-14, 4], arms: [[[0, -8], [18, -10]], [[0, -4], [20, -6]]], legs: [[[-18, 22]], [[-10, 22]]], shirt: '#43a047',
+    behind: RR(132, 18, 72, 16, 6, G('#b0bec5'), ink()) + R(184, 30, 16, 26, G('#b0bec5'), ink(3.5)),
+    front: P('M192 60 Q186 72 192 78 Q198 72 192 60Z', G('#5ab4e6'), ink(2.5)) + P('M192 84 Q187 94 192 99 Q197 94 192 84Z', G('#5ab4e6'), ink(2.5))
+      + C(164, 86, 8, '#ffffff', ink(2.5)) + C(212, 112, 9, '#ffffff', ink(2.5)) + C(204, 140, 6, '#ffffff', ink(2.5)) })],
+  'act-drink': () => [kid({ arms: [[[-10, -2]], [[12, -10], [12, -22]]], shirt: '#f6c43a', mouth: 'o',
+    front: P('M148 34 L180 34 L176 80 L152 80Z', '#e8f6fd', ink(3.5)) + P('M150 52 L178 52 L176 80 L152 80Z', G('#5ab4e6')) + P('M148 34 L180 34 L176 80 L152 80Z', 'none', ink(3.5)) })],
+  'act-kick': () => [kid({ head: [-8, -26], sh: [-8, -16], hip: [-8, 4], arms: [[[-20, -8]], [[4, -8]]], legs: [[[-10, 22]], [[6, 10], [14, 10]]], shirt: '#3d7fd6', pants: '#2b3a55',
+    front: smallBall(194, 160, 20, '#ffffff') + P('M194 146 L204 154 L200 166 L188 166 L184 154Z', INK) })],
+  'act-throw': () => [kid({ head: [-6, -24], sh: [-6, -14], hip: [-6, 4], arms: [[[-16, -4]], [[2, -26], [8, -32]]], shirt: '#ef6a5e',
+    front: smallBall(196, 44, 15, '#e5484d') + P('M150 50 L170 48 M152 62 L172 62', 'none', 'stroke="#90a4ae" stroke-width="4" stroke-linecap="round"') })],
+  // ---- 月份：月曆頁，月份名稱由遊戲疊上去（Andika）----
+  calendar: () => [
+    RR(28, 46, 184, 164, 18, G('#ffffff'), ink()),
+    P('M28 64 Q28 46 46 46 L194 46 Q212 46 212 64 L212 86 L28 86Z', G('#e5484d'), ink()),
+    RR(70, 30, 14, 32, 7, G('#b0bec5'), ink(3.5)), RR(156, 30, 14, 32, 7, G('#b0bec5'), ink(3.5)),
+    ...[0, 1, 2, 3, 4, 5, 6].map((i) => RR(44 + i * 22, 162, 14, 12, 3, '#e3e8ec') + RR(44 + i * 22, 182, 14, 12, 3, i === 4 ? '#f8bccb' : '#e3e8ec')),
+  ],
   // 印章：選對時蓋在卡片上
   stamp: () => [
     `<g transform="rotate(-14 120 120)">`,
@@ -618,17 +783,23 @@ function svgFor(name) {
 }
 
 const { Resvg } = require('@resvg/resvg-js');   // cd tools/art && npm install
+const sharp = require('sharp');                   // 壓縮：轉成 256 色調色盤 PNG（libimagequant），檔案約小 3～4 倍
 const svgDir = path.join(__dirname, 'svg');
 const out = path.join(__dirname, '..', '..', 'game', 'art');
 fs.mkdirSync(svgDir, { recursive: true });
 fs.mkdirSync(out, { recursive: true });
-Object.keys(ART).forEach((k) => {
-  const svg = svgFor(k);
-  fs.writeFileSync(path.join(svgDir, k + '.svg'), svg);
-  // 2 倍解析度：顯示約 160px，點陣 320px
-  const png = new Resvg(svg, { fitTo: { mode: 'width', value: 320 } }).render().asPng();
-  fs.writeFileSync(path.join(out, k + '.png'), png);
-});
-// 遊戲讀這份清單載入貼紙（index.html 在 game.js 之前載入）
-fs.writeFileSync(path.join(out, 'index.js'), '// 由 tools/art/stickers.js 產生，請勿手動修改\nwindow.ART_KEYS = ' + JSON.stringify(Object.keys(ART)) + ';\n');
-console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)');
+(async () => {
+  let raw = 0, packed = 0;
+  for (const k of Object.keys(ART)) {
+    const svg = svgFor(k);
+    fs.writeFileSync(path.join(svgDir, k + '.svg'), svg);
+    // 2 倍解析度：顯示約 160px，點陣 320px
+    const png = new Resvg(svg, { fitTo: { mode: 'width', value: 320 } }).render().asPng();
+    const small = await sharp(png).png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 }).toBuffer();
+    fs.writeFileSync(path.join(out, k + '.png'), small);
+    raw += png.length; packed += small.length;
+  }
+  // 遊戲讀這份清單載入貼紙（index.html 在 game.js 之前載入）
+  fs.writeFileSync(path.join(out, 'index.js'), '// 由 tools/art/stickers.js 產生，請勿手動修改\nwindow.ART_KEYS = ' + JSON.stringify(Object.keys(ART)) + ';\n');
+  console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)', (raw / 1048576).toFixed(1) + ' MB →', (packed / 1048576).toFixed(1) + ' MB');
+})();

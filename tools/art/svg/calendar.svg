@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#ffffff"/><stop offset="1" stop-color="#d6d7db"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f09598"/><stop offset="0.55" stop-color="#e5484d"/><stop offset="1" stop-color="#c14149"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#d1d9dd"/><stop offset="0.55" stop-color="#b0bec5"/><stop offset="1" stop-color="#96a2ac"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#d1d9dd"/><stop offset="0.55" stop-color="#b0bec5"/><stop offset="1" stop-color="#96a2ac"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="28" y="46" width="184" height="164" rx="18" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M28 64 Q28 46 46 46 L194 46 Q212 46 212 64 L212 86 L28 86Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="70" y="30" width="14" height="32" rx="7" fill="url(#g2)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="156" y="30" width="14" height="32" rx="7" fill="url(#g3)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="44" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="44" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+    <rect x="66" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="66" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+    <rect x="88" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="88" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+    <rect x="110" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="110" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+    <rect x="132" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="132" y="182" width="14" height="12" rx="3" fill="#f8bccb" />
+    <rect x="154" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="154" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+    <rect x="176" y="162" width="14" height="12" rx="3" fill="#e3e8ec" /><rect x="176" y="182" width="14" height="12" rx="3" fill="#e3e8ec" />
+  </g>
+</svg>

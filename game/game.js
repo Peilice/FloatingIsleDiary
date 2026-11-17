@@ -304,15 +304,15 @@
     color:  { list: Object.keys(BALLOON), art: (k) => 'balloon-' + k, draw: (g, k) => drawBalloon(g, k), say: (k) => 'Which balloon is ' + k + '?', zh: (k) => '哪一顆氣球是' + zhOf(k) + '？', thanks: (k) => 'Yes, it is ' + k + '. Thank you!' },
     meal:   { list: FOODS, draw: (g, k) => drawFood(g, k), say: (k) => 'Can I have the ' + k + ', please?', zh: (k) => '可以給我' + zhOf(k) + '嗎？', thanks: () => 'Yummy! Thank you!' },
     season: { list: SEASONS, draw: (g, k) => drawSeason(g, k), say: (k) => 'Which one is ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: (k) => 'I like ' + k + '! Thank you!' },
-    count:  { list: COUNT, draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
+    count:  { list: COUNT, art: (k) => 'stars-' + (COUNT.indexOf(k) + 6), draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
     zoo:    { list: ZOO, draw: (g, k) => drawZoo(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'I see the ' + k + '! Thank you!' },
-    body:   { list: BODY, draw: (g, k) => drawBody(g, k), say: (k) => 'Point to the ' + k + '.', zh: (k) => '指出' + zhOf(k) + '。', thanks: () => 'Good job!' },
-    act:    { list: Object.keys(ACTS), draw: (g, k) => drawAct(g, k), say: (k) => 'Who is ' + ACTS[k] + '?', zh: (k) => '誰在' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
-    feel:   { list: FEELS, draw: (g, k) => drawFeel(g, k), say: (k) => 'Who is ' + k + '?', zh: (k) => '誰覺得' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    body:   { list: BODY, art: (k) => 'body-' + k, draw: (g, k) => drawBody(g, k), say: (k) => 'Point to the ' + k + '.', zh: (k) => '指出' + zhOf(k) + '。', thanks: () => 'Good job!' },
+    act:    { list: Object.keys(ACTS), art: (k) => 'act-' + k, draw: (g, k) => drawAct(g, k), say: (k) => 'Who is ' + ACTS[k] + '?', zh: (k) => '誰在' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    feel:   { list: FEELS, art: (k) => 'feel-' + k, draw: (g, k) => drawFeel(g, k), say: (k) => 'Who is ' + k + '?', zh: (k) => '誰覺得' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     time:   { list: DAYTIME, draw: (g, k) => drawDaytime(g, k), say: (k) => 'Which one is ' + (k === 'night' ? 'night' : 'the ' + k) + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     spot:   { list: SPOTS, draw: (g, k) => drawSpot(g, k), say: (k) => 'Which one is the ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     thing:  { list: THINGS, draw: (g, k) => drawThing(g, k), say: (k) => (k === 'pants' ? 'Where are the pants?' : 'Where is the ' + k + '?'), zh: (k) => zhOf(k) + '在哪裡？', thanks: () => 'There it is! Thank you!' },
-    month:  { list: MONTHS, draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
+    month:  { list: MONTHS, art: () => 'calendar', draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
   };
   // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
   const FAMILY = ['grandfather', 'grandmother', 'father', 'mother', 'brother', 'sister', 'baby'];
@@ -3173,6 +3173,9 @@
         c.pic.setScale(o.type === 'body' ? 2.2 : road ? 1.9 : 1.7).setY(o.type === 'body' ? -4 : -14);
         P.draw(c.pic, k);
         c.en.setText(P.label ? P.label(k) : '');
+        // 月曆貼紙的空白區比較窄：September 之類的長字縮小字級，放在紅色頁首下方
+        c.en.setY(useImg ? -2 : -14);
+        for (let fs = 30; fs >= 20; fs -= 2) { c.en.setFontSize(fs); if (!useImg || c.en.width <= 124) break; }
         c.zh.setFontSize(road ? 30 : 20);
         c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? (o.type === 'color' ? zhOf(k).split('；')[0] : zhOf(k)) : '');   // 顏色題的 orange 只寫「橘色」
         c.stamp.setVisible(!!o.done && k === o.answer);
