@@ -423,6 +423,22 @@ const ART = {
     E(120, 150, 10, 7.5, INK), shine(116, 148, 3.5, 2, 0), smile(120, 162, 7),
     cheek(82, 146, 8), cheek(158, 146, 8), shine(92, 82, 18, 8),
   ],
+  // ---- 草地上的全身角色（頭沿用上面的頭像，縮小放在身體上）----
+  'pip': () => [
+    P('M150 196 Q216 200 216 140 Q214 98 184 106 Q204 140 178 164 Q162 176 146 172Z', G('#f08a3a'), ink()),
+    P('M184 106 Q214 98 216 132 Q200 126 192 116Z', '#fff7ee', ink(3.5)),
+    E(120, 176, 44, 42, G('#f08a3a'), ink()),
+    E(120, 186, 25, 27, '#fff7ee', ink(3)),
+    E(98, 214, 17, 9, G('#d8722c'), ink(3.5)), E(142, 214, 17, 9, G('#d8722c'), ink(3.5)),
+    `<g transform="translate(120 92) scale(.64) translate(-120 -120)">`, ...ART.fox(), `</g>`,
+  ],
+  'rabbit-body': () => [
+    E(120, 180, 50, 42, G('#fffdf8'), ink()),
+    C(168, 198, 13, '#ffffff', ink(3.5)),
+    E(94, 214, 21, 10, G('#fffdf8'), ink(3.5)), E(146, 214, 21, 10, G('#fffdf8'), ink(3.5)),
+    C(100, 180, 11, G('#fffdf8'), ink(3)), C(140, 180, 11, G('#fffdf8'), ink(3)),
+    `<g transform="translate(120 98) scale(.62) translate(-120 -136)">`, ...ART.rabbit(), `</g>`,
+  ],
   // ---- 水果（市集水果訂單：BINS 的 6 種）----
   'apple-red': () => apple('#e8443a'),
   'apple-green': () => apple('#8cc63f'),
@@ -789,17 +805,20 @@ const out = path.join(__dirname, '..', '..', 'game', 'art');
 fs.mkdirSync(svgDir, { recursive: true });
 fs.mkdirSync(out, { recursive: true });
 (async () => {
-  let raw = 0, packed = 0;
+  let raw = 0, packed = 0, made = 0;
   for (const k of Object.keys(ART)) {
     const svg = svgFor(k);
-    fs.writeFileSync(path.join(svgDir, k + '.svg'), svg);
+    const svgFile = path.join(svgDir, k + '.svg'), pngFile = path.join(out, k + '.png');
+    // SVG 沒變、PNG 也在：跳過（壓縮很慢，全部重做要 2 分鐘以上）；加 --all 強制全部重做
+    if (!process.argv.includes('--all') && fs.existsSync(pngFile) && fs.existsSync(svgFile) && fs.readFileSync(svgFile, 'utf8') === svg) { packed += fs.statSync(pngFile).size; continue; }
+    fs.writeFileSync(svgFile, svg);
     // 2 倍解析度：顯示約 160px，點陣 320px
     const png = new Resvg(svg, { fitTo: { mode: 'width', value: 320 } }).render().asPng();
     const small = await sharp(png).png({ palette: true, quality: 90, effort: 10, compressionLevel: 9 }).toBuffer();
-    fs.writeFileSync(path.join(out, k + '.png'), small);
+    fs.writeFileSync(pngFile, small); made++;
     raw += png.length; packed += small.length;
   }
   // 遊戲讀這份清單載入貼紙（index.html 在 game.js 之前載入）
   fs.writeFileSync(path.join(out, 'index.js'), '// 由 tools/art/stickers.js 產生，請勿手動修改\nwindow.ART_KEYS = ' + JSON.stringify(Object.keys(ART)) + ';\n');
-  console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)', (raw / 1048576).toFixed(1) + ' MB →', (packed / 1048576).toFixed(1) + ' MB');
+  console.log('wrote', Object.keys(ART).length, 'stickers (svg → tools/art/svg, png → game/art)；重新輸出', made, '張，PNG 共', (packed / 1048576).toFixed(1) + ' MB');
 })();
