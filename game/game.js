@@ -17,6 +17,8 @@
   const FAST = Number(params.get('fast')) || 0;
   const SPEED = FAST > 1 ? FAST : (FAST ? 4 : 1);
   const BOT = !!params.get('bot');
+  // ?mute=1 測試時完全不出聲（不改存檔裡的聲音設定）
+  const MUTE = !!params.get('mute');
   // 內部 key 是舊暫定名，刻意不改，避免玩家存檔消失；機器人用另一個存檔，不會蓋掉真的進度
   // ?save=名稱 使用另一個存檔（測試用，不會動到正式進度）
   const SAVE_KEY = BOT ? 'cloudisland-bot' : (params.get('save') ? 'cloudisland-' + params.get('save').replace(/\W/g, '') : 'cloudisland-v1');
@@ -497,7 +499,7 @@
   // ---------- 語音（占位：之後換成 audio/xxx.mp3） ----------
   let muted = false;
   function speak(text) {
-    if (muted) return;
+    if (muted || MUTE) return;
     try {
       if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
