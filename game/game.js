@@ -1330,6 +1330,27 @@
     }
   }
 
+  // 效能：Phaser 的 Graphics 每一格都會重新計算全部形狀，靜態的圖要烘焙成貼圖、換成 Image
+  // bakeTex：把 g 目前的繪圖指令，取 (x0, y0) 起 w×h 的範圍，存成貼圖 key（已有同名貼圖就換掉）
+  function bakeTex(scene, g, key, x0, y0, w, h) {
+    const tmp = scene.make.graphics({ add: false });
+    tmp.translateCanvas(-x0, -y0);
+    tmp.commandBuffer.push(...g.commandBuffer);
+    if (scene.textures.exists(key)) scene.textures.remove(key);
+    tmp.generateTexture(key, Math.ceil(w), Math.ceil(h));
+    tmp.destroy();
+    return key;
+  }
+  // bakeGfx：靜態的 Graphics（畫完就不再改）換成同位置、同深度的 Image，原本的 Graphics 刪掉
+  let bakeN = 0;
+  function bakeGfx(scene, g, x0, y0, w, h) {
+    const key = 'bake-' + (bakeN++);
+    bakeTex(scene, g, key, x0 - g.x, y0 - g.y, w, h);
+    const img = scene.add.image(x0, y0, key).setOrigin(0).setDepth(g.depth).setAlpha(g.alpha);
+    g.destroy();
+    return img;
+  }
+
   // 幫程式繪製的圖加墨線外框：fn(g) 畫兩次，第一次每個形狀都放大一圈、全部用墨色（半透明的高光跳過），第二次正常畫
   // fn 裡的 g.clear() 兩次都不會真的清除（一開始先清一次）
   function inked(g, fn, w) {
@@ -1373,8 +1394,14 @@
     g.lineBetween(tailX - 13, y + h, tailX, y + h + 18); g.lineBetween(tailX, y + h + 18, tailX + 13, y + h);
   }
   // 貼紙小塊（HUD 按鈕、工具格）：白色切割邊＋墨線框＋柔和落影，以 (0,0) 為中心
+  // g 可以是 Graphics（直接畫）或 Image（換成依參數快取的貼圖，不用每格重算，HUD、工具格都用這種）
   function stickerPill(g, w, h, fill, r, lift) {
     r = r == null ? Math.min(h / 2, 22) : r;
+    if (g.type === 'Image') {
+      const key = 'pill-' + [Math.round(w), h, fill, r, lift ? 1 : 0].join('-');
+      if (!g.scene.textures.exists(key)) { const t = g.scene.make.graphics({ add: false }); stickerPill(t, Math.round(w), h, fill, r, lift); bakeTex(g.scene, t, key, -Math.round(w) / 2, -h / 2, Math.round(w), h + 10); t.destroy(); }
+      return g.setTexture(key).setOrigin(0.5, (h / 2) / (h + 10));
+    }
     g.fillStyle(0x3b2f1e, 0.16); g.fillRoundedRect(-w / 2, -h / 2 + (lift ? 9 : 5), w, h, r);
     g.fillStyle(0xffffff, 1); g.fillRoundedRect(-w / 2, -h / 2, w, h, r);
     g.fillStyle(fill, 1); g.fillRoundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, Math.max(4, r - 5));
@@ -1393,6 +1420,11 @@
     g.lineStyle(3, INK, 1); g.strokeRoundedRect(x + e, y + e, w - e * 2, h - e * 2, ir);
   }
   function stickerDisc(g, r, fill) {
+    if (g.type === 'Image') {
+      const key = 'disc-' + r + '-' + fill;
+      if (!g.scene.textures.exists(key)) { const t = g.scene.make.graphics({ add: false }); stickerDisc(t, r, fill); bakeTex(g.scene, t, key, -r, -r, r * 2, r * 2 + 6); t.destroy(); }
+      return g.setTexture(key).setOrigin(0.5, r / (r * 2 + 6));
+    }
     g.fillStyle(0x3b2f1e, 0.16); g.fillCircle(0, 5, r);
     g.fillStyle(0xffffff, 1); g.fillCircle(0, 0, r);
     g.fillStyle(fill, 1); g.fillCircle(0, 0, r - 6);
@@ -1496,7 +1528,7 @@
       this.add.image(906, 552, 'st-rabbit-body').setDisplaySize(180, 180);
       // 標題：手帳的一張紙，兩角貼紙膠帶
       const card = this.add.container(W / 2, 196);
-      const cg = this.add.graphics(); stickerPill(cg, 820, 200, 0xfdf9f0, 28, true);
+      const cg = this.add.image(0, 0, '__DEFAULT'); stickerPill(cg, 820, 200, 0xfdf9f0, 28, true);
       card.add([cg, washiTape(this, -380, -88, 170, 0xf2b84b, -14), washiTape(this, 380, -88, 150, 0x7fc4dc, 12),
         txt(this, 0, -24, 'Floating Isle Diary', 74, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5),
         txt(this, 0, 52, '浮島日記', 40, '#4f5a6b').setOrigin(0.5)]);
@@ -1631,6 +1663,9 @@
       this.sunG.fillStyle(0xffd54a, 1); this.sunG.fillCircle(0, 0, 44);
       this.sunG.lineStyle(3, INK, 1); this.sunG.strokeCircle(0, 0, 44);
       this.sunG.fillStyle(0xfff3b0, 0.8); this.sunG.fillEllipse(-14, -16, 22, 12);
+      bakeTex(this, this.sunG, 'bake-sun', -80, -80, 160, 160);
+      this.sunG.destroy();
+      this.sunG = this.add.image(1110, 130, 'bake-sun').setDepth(1);
       this.tweens.add({ targets: this.sunG, angle: 360, duration: 24000, repeat: -1 });
     }
 
@@ -1638,18 +1673,22 @@
       this.clouds = [];
       const defs = [[180, 130, 1.0, 14], [560, 80, 1.3, 9], [900, 200, 0.9, 18], [1200, 70, 1.1, 12], [380, 270, 0.8, 20]];
       defs.forEach(([x, y, s, v]) => {
-        const g = this.add.graphics({ x, y }).setDepth(2);
+        const g = this.add.image(x, y, '__DEFAULT').setDepth(2);
         this.clouds.push({ g, s, v });
       });
     }
 
     drawClouds(color, alpha) {
       this.clouds.forEach((c) => {
-        c.g.clear();
+        const key = 'cloud-' + color.toString(16) + '-' + c.s;
+        if (this.textures.exists(key)) { c.g.setTexture(key).setOrigin(48 * c.s / (176 * c.s + 12), (66 * c.s + 6) / (106 * c.s + 12)).setAlpha(Math.max(0.8, alpha)); return; }
+        const tg = this.make.graphics({ add: false });
         const s = c.s;
         // 剪紙雲：墨線外框（透明度只用來區分天氣，晴天也不要太淡，否則墨線會糊掉）
-        inkBlob(c.g, [[0, 0, 34 * s], [40 * s, -14 * s, 44 * s], [84 * s, 0, 32 * s]], [[-34 * s, 0, 152 * s, 34 * s, 17 * s]], color);
-        c.g.setAlpha(Math.max(0.8, alpha));
+        inkBlob(tg, [[0, 0, 34 * s], [40 * s, -14 * s, 44 * s], [84 * s, 0, 32 * s]], [[-34 * s, 0, 152 * s, 34 * s, 17 * s]], color);
+        // 範圍：x 從 -40s-6 到 136s+6，y 從 -60s-6 到 40s+6
+        bakeTex(this, tg, key, -48 * s, -66 * s - 6, 176 * s + 12, 106 * s + 12); tg.destroy();
+        c.g.setTexture(key).setOrigin(48 * s / (176 * s + 12), (66 * s + 6) / (106 * s + 12)).setAlpha(Math.max(0.8, alpha));
       });
     }
 
@@ -1663,6 +1702,7 @@
       // 草地上幾撮小草（墨線短筆畫）
       g.lineStyle(3, 0x3f8f3a, 1);
       [[170, 560], [300, 650], [880, 640], [1080, 600], [960, 470], [520, 640]].forEach(([x, y]) => { g.lineBetween(x, y, x - 6, y - 14); g.lineBetween(x, y, x + 2, y - 18); g.lineBetween(x, y, x + 9, y - 12); });
+      bakeGfx(this, g, 100, 400, 1080, 320);
       // 樹與樹蔭
       this.shadeG = this.add.graphics().setDepth(4);
       this.shadeG.fillStyle(0x1b5e20, 0.28); this.shadeG.fillEllipse(400, 490, 230, 200);
@@ -1672,19 +1712,23 @@
       inkBlob(tree, [[0, -150, 80], [-62, -112, 56], [62, -112, 56]], null, 0x2e8b3a);
       tree.fillStyle(0x3aa34a, 1); tree.fillCircle(-10, -165, 50);
       tree.fillStyle(0xffffff, 0.25); tree.fillEllipse(-34, -186, 34, 18);
+      bakeGfx(this, tree, 250 - 130, 470 - 240, 260, 260);
     }
 
     buildPlots() {
       this.plotObjs = [];
       for (let i = 0; i < 6; i++) {
         const x = PLOT_X[i % 3], y = PLOT_Y[Math.floor(i / 3)];
-        const soil = this.add.graphics({ x, y }).setDepth(6);
-        const plant = this.add.graphics({ x, y: y + 8 }).setDepth(9);
+        // 土和作物只在狀態改變時重畫，畫在離屏的 Graphics 上再烘焙成貼圖（每格重算圖形太耗資源）
+        const soil = this.make.graphics({ add: false });
+        const plant = this.make.graphics({ add: false });
+        const soilImg = this.add.image(x, y, '__DEFAULT').setOrigin(0.5, 30 / 80).setDepth(6);
+        const plantImg = this.add.image(x, y + 8, '__DEFAULT').setOrigin(0.5, 130 / 150).setDepth(9).setVisible(false);
         const hint = this.add.container(x + 62, y - 64).setDepth(12).setVisible(false).setScale(0.85);
         const hg = this.add.graphics(); hint.add(hg);
         const zone = this.add.zone(x, y - 30, 150, 110).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.onPlot(i));
-        const o = { x, y, soil, plant, hint, hg, zone, sig: '', hintKind: '' };
+        const o = { x, y, soil, plant, soilImg, plantImg, hint, hg, zone, sig: '', hintKind: '' };
         this.plotObjs.push(o);
         this.tweens.add({ targets: hint, y: y - 74, yoyo: true, repeat: -1, duration: 600, ease: 'Sine.easeInOut' });
       }
@@ -1817,12 +1861,13 @@
       bar.fillStyle(0xddd0b2, 1); for (let x = 60; x < 1240; x += 30) for (let y = 630; y < 700; y += 30) bar.fillCircle(x, y, 2);
       bar.lineStyle(3, INK, 1); bar.strokeRoundedRect(30, 614, 1220, 92, 16);
       bar.lineStyle(3, 0xef9f96, 1); bar.lineBetween(370, 626, 370, 694);
+      bakeGfx(this, bar, 24, 606, 1236, 114);
       washiTape(this, 32, 618, 80, 0x7fc4dc, -38).setDepth(32);
       washiTape(this, 1248, 618, 80, 0xf2b84b, 38).setDepth(32);
       this.tools = {};
       TOOL_KEYS.forEach((k) => {
         const c = this.add.container(TOOL_X[k], 662).setDepth(31);
-        const bg = this.add.graphics();
+        const bg = this.add.image(0, 0, '__DEFAULT');
         const icon = makeIcon(this, k === 'seeds' ? 'carrot' : k, 0, -8, k === 'shovel' ? 0.9 : 1.1);
         const label = txt(this, 0, 28, k, 20, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
         c.add([bg, icon, label]);
@@ -1836,7 +1881,7 @@
       PLANT_KEYS.forEach((k) => {
         const x = BAG_X[k];
         const c = this.add.container(x, 662).setDepth(31);
-        const bg = this.add.graphics();
+        const bg = this.add.image(0, 0, '__DEFAULT');
         const icon = makeIcon(this, k, -18, 0, 0.8);
         const n = txt(this, 6, 0, 'x0', 22, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0, 0.5);
         c.add([bg, icon, n]);
@@ -1848,7 +1893,7 @@
 
     buildHud() {
       // 星砂
-      this.dustBg = this.add.graphics().setDepth(40);
+      this.dustBg = this.add.image(0, 0, '__DEFAULT').setDepth(40);
       this.dustBg.setPosition(1175, 46); stickerPill(this.dustBg, 170, 62, 0xfdf9f0);
       this.dustStar = this.add.graphics({ x: 1124, y: 46 }).setDepth(41);
       this.dustStar.fillStyle(0xffc83a, 1); this.dustStar.lineStyle(2.5, INK, 1);
@@ -1859,7 +1904,7 @@
       const hudBtn = (x, label, onTap, w) => {
         w = w || 120;
         const b = this.add.container(x, 48).setDepth(40);
-        const g = this.add.graphics();
+        const g = this.add.image(0, 0, '__DEFAULT');
         stickerPill(g, w, 62, 0xfdf9f0);
         b.add([g, txt(this, 0, 0, label, w < 120 ? 24 : 27, '#2b3a55').setOrigin(0.5)]);
         b.setSize(w, 60).setInteractive({ useHandCursor: true });
@@ -1874,7 +1919,7 @@
       // 靜音
       const mb = this.add.container(320, 48).setDepth(40);
       this.muteG = this.add.graphics();
-      mb.add(this.muteG);
+      mb.add([stickerDisc(this.add.image(0, 0, '__DEFAULT'), 31, 0xdcedf4), this.muteG]);
       mb.setSize(60, 60).setInteractive({ useHandCursor: true });
       mb.on('pointerdown', () => this.setMuted(!muted));
       this.drawMute();
@@ -1882,7 +1927,7 @@
       // 設定（齒輪）
       const sb = this.add.container(398, 48).setDepth(40);
       const sg = this.add.graphics();
-      stickerDisc(sg, 31, 0xfdf9f0);
+      sb.add(stickerDisc(this.add.image(0, 0, '__DEFAULT'), 31, 0xfdf9f0));
       sg.fillStyle(INK, 1);
       for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; sg.fillCircle(Math.cos(a) * 14, Math.sin(a) * 14, 5); }
       sg.fillCircle(0, 0, 14);
@@ -1924,7 +1969,6 @@
 
     drawMute() {
       const g = this.muteG; g.clear();
-      stickerDisc(g, 31, 0xdcedf4);
       g.fillStyle(INK, 1); g.fillRect(-14, -6, 8, 12); g.fillTriangle(-6, -6, 6, -16, 6, 16); g.fillTriangle(-6, 6, 6, 16, -6, -6);
       if (muted) { g.lineStyle(4, 0xe53935, 1); g.lineBetween(-20, 20, 20, -20); }
       else { g.lineStyle(3, INK, 1); g.beginPath(); g.arc(8, 0, 9, -0.9, 0.9, false); g.strokePath(); }
@@ -1932,7 +1976,7 @@
 
     buildBanner() {
       this.banner = this.add.container(W / 2, 250).setDepth(60).setAlpha(0);
-      this.bannerG = this.add.graphics();
+      this.bannerG = this.add.image(0, 0, '__DEFAULT');
       this.bannerDay = txt(this, 0, -62, '', 26, '#4f5a6b', { fontFamily: FONT_EN }).setOrigin(0.5);
       this.bannerEn = txt(this, 0, -8, '', 52, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
       this.bannerZh = txt(this, 0, 52, '', 24, '#4f5a6b').setOrigin(0.5);
@@ -2226,7 +2270,7 @@
     buildSeeds() {
       const c = this.add.container(0, 0).setDepth(85).setVisible(false);
       c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x10243a, 0.35).setInteractive().on('pointerdown', () => this.closeSeeds()));
-      const g = this.add.graphics();
+      const g = this.add.image(0, 0, '__DEFAULT');
       // 手帳的一張小紙：白色切割邊＋墨線，標題寫在芥末紙膠帶上
       g.setPosition(550, 491); stickerPill(g, 800, 222, 0xfdf9f0, 24, true);
       c.add([g, washiTape(this, 260, 386, 190, 0xf2b84b, -4), txt(this, 260, 385, '種子袋 Seeds', 20, '#2b3a55').setOrigin(0.5).setAngle(-4)]);
@@ -2234,7 +2278,7 @@
       c.add(this.sdMsg);
       this.sdCards = PLANT_KEYS.map((k, i) => {
         const card = this.add.container(220 + i * 126, 506);
-        const bg = this.add.graphics();
+        const bg = this.add.image(0, 0, '__DEFAULT');
         const icon = makeIcon(this, k, 0, -22, 1.1);
         const name = txt(this, 0, 28, k, 20, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
         const price = txt(this, 0, 52, '', 18, '#c2185b', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -2263,7 +2307,7 @@
       const s = this.s;
       this.sdCards.forEach((c) => {
         const own = s.seeds.includes(c.k), on = this.tool === c.k;
-        c.bg.clear(); stickerPill(c.bg, 114, 150, own ? (on ? 0xffd77a : 0xfdf9f0) : 0xebe3d1, 18, on);
+        stickerPill(c.bg, 114, 150, own ? (on ? 0xffd77a : 0xfdf9f0) : 0xebe3d1, 18, on);
         c.card.setY(on ? 500 : 506);
         c.icon.setAlpha(own ? 1 : 0.45);
         c.price.setText(own ? (this.subs() ? zhOf(c.k) : '') : '★' + PLANTS[c.k].price);
@@ -2708,8 +2752,8 @@
       c.add(bg);
       c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0).setInteractive()); // 擋住下面的點擊
       // 上方：問句寫在一張紙上；日期、星砂是左右兩張小貼紙
-      const head = this.add.graphics({ x: W / 2, y: 82 }); stickerPill(head, 620, 116, 0xfdf9f0, 24, true);
-      const tag = (x, w) => { const t = this.add.graphics({ x, y: 44 }); stickerPill(t, w, 56, 0xfdf9f0); return t; };
+      const head = this.add.image(W / 2, 82, '__DEFAULT'); stickerPill(head, 620, 116, 0xfdf9f0, 24, true);
+      const tag = (x, w) => stickerPill(this.add.image(x, 44, '__DEFAULT'), w, 56, 0xfdf9f0);
       c.add([head, washiTape(this, W / 2 - 290, 34, 120, 0xf2b84b, -20), tag(150, 230), tag(W - 120, 150)]);
       c.add(txt(this, W / 2, 64, 'Where do you want to go?', 38, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5));
       this.mapZh = txt(this, W / 2, 110, '要去哪一座島？', 24, '#4f5a6b').setOrigin(0.5);
@@ -2727,7 +2771,7 @@
         const icon = this.add.graphics({ y: -10 }).setScale(1.6);
         if (m.icon === 'moon') drawMoon(icon, 2); else drawIcon(icon, m.icon);
         const name = txt(this, 0, 112, m.en + ' ' + m.zh, 21, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
-        const nameBg = this.add.graphics({ y: 112 }); stickerPill(nameBg, name.width + 34, 46, 0xfdf9f0);
+        const nameBg = stickerPill(this.add.image(0, 112, '__DEFAULT'), name.width + 34, 46, 0xfdf9f0);
         const need = txt(this, 0, 140, '', 17, '#2b3a55', { stroke: '#ffffff', strokeThickness: 4, align: 'center', wordWrap: { width: 200 } }).setOrigin(0.5, 0);
         const here = txt(this, 0, -66, '', 19, '#c2185b', { fontStyle: 'bold', fontFamily: FONT_EN, stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
         isle.add([g, icon, nameBg, name, need, here]);
@@ -6631,7 +6675,6 @@
         // 種子袋：手上拿著種子時亮起來，並顯示那種種子的圖
         const on = t.k === 'seeds' ? !!PLANTS[this.tool] : this.tool === t.k;
         if (t.k === 'seeds') { drawIcon(t.icon, PLANTS[this.tool] ? this.tool : 'carrot'); t.label.setText(PLANTS[this.tool] ? this.tool : 'seeds'); }
-        t.bg.clear();
         stickerPill(t.bg, 104, 88, on ? 0xffd77a : 0xfdf9f0, 20, on);
         t.c.setY(on ? 656 : 662).setAngle(on ? -3 : 0);
       });
@@ -6639,7 +6682,6 @@
         const on = this.held === b.k;
         const n = this.s.inv[b.k] || 0;
         b.c.setVisible(this.s.seeds.includes(b.k));
-        b.bg.clear();
         stickerPill(b.bg, 94, 82, on ? 0xffd77a : 0xfdf9f0, 18, on);
         b.c.setY(on ? 656 : 662).setAngle(on ? 3 : 0);
         b.n.setText('x' + n);
@@ -7020,10 +7062,14 @@
           g.fillStyle(Phaser.Display.Color.GetColor(c.r, c.g, c.b), 1); g.fillEllipse(0, 6, 140, 56);
           g.lineStyle(3, INK, 1); g.strokeEllipse(0, 6, 140, 56);
           g.lineStyle(2, 0x3b2f1e, 0.25); g.lineBetween(-40, 0, -14, 0); g.lineBetween(10, 12, 38, 12);
-          if (p.plant) inked(o.plant, (g2) => drawPlant(g2, p.plant, p.progress, p.water < 0.08)); else o.plant.clear();   // 作物也有墨線外框
+          o.soilImg.setTexture(bakeTex(this, g, 'soil-' + i, -80, -30, 160, 80));
+          if (p.plant) {
+            inked(o.plant, (g2) => drawPlant(g2, p.plant, p.progress, p.water < 0.08));   // 作物也有墨線外框
+            o.plantImg.setTexture(bakeTex(this, o.plant, 'plant-' + i, -60, -130, 120, 150)).setVisible(true);
+          } else o.plantImg.setVisible(false);
         }
         // 輕輕搖擺
-        o.plant.rotation = Math.sin(tSec * (s.weather === 'windy' ? 4 : 1.5) + i) * (s.weather === 'windy' ? 0.1 : 0.03);
+        o.plantImg.rotation = Math.sin(tSec * (s.weather === 'windy' ? 4 : 1.5) + i) * (s.weather === 'windy' ? 0.1 : 0.03);
 
         // 提示泡泡
         let kind = '';
