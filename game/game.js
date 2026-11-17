@@ -512,7 +512,7 @@
   // ---------- 繪圖輔助 ----------
   function txt(scene, x, y, str, size, color, extra) {
     return scene.add.text(x, y, str, Object.assign({
-      fontFamily: FONT, fontSize: size + 'px', color: color || '#27384a', resolution: 2,
+      fontFamily: FONT, fontSize: size + 'px', color: color || '#2b3a55', resolution: 2,
     }, extra || {}));
   }
 
@@ -1697,8 +1697,8 @@
       this.tweens.add({ targets: this.visitorG, y: VISITOR.y - 8, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
       this.visitorBubble = this.add.container(OFF + VISITOR.x - 400, VISITOR.y - 335).setDepth(15);
       const vg = this.add.graphics(); drawBubble(vg, 0, 0, 420, 108, 400);
-      this.visitorEn = txt(this, 22, 16, '', 26, '#27384a', { fontStyle: 'bold' });
-      this.visitorZh = txt(this, 22, 64, '', 20, '#6b7c8c');
+      this.visitorEn = txt(this, 22, 16, '', 26, '#2b3a55', { fontStyle: 'bold' });
+      this.visitorZh = txt(this, 22, 64, '', 20, '#4f5a6b');
       this.visitorBubble.add([vg, this.visitorEn, this.visitorZh]);
       const vb = this.add.zone(OFF + VISITOR.x - 190, VISITOR.y - 281, 420, 108).setDepth(22).setInteractive();
       vb.on('pointerdown', () => this.onVisitor(true));
@@ -1877,10 +1877,25 @@
     modalBase(depth, x, y, w, h, color) {
       const c = this.add.container(0, 0).setDepth(depth).setVisible(false);
       c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x10243a, 0.55).setInteractive());
-      const panel = this.add.graphics();
-      panel.fillStyle(0x000000, 0.15); panel.fillRoundedRect(x + 4, y + 8, w, h, 36);
-      panel.fillStyle(color, 1); panel.fillRoundedRect(x, y, w, h, 36);
-      c.add(panel);
+      // 手帳內頁：白色切割邊＋墨線框＋點格紙，烘焙成貼圖（同尺寸同顏色共用），左上角斜貼一段紙膠帶（右上是關閉鈕、下方常有按鈕，都不貼）
+      // 淺色頁一律換成手帳紙色；深色頁（洞穴、夜空）保留原本的顏色，點格改成淡白色
+      const dark = ((color >> 16 & 255) * 0.3 + (color >> 8 & 255) * 0.59 + (color & 255) * 0.11) < 140;
+      const fill = dark ? color : 0xfdf9f0;
+      const key = 'mb-' + w + 'x' + h + '-' + fill.toString(16);
+      if (!this.textures.exists(key)) {
+        const g = this.make.graphics({ add: false });
+        g.fillStyle(0x10243a, 0.16); g.fillRoundedRect(4, 14, w, h, 30);
+        g.fillStyle(0x10243a, 0.12); g.fillRoundedRect(2, 7, w, h, 30);
+        g.fillStyle(0xffffff, 1); g.fillRoundedRect(0, 0, w, h, 30);
+        g.fillStyle(fill, 1); g.fillRoundedRect(10, 10, w - 20, h - 20, 22);
+        g.fillStyle(dark ? 0xffffff : 0xddd0b2, dark ? 0.10 : 0.7);
+        for (let yy = 40; yy < h - 20; yy += 30) for (let xx = 40; xx < w - 20; xx += 30) g.fillCircle(xx, yy, 2);
+        g.lineStyle(3, INK, 1); g.strokeRoundedRect(10, 10, w - 20, h - 20, 22);
+        g.generateTexture(key, w + 6, h + 16);
+        g.destroy();
+      }
+      c.add(this.add.image(x, y, key).setOrigin(0));
+      c.add(washiTape(this, x + 34, y + 20, 120, 0xf2b84b, -38));
       return c;
     }
 
@@ -1899,7 +1914,7 @@
 
     buildLibrary() {
       const c = this.modalBase(100, 120, 50, 1040, 620, 0xfff8ec);
-      c.add(txt(this, 640, 92, '圖鑑 Book', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(txt(this, 640, 92, '圖鑑 Book', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5));
       this.libPage = 0;
       this.libCards = [];
       for (let i = 0; i < LIB_PER_PAGE; i++) {
@@ -1908,10 +1923,12 @@
         const card = this.add.container(x, y);
         const bg = this.add.graphics();
         const icon = makeIcon(this, 'sunny', 0, -10, 1.5);
-        const name = txt(this, 0, 62, '', 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        card.add([bg, icon, name]);
+        const img = this.add.image(0, -12, 'st-panda').setDisplaySize(112, 112).setVisible(false);   // 有貼紙的項目（動物）用貼紙
+        const name = txt(this, 0, 58, '', 24, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
+        card.add([bg, icon, img, name]);
+        card.setAngle([-1.5, 1, -0.5, 1.5, 1, -1.5, 1.5, -1][i % 8]);
         card.setSize(220, 168).setInteractive({ useHandCursor: true });
-        const slot = { e: null, card, bg, icon, name };
+        const slot = { e: null, card, bg, icon, img, name };
         card.on('pointerdown', () => { if (slot.e) this.pickCard(slot.e); });
         c.add(card);
         this.libCards.push(slot);
@@ -1929,10 +1946,10 @@
       });
       this.libFilterBtn.label = this.libFilterBtn.list.find((o) => o.type === 'Text');
       c.add(this.libFilterBtn);
-      this.libPageText = txt(this, 930, 92, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.libPageText = txt(this, 930, 92, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.libPrev, this.libNext, this.libPageText]);
-      this.libDetailEn = txt(this, 640, 510, '', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.libDetailZh = txt(this, 640, 548, '', 24, '#6b7c8c', { wordWrap: { width: 860 }, align: 'center' }).setOrigin(0.5, 0);
+      this.libDetailEn = txt(this, 640, 510, '', 36, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.libDetailZh = txt(this, 640, 548, '', 24, '#4f5a6b', { wordWrap: { width: 860 }, align: 'center' }).setOrigin(0.5, 0);
       c.add([this.libDetailEn, this.libDetailZh]);
       this.closeButton(c, 1100, 90, () => this.closeModal());
       this.lib = c;
@@ -1941,8 +1958,8 @@
     // 早上的天氣題（§4.3）：居民問 How is the weather?，從 4 張卡片選今天的天氣
     buildWeatherQ() {
       const c = this.modalBase(80, 230, 120, 820, 470, 0xfffdf6);
-      this.wqTitle = txt(this, 640, 190, 'How is the weather?', 44, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.wqZh = txt(this, 640, 240, '今天天氣怎麼樣？', 24, '#6b7c8c').setOrigin(0.5);
+      this.wqTitle = txt(this, 640, 190, 'How is the weather?', 44, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.wqZh = txt(this, 640, 240, '今天天氣怎麼樣？', 24, '#4f5a6b').setOrigin(0.5);
       c.add([this.wqTitle, this.wqZh]);
       // 重聽（不算提示）
       const lis = this.add.container(990, 190);
@@ -1962,8 +1979,8 @@
         const card = this.add.container(640 + (i - 1.5) * 186, 420);
         const bg = this.add.graphics();
         const icon = makeIcon(this, 'sunny', 0, -38, 1.7);
-        const en = txt(this, 0, 42, '', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 78, '', 20, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 42, '', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 78, '', 20, '#4f5a6b').setOrigin(0.5);
         card.add([bg, icon, en, zh]);
         card.setSize(170, 210).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickWeather(i));
@@ -1981,18 +1998,18 @@
       for (let y = 250; y <= 560; y += 52) lines.lineBetween(240, y, 1040, y);
       lines.lineStyle(3, 0xf2b8b8, 1); lines.lineBetween(290, 130, 290, 590);
       c.add(lines);
-      this.dyTitle = txt(this, 640, 168, '', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.dyBefore = txt(this, 0, 300, '', 46, '#27384a').setOrigin(0, 0.5);
+      this.dyTitle = txt(this, 640, 168, '', 36, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.dyBefore = txt(this, 0, 300, '', 46, '#2b3a55').setOrigin(0, 0.5);
       this.dyBlank = txt(this, 0, 300, '', 46, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5, 0.5);
-      this.dyAfter = txt(this, 0, 300, '', 46, '#27384a').setOrigin(0, 0.5);
+      this.dyAfter = txt(this, 0, 300, '', 46, '#2b3a55').setOrigin(0, 0.5);
       this.dyLine = this.add.graphics();
       this.dyHint = makeIcon(this, 'sunny', 640, 380, 1.4).setVisible(false);
       c.add([this.dyTitle, this.dyBefore, this.dyBlank, this.dyAfter, this.dyLine, this.dyHint]);
       this.dyOpts = [0, 1, 2].map((i) => {
         const b = this.add.container(640 + (i - 1) * 250, 480);
         const bg = this.add.graphics();
-        const en = txt(this, 0, -8, '', 34, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 26, '', 18, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, -8, '', 34, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 26, '', 18, '#4f5a6b').setOrigin(0.5);
         b.add([bg, en, zh]);
         b.setSize(220, 96).setInteractive({ useHandCursor: true });
         b.on('pointerdown', () => this.pickDiary(i));
@@ -2009,22 +2026,22 @@
     // 日記本：可以翻回前面的頁面
     buildBook() {
       const c = this.modalBase(90, 160, 60, 960, 600, 0xfffaf0);
-      c.add(txt(this, 640, 110, '日記本 Diary', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(txt(this, 640, 110, '日記本 Diary', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5));
       this.bookRows = [0, 1, 2, 3, 4].map((i) => {
         const y = 200 + i * 78;
         const row = this.add.container(640, y);
         const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-420, -32, 840, 64, 18);
         const icon = makeIcon(this, 'sunny', -380, 0, 0.9);
-        const day = txt(this, -330, 0, '', 22, '#6b7c8c').setOrigin(0, 0.5);
-        const t = txt(this, -230, 0, '', 30, '#27384a').setOrigin(0, 0.5);
+        const day = txt(this, -330, 0, '', 22, '#4f5a6b').setOrigin(0, 0.5);
+        const t = txt(this, -230, 0, '', 30, '#2b3a55').setOrigin(0, 0.5);
         row.add([bg, icon, day, t]);
         row.setSize(840, 64).setInteractive({ useHandCursor: true });
         row.on('pointerdown', () => { if (row.entry) speak(row.entry.text); });
         c.add(row);
         return { row, icon, day, t };
       });
-      this.bookEmpty = txt(this, 640, 330, '還沒有日記。過完一天就會寫下第一頁。', 26, '#6b7c8c').setOrigin(0.5);
-      this.bookPageText = txt(this, 640, 612, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.bookEmpty = txt(this, 640, 330, '還沒有日記。過完一天就會寫下第一頁。', 26, '#4f5a6b').setOrigin(0.5);
+      this.bookPageText = txt(this, 640, 612, '', 22, '#4f5a6b').setOrigin(0.5);
       this.bookPrev = makeButton(this, 300, 612, 120, 60, 0x90a4ae, '◀', 28, () => { this.bookPage -= 1; this.renderBook(); });
       this.bookNext = makeButton(this, 980, 612, 120, 60, 0x90a4ae, '▶', 28, () => { this.bookPage += 1; this.renderBook(); });
       c.add([this.bookEmpty, this.bookPageText, this.bookPrev, this.bookNext]);
@@ -2035,15 +2052,15 @@
     // 設定：中文字幕、聲音（開著時時間暫停，§3.1）
     buildSettings() {
       const c = this.modalBase(95, 340, 150, 600, 400, 0xfffaf0);
-      c.add(txt(this, 640, 205, '設定 Settings', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(txt(this, 640, 205, '設定 Settings', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5));
       const rows = [
         { key: 'subs', label: '中文字幕', sub: '英文句子下方顯示中文', get: () => this.subs(), set: (v) => { this.s.subs = v; this.applySubs(); } },
         { key: 'sound', label: '聲音', sub: '唸出英文', get: () => !muted, set: (v) => this.setMuted(!v) },
       ];
       this.setRows = rows.map((r, i) => {
         const y = 300 + i * 110;
-        c.add(txt(this, 400, y - 14, r.label, 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5));
-        c.add(txt(this, 400, y + 24, r.sub, 20, '#6b7c8c').setOrigin(0, 0.5));
+        c.add(txt(this, 400, y - 14, r.label, 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0, 0.5));
+        c.add(txt(this, 400, y + 24, r.sub, 20, '#4f5a6b').setOrigin(0, 0.5));
         const sw = this.add.container(820, y);
         const g = this.add.graphics();
         const state = txt(this, 0, 0, '', 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -2140,18 +2157,17 @@
       const c = this.add.container(0, 0).setDepth(85).setVisible(false);
       c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x10243a, 0.35).setInteractive().on('pointerdown', () => this.closeSeeds()));
       const g = this.add.graphics();
-      g.fillStyle(0xfffaf0, 1); g.fillRoundedRect(150, 380, 800, 222, 24);
-      g.lineStyle(4, 0xffcc80, 1); g.strokeRoundedRect(150, 380, 800, 222, 24);
-      c.add(g);
-      c.add(txt(this, 180, 396, 'Seeds 種子袋', 22, '#e65100', { fontStyle: 'bold' }));
+      // 手帳的一張小紙：白色切割邊＋墨線，標題寫在芥末紙膠帶上
+      g.setPosition(550, 491); stickerPill(g, 800, 222, 0xfdf9f0, 24, true);
+      c.add([g, washiTape(this, 260, 386, 190, 0xf2b84b, -4), txt(this, 260, 385, '種子袋 Seeds', 20, '#2b3a55').setOrigin(0.5).setAngle(-4)]);
       this.sdMsg = txt(this, 880, 398, '', 18, '#c62828', { fontStyle: 'bold' }).setOrigin(1, 0);
       c.add(this.sdMsg);
       this.sdCards = PLANT_KEYS.map((k, i) => {
         const card = this.add.container(220 + i * 126, 506);
         const bg = this.add.graphics();
         const icon = makeIcon(this, k, 0, -22, 1.1);
-        const name = txt(this, 0, 28, k, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const price = txt(this, 0, 54, '', 18, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+        const name = txt(this, 0, 28, k, 20, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
+        const price = txt(this, 0, 52, '', 18, '#c2185b', { fontStyle: 'bold' }).setOrigin(0.5);
         card.add([bg, icon, name, price]);
         card.setSize(114, 150).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickSeed(k));
@@ -2177,12 +2193,11 @@
       const s = this.s;
       this.sdCards.forEach((c) => {
         const own = s.seeds.includes(c.k), on = this.tool === c.k;
-        c.bg.clear();
-        c.bg.fillStyle(own ? (on ? 0xffe082 : 0xffffff) : 0xeeeeee, 1); c.bg.fillRoundedRect(-57, -75, 114, 150, 16);
-        c.bg.lineStyle(on ? 5 : 3, on ? 0xff9800 : 0xd7ccc8, 1); c.bg.strokeRoundedRect(-57, -75, 114, 150, 16);
+        c.bg.clear(); stickerPill(c.bg, 114, 150, own ? (on ? 0xffd77a : 0xfdf9f0) : 0xebe3d1, 18, on);
+        c.card.setY(on ? 500 : 506);
         c.icon.setAlpha(own ? 1 : 0.45);
         c.price.setText(own ? (this.subs() ? zhOf(c.k) : '') : '★' + PLANTS[c.k].price);
-        c.price.setColor(own ? '#6b7c8c' : '#e65100');
+        c.price.setColor(own ? '#4f5a6b' : '#c2185b');
       });
     }
 
@@ -2636,7 +2651,7 @@
         g.fillStyle(m.color, 1); g.fillEllipse(0, 18, 190, 64);
         const icon = this.add.graphics({ y: -10 }).setScale(1.6);
         if (m.icon === 'moon') drawMoon(icon, 2); else drawIcon(icon, m.icon);
-        const name = txt(this, 0, 104, m.en + ' ' + m.zh, 22, '#27384a', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
+        const name = txt(this, 0, 104, m.en + ' ' + m.zh, 22, '#2b3a55', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
         const need = txt(this, 0, 134, '', 17, '#455a64', { stroke: '#ffffff', strokeThickness: 4, align: 'center', wordWrap: { width: 200 } }).setOrigin(0.5, 0);
         const here = txt(this, 0, -66, '', 18, '#e65100', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 4 }).setOrigin(0.5);
         isle.add([g, icon, name, need, here]);
@@ -2787,8 +2802,8 @@
 
     buildBuildMenu() {
       const c = this.modalBase(80, 250, 120, 780, 480, 0xfffdf6);
-      this.bmSay = txt(this, 640, 180, '', 34, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.bmSayZh = txt(this, 640, 222, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.bmSay = txt(this, 640, 180, '', 34, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.bmSayZh = txt(this, 640, 222, '', 22, '#4f5a6b').setOrigin(0.5);
       this.bmTitle = txt(this, 640, 268, 'Build a home.　每個 ★' + HAB_COST, 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.bmSay, this.bmSayZh, this.bmTitle]);
       this.bmCards = [0, 1, 2].map((i) => {
@@ -2797,8 +2812,8 @@
         bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -110, 190, 220, 24);
         bg.lineStyle(4, 0xa5d6a7, 1); bg.strokeRoundedRect(-95, -110, 190, 220, 24);
         const icon = makeIcon(this, 'pond', 0, -30, 2);
-        const en = txt(this, 0, 52, '', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 86, '', 20, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 52, '', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 86, '', 20, '#4f5a6b').setOrigin(0.5);
         card.add([bg, icon, en, zh]);
         card.setSize(190, 220).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickBuild(i));
@@ -2932,8 +2947,8 @@
       sb.setAngle(0);
       c.add(sb);
       this.sqSound = txt(this, 600, 188, '', 40, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.sqTitle = txt(this, 640, 290, 'Who is it?', 36, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.sqZh = txt(this, 640, 326, '是誰的叫聲？', 20, '#6b7c8c').setOrigin(0.5);
+      this.sqTitle = txt(this, 640, 290, 'Who is it?', 36, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.sqZh = txt(this, 640, 326, '是誰的叫聲？', 20, '#4f5a6b').setOrigin(0.5);
       this.sqHint = txt(this, 640, 590, '', 24, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.sqSound, this.sqTitle, this.sqZh, this.sqHint]);
       const lis = this.add.container(990, 190);
@@ -2952,8 +2967,8 @@
         const card = this.add.container(640 + (i - 1.5) * 186, 455);
         const bg = this.add.graphics();
         const icon = makeIcon(this, 'frog', 0, -30, 1.7);
-        const en = txt(this, 0, 44, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 76, '', 20, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 44, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 76, '', 20, '#4f5a6b').setOrigin(0.5);
         card.add([bg, icon, en, zh]);
         card.setSize(170, 200).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickSound(i));
@@ -3349,9 +3364,9 @@
       const c = this.modalBase(80, 130, 110, 1020, 470, 0xfffaf0);
       this.ivWho = makeIcon(this, 'rabbit', 230, 220, 2);
       const bub = this.add.graphics(); drawBubble(bub, 300, 150, 620, 110, 330);
-      this.ivSay = txt(this, 322, 168, '', 32, '#27384a', { fontStyle: 'bold' });
-      this.ivZh = txt(this, 322, 216, '', 20, '#6b7c8c');
-      this.ivToday = txt(this, 640, 312, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.ivSay = txt(this, 322, 168, '', 32, '#2b3a55', { fontStyle: 'bold' });
+      this.ivZh = txt(this, 322, 216, '', 20, '#4f5a6b');
+      this.ivToday = txt(this, 640, 312, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.ivWho, bub, this.ivSay, this.ivZh, this.ivToday]);
       const lis = this.add.container(1060, 205);
       const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 32);
@@ -3362,8 +3377,8 @@
       this.ivCards = WEEK.map((d, i) => {
         const card = this.add.container(640 + (i - 3) * 134, 440);
         const bg = this.add.graphics();
-        const en = txt(this, 0, -10, d, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 22, '', 18, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, -10, d, 20, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 22, '', 18, '#4f5a6b').setOrigin(0.5);
         card.add([bg, en, zh]);
         card.setSize(124, 120).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickDay(i));
@@ -3517,8 +3532,8 @@
     talkRow(c, y) {
       const who = makeIcon(this, 'rabbit', 250, y + 50, 1.8);
       const bub = this.add.graphics(); drawBubble(bub, 320, y, 620, 100, 350);
-      const say = txt(this, 342, y + 16, '', 30, '#27384a', { fontStyle: 'bold' });
-      const zh = txt(this, 342, y + 60, '', 20, '#6b7c8c');
+      const say = txt(this, 342, y + 16, '', 30, '#2b3a55', { fontStyle: 'bold' });
+      const zh = txt(this, 342, y + 60, '', 20, '#4f5a6b');
       c.add([who, bub, say, zh]);
       const lis = this.add.container(1010, y + 50);
       const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
@@ -3565,8 +3580,8 @@
         pot.lineStyle(4, 0x555555, 1); pot.beginPath(); pot.arc(-28, 0, 12, Math.PI * 0.5, Math.PI * 1.5, false); pot.strokePath();
         if (k === 'hot') { pot.lineStyle(3, 0xbdbdbd, 1); [-10, 0, 10].forEach((x) => pot.lineBetween(x, -30, x + 4, -44)); }
         else { pot.fillStyle(0xe1f5fe, 1); pot.fillRect(-12, -36, 12, 12); pot.fillRect(4, -40, 12, 12); }
-        const en = txt(this, 45, -12, k, 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 45, 24, '', 18, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 45, -12, k, 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 45, 24, '', 18, '#4f5a6b').setOrigin(0.5);
         p.add([bg, pot, en, zh]);
         p.setSize(190, 130).setInteractive({ useHandCursor: true });
         p.on('pointerdown', () => this.pourTea(k));
@@ -3681,18 +3696,18 @@
       const kg = this.add.graphics();
       [[0xf48fb1, 'sour'], [0x9575cd, 'sweet'], [0x81c784, 'bitter']].forEach(([col, w], i) => {
         kg.fillStyle(col, 1); kg.fillCircle(-110 + i * 110, 0, 16);
-        this.acKey.add(txt(this, -110 + i * 110, 30, w, 18, '#6b7c8c').setOrigin(0.5));
+        this.acKey.add(txt(this, -110 + i * 110, 30, w, 18, '#4f5a6b').setOrigin(0.5));
       });
       this.acKey.addAt(kg, 0);
       this.acMsg = txt(this, 640, 615, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.acProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.acProg = txt(this, 985, 98, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.acCup, this.acQ, this.acDrop, this.acKey, this.acMsg, this.acProg]);
       this.acBoxes = TASTES.map((w, i) => {
         const b = this.add.container(640 + i * 150, 460);
         const bg = this.add.graphics();
         bg.fillStyle(0xd7b98e, 1); bg.fillRoundedRect(-65, -60, 130, 120, 16);
         bg.fillStyle(0xbf9a68, 1); bg.fillRect(-65, -60, 130, 20);
-        const en = txt(this, 0, 4, w, 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const en = txt(this, 0, 4, w, 28, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 38, '', 18, '#5d4037').setOrigin(0.5);
         b.add([bg, en, zh]);
         b.setSize(130, 120).setInteractive({ useHandCursor: true });
@@ -3778,15 +3793,15 @@
     buildMagnet() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
       c.add(txt(this, 640, 98, 'Magnet 磁鐵', 28, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.mgTitle = txt(this, 640, 150, 'Will the magnet pull it?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.mgZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.mgTitle = txt(this, 640, 150, 'Will the magnet pull it?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.mgZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.mgMsg = txt(this, 640, 470, '', 22, '#6d4c2f', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
       c.add([this.mgTitle, this.mgZh, this.mgMsg]);
       this.mgCards = [0, 1, 2, 3, 4].map((i) => {
         const card = this.add.container(330 + i * 155, 300);
         const bg = this.add.graphics();
         const icon = this.add.graphics({ y: -12 }).setScale(1.5);
-        const name = txt(this, 0, 42, '', 18, '#6b7c8c').setOrigin(0.5);
+        const name = txt(this, 0, 42, '', 18, '#4f5a6b').setOrigin(0.5);
         const tag = txt(this, 0, -66, '', 20, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
         card.add([bg, icon, name, tag]);
         card.setSize(140, 130).setInteractive({ useHandCursor: true });
@@ -3887,11 +3902,11 @@
     buildDig() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
       c.add(txt(this, 640, 98, 'Dig 挖挖看', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.dgTitle = txt(this, 640, 150, 'Rock, sand, or mud?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.dgZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.dgTitle = txt(this, 640, 150, 'Rock, sand, or mud?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.dgZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.dgSample = this.add.graphics({ x: 640, y: 300 }).setScale(1.6);
       this.dgHint = txt(this, 640, 380, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.dgProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.dgProg = txt(this, 985, 98, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.dgTitle, this.dgZh, this.dgSample, this.dgHint, this.dgProg]);
       this.dgPiles = SOILS.map((w, i) => {
         const b = this.add.container(640 + (i - 1) * 230, 510);
@@ -3899,8 +3914,8 @@
         bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -70, 190, 140, 18);
         bg.lineStyle(4, 0xbcaaa4, 1); bg.strokeRoundedRect(-95, -70, 190, 140, 18);
         const pile = this.add.graphics({ y: -16 }).setScale(1.1);
-        const en = txt(this, 0, 34, w, 28, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 60, '', 16, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 34, w, 28, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 60, '', 16, '#4f5a6b').setOrigin(0.5);
         b.add([bg, pile, en, zh]);
         b.setSize(190, 140).setInteractive({ useHandCursor: true });
         b.on('pointerdown', () => this.sortDig(i));
@@ -4004,8 +4019,8 @@
       const c = this.modalBase(80, 170, 70, 940, 590, 0x1f2633);
       c.add(txt(this, 640, 98, 'Light 光', 28, '#ffd54a', { fontStyle: 'bold' }).setOrigin(0.5));
       const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
-      this.ltSay = txt(this, 352, 140, '', 30, '#27384a', { fontStyle: 'bold' });
-      this.ltZh = txt(this, 352, 182, '', 20, '#6b7c8c');
+      this.ltSay = txt(this, 352, 140, '', 30, '#2b3a55', { fontStyle: 'bold' });
+      this.ltZh = txt(this, 352, 182, '', 20, '#4f5a6b');
       c.add([bub, this.ltSay, this.ltZh, makeIcon(this, 'lamp', 260, 172, 1.4)]);
       const lis = this.add.container(1010, 172);
       const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
@@ -4231,8 +4246,8 @@
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
       c.add(txt(this, 640, 98, 'Push and Pull 推與拉', 28, '#5d4037', { fontStyle: 'bold' }).setOrigin(0.5));
       const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
-      this.puSay = txt(this, 352, 140, '', 30, '#27384a', { fontStyle: 'bold' });
-      this.puZh = txt(this, 352, 182, '', 20, '#6b7c8c');
+      this.puSay = txt(this, 352, 140, '', 30, '#2b3a55', { fontStyle: 'bold' });
+      this.puZh = txt(this, 352, 182, '', 20, '#4f5a6b');
       c.add([bub, this.puSay, this.puZh, makeIcon(this, 'box', 260, 172, 1.4)]);
       const lis = this.add.container(1010, 172);
       const lg = this.add.graphics(); lg.fillStyle(0xe3f2fd, 1); lg.fillCircle(0, 0, 30);
@@ -4257,7 +4272,7 @@
         return { card, x: card.x };
       });
       this.puMsg = txt(this, 640, 600, '', 22, '#5d4037', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.puProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.puProg = txt(this, 985, 98, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.puMsg, this.puProg]);
       this.closeButton(c, 1080, 100, () => this.closeModal());
       this.puBoxBox = c;
@@ -4357,8 +4372,8 @@
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
       c.add(txt(this, 640, 98, 'Circuit 電路', 28, '#f57f17', { fontStyle: 'bold' }).setOrigin(0.5));
       const bub = this.add.graphics(); drawBubble(bub, 250, 125, 560, 80, 300);
-      this.ciSay = txt(this, 272, 136, '', 30, '#27384a', { fontStyle: 'bold' });
-      this.ciZh = txt(this, 272, 174, '', 18, '#6b7c8c');
+      this.ciSay = txt(this, 272, 136, '', 30, '#2b3a55', { fontStyle: 'bold' });
+      this.ciZh = txt(this, 272, 174, '', 18, '#4f5a6b');
       c.add([bub, this.ciSay, this.ciZh]);
       this.ciWire = this.add.graphics();
       this.ciBulb = this.add.graphics({ x: CIRC.bulb.x, y: CIRC.bulb.y });
@@ -4367,7 +4382,7 @@
       // 開關：點一下切換
       this.ciSw = this.add.container(CIRC.sw.x, CIRC.sw.y);
       this.ciSwG = this.add.graphics();
-      this.ciSwT = txt(this, 0, 34, '', 18, '#6b7c8c').setOrigin(0.5);
+      this.ciSwT = txt(this, 0, 34, '', 18, '#4f5a6b').setOrigin(0.5);
       this.ciSw.add([this.ciSwG, this.ciSwT]);
       this.ciSw.setSize(110, 80).setInteractive({ useHandCursor: true });
       this.ciSw.on('pointerdown', () => this.toggleSwitch());
@@ -4514,8 +4529,8 @@
     buildMusic() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
       c.add(txt(this, 640, 98, 'Music 樂器', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.muTitle = txt(this, 640, 150, 'Which one is broken?', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.muZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.muTitle = txt(this, 640, 150, 'Which one is broken?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.muZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.muMsg = txt(this, 640, 610, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.muTitle, this.muZh, this.muMsg]);
       this.muItems = INSTR.map((k, i) => {
@@ -4525,7 +4540,7 @@
         bg.lineStyle(3, 0xd1c4e9, 1); bg.strokeRoundedRect(-85, -95, 170, 190, 20);
         const ic = this.add.graphics({ y: -20 }).setScale(1.6); drawInstr(ic, k);
         const waves = this.add.graphics({ y: -20 });
-        const nm = txt(this, 0, 52, k, 26, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const nm = txt(this, 0, 52, k, 26, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const snd = txt(this, 0, -82, '', 22, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
         b.add([bg, ic, waves, nm, snd]);
         b.setSize(170, 190).setInteractive({ useHandCursor: true });
@@ -4599,7 +4614,7 @@
     buildFog() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xcfd8dc);
       c.add(txt(this, 640, 98, 'Fog 霧中找朋友', 28, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.fgTitle = txt(this, 640, 150, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fgTitle = txt(this, 640, 150, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.fgZh = txt(this, 640, 188, '', 20, '#546e7a').setOrigin(0.5);
       this.fgField = this.add.graphics();
       this.fgWaves = this.add.graphics();
@@ -4681,8 +4696,8 @@
     buildDrill() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfff8e1);
       c.add(txt(this, 640, 98, 'Drill Day 防災演練日', 28, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.drSay = txt(this, 640, 150, '', 32, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.drZh = txt(this, 640, 190, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.drSay = txt(this, 640, 150, '', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.drZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.drMsg = txt(this, 640, 612, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.drSay, this.drZh, this.drMsg]);
       // A：防災包，8 樣東西 2 排
@@ -4690,8 +4705,8 @@
         const card = this.add.container(355 + (i % 4) * 190, 300 + Math.floor(i / 4) * 150);
         const bg = this.add.graphics();
         const icon = this.add.graphics({ y: -14 }).setScale(1.4); drawBagItem(icon, it.k);
-        const name = txt(this, 0, 44, it.en, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 66, it.zh, 16, '#6b7c8c').setOrigin(0.5);
+        const name = txt(this, 0, 44, it.en, 20, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 66, it.zh, 16, '#4f5a6b').setOrigin(0.5);
         card.add([bg, icon, name, zh]);
         card.setSize(170, 136).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.toggleBag(i));
@@ -4844,14 +4859,14 @@
     buildRecycle() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xf1f8e9);
       c.add(txt(this, 640, 98, 'Recycle 回收與環境', 28, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.rcSay = txt(this, 640, 150, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.rcZh = txt(this, 640, 188, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.rcSay = txt(this, 640, 150, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.rcZh = txt(this, 640, 188, '', 20, '#4f5a6b').setOrigin(0.5);
       this.rcMsg = txt(this, 640, 612, '', 22, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.rcProg = txt(this, 985, 98, '', 22, '#6b7c8c').setOrigin(0.5);
+      this.rcProg = txt(this, 985, 98, '', 22, '#4f5a6b').setOrigin(0.5);
       c.add([this.rcSay, this.rcZh, this.rcMsg, this.rcProg]);
       // A：分類
       this.rcItem = this.add.graphics({ x: 640, y: 290 }).setScale(1.8);
-      this.rcItemName = txt(this, 640, 350, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.rcItemName = txt(this, 640, 350, '', 20, '#4f5a6b').setOrigin(0.5);
       c.add([this.rcItem, this.rcItemName]);
       this.rcBins = BINS3.map((w, i) => {
         const b = this.add.container(640 + (i - 1) * 230, 490);
@@ -5149,7 +5164,7 @@
         for (let i = 0; i < pts.length - 1; i++) g.lineBetween(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1]);
         spots.forEach((p, i) => { g.lineStyle(3, 0xffffff, 1); g.strokeRect(p.x - 26, p.y - 14, 52, 28); });
         this.rx(txt(this, sandX, 452, '沙地', 16, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
-        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#27384a', strokeThickness: 4 }).setOrigin(0.5)));
+        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#2b3a55', strokeThickness: 4 }).setOrigin(0.5)));
       };
       const opts = spots.map((p, i) => ({ draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-30, -6, 60, 16); g.lineStyle(2, 0x616161, 1); for (let x = -30; x < 30; x += 12) g.strokeRect(x, -6, 12, 8); }, label: '蓋在 ' + names[i] }));
       this.runQuiz('wall', [
@@ -5220,7 +5235,7 @@
         g.lineStyle(3, 0xe53935, 0.8); [24, 38].forEach((r) => { g.beginPath(); g.arc(520, 320, r, -0.7, 0.7, false); g.strokePath(); });
         g.fillStyle(0xffcc80, 1); g.fillRect(760, 300, 80, 60); g.fillStyle(0xe65100, 1); g.fillTriangle(750, 300, 850, 300, 800, 266);
         spots.forEach((p) => { g.lineStyle(3, 0x27384a, 0.6); g.strokeRect(p.x - 10, 280, 20, 80); });
-        spots.forEach((p) => this.rx(txt(this, p.x, 262, p.label, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)));
+        spots.forEach((p) => this.rx(txt(this, p.x, 262, p.label, 20, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5)));
         this.rx(txt(this, 485, 380, '吵的機器', 16, '#455a64').setOrigin(0.5)); this.rx(txt(this, 800, 380, '房子', 16, '#455a64').setOrigin(0.5));
       };
       const wallCard = (lbl) => ({ draw: (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-8, -26, 16, 52); }, label: '蓋在 ' + lbl });
@@ -5280,7 +5295,7 @@
         const hx = X(860);
         g.fillStyle(0xffcc80, 1); g.fillRect(hx - 22, 336, 44, 34); g.fillStyle(0xd84315, 1); g.fillTriangle(hx - 28, 338, hx + 28, 338, hx, 312);
         spots.forEach((p) => { g.lineStyle(3, 0xffffff, 1); g.strokeRect(p.x - 22, p.y - 16, 44, 32); g.fillStyle(0x37474f, 0.35); g.fillRect(p.x - 22, p.y - 16, 44, 32); });
-        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#27384a', strokeThickness: 4 }).setOrigin(0.5)));
+        spots.forEach((p, i) => this.rx(txt(this, p.x, p.y, names[i], 20, '#ffffff', { fontStyle: 'bold', stroke: '#2b3a55', strokeThickness: 4 }).setOrigin(0.5)));
       };
       const card = (draw) => spots.map((p, i) => ({ draw, label: '在 ' + names[i] }));
       const wall = (g) => { g.fillStyle(0x9e9e9e, 1); g.fillRect(-30, -6, 60, 16); g.lineStyle(2, 0x616161, 1); for (let x = -30; x < 30; x += 12) g.strokeRect(x, -6, 12, 8); };
@@ -5353,7 +5368,7 @@
         sg.fillStyle(0xeceff1, 1); sg.fillRoundedRect(-58, -62, 116, 104, 14);
         sg.lineStyle(4, RGROUPS.find((g2) => g2.k === st.g).color, 1); sg.strokeRoundedRect(-58, -62, 116, 104, 14);
         const icon = this.add.graphics({ y: -18 }).setScale(1.2); labIcon(icon, st.k);
-        const en = txt(this, 0, 24, st.en, 17, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const en = txt(this, 0, 24, st.en, 17, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 62, st.zh, 15, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 4 }).setOrigin(0.5);
         const lock = txt(this, 0, -18, '', 30, '#78909c', { fontStyle: 'bold' }).setOrigin(0.5);
         c.add([sg, icon, en, zh, lock]);
@@ -5377,8 +5392,8 @@
     buildLab() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfafafa);
       this.rxTitle = txt(this, 640, 98, '', 28, '#00695c', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.rxSay = txt(this, 640, 148, '', 28, '#27384a', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
-      this.rxZh = txt(this, 640, 186, '', 19, '#6b7c8c').setOrigin(0.5);
+      this.rxSay = txt(this, 640, 148, '', 28, '#2b3a55', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
+      this.rxZh = txt(this, 640, 186, '', 19, '#4f5a6b').setOrigin(0.5);
       this.rxMsg = txt(this, 640, 615, '', 21, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
       this.rxContent = this.add.container(0, 0);
       c.add([this.rxTitle, this.rxSay, this.rxZh, this.rxMsg, this.rxContent]);
@@ -5585,9 +5600,9 @@
           : prob >= 0 ? '你的生態園正在慢慢恢復，先來做練習題'
           : '你的生態園今天很平衡（平衡 ' + (s.eco.okDays || 0) + ' 天），來做練習題');
       q.board = this.rx(this.add.graphics());
-      q.nums = ['grass', 'rabbit', 'fox'].map((k, i) => this.rx(txt(this, 520, 250 + i * 70, '', 26, '#27384a', { fontStyle: 'bold' }).setOrigin(0, 0.5)));
+      q.nums = ['grass', 'rabbit', 'fox'].map((k, i) => this.rx(txt(this, 520, 250 + i * 70, '', 26, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0, 0.5)));
       q.icons = ['grass', 'rabbit', 'fox'].map((k, i) => { const g = this.add.graphics({ x: 330, y: 250 + i * 70 }); if (k === 'fox') foxIcon(g); else drawIcon(g, k); return this.rx(g); });
-      q.dayT = this.rx(txt(this, 820, 220, q.live ? 'My island 我的生態園' : 'Practice 練習', 18, '#6b7c8c').setOrigin(0.5));
+      q.dayT = this.rx(txt(this, 820, 220, q.live ? 'My island 我的生態園' : 'Practice 練習', 18, '#4f5a6b').setOrigin(0.5));
       q.cards = q.order.map((ai, j) => this.rxCard(340 + j * 200, 500, 180, 110, (card) => {
         card.add(txt(this, 0, 0, FOOD_ACTS[ai].zh, 20, '#37474f', { fontStyle: 'bold', align: 'center', wordWrap: { width: 160 } }).setOrigin(0.5));
       }, () => this.pickFood(j)));
@@ -5682,7 +5697,7 @@
       const q = this.xq = { w, tiles, used: {}, pos: 0, mistakes: 0, done: false };
       this.rxSet('Spell the word.', '拼出這個字：' + (zhOf(w) || ''), 'Tap the letters in order. 依序點字母；拼錯的會彈回去');
       const pic = this.add.graphics({ x: 640, y: 250 }).setScale(1.5); spellIcon(pic, w); this.rx(pic);
-      q.slots = w.split('').map((ch, i) => this.rx(txt(this, 640 + (i - (w.length - 1) / 2) * 56, 350, '_', 44, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5)));
+      q.slots = w.split('').map((ch, i) => this.rx(txt(this, 640 + (i - (w.length - 1) / 2) * 56, 350, '_', 44, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5)));
       q.tileObjs = tiles.map((ch, i) => this.rxCard(640 + (i - (tiles.length - 1) / 2) * 76, 470, 64, 72, (card) => card.add(txt(this, 0, 0, ch, 34, '#00695c', { fontStyle: 'bold' }).setOrigin(0.5)), () => this.pickLetter(i)));
       this.rxButton(1000, 560, 150, 52, 0x90a4ae, 'Skip 跳過', 20, () => { if (!q.done) { q.done = true; this.openLab('spell'); } });
       this.rxButton(280, 560, 70, 52, 0x4fc3f7, '♪', 26, () => speak(w));
@@ -5775,7 +5790,7 @@
 
     buildParent() {
       const c = this.modalBase(110, 120, 40, 1040, 640, 0xffffff);
-      this.paTitle = txt(this, 640, 78, '家長端', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.paTitle = txt(this, 640, 78, '家長端', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add(this.paTitle);
       this.paContent = this.add.container(0, 0);
       c.add(this.paContent);
@@ -5785,7 +5800,7 @@
 
     // 加進家長端內容，固定在畫面上
     pa(o) { const fix = (x) => { if (x.setScrollFactor) x.setScrollFactor(0); if (x.list) x.list.forEach(fix); }; fix(o); this.paContent.add(o); return o; }
-    paText(x, y, str, size, color, extra) { return this.pa(txt(this, x, y, str, size, color || '#27384a', extra)); }
+    paText(x, y, str, size, color, extra) { return this.pa(txt(this, x, y, str, size, color || '#2b3a55', extra)); }
 
     // 長按設定 3 秒才會進來；先出一題兩位數加法，用數字鍵輸入（不是選擇題，孩子亂猜進不來）
     openParentGate() {
@@ -5797,7 +5812,7 @@
       this.paContent.removeAll(true);
       this.paTitle.setText('家長確認');
       this.paBox.setVisible(true);
-      this.paText(640, 160, '請家長回答：' + a + ' + ' + b + ' = ?', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.paText(640, 160, '請家長回答：' + a + ' + ' + b + ' = ?', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.pgShow = this.paText(640, 220, '', 40, '#1e88e5', { fontStyle: 'bold' }).setOrigin(0.5);
       this.pgMsg = this.paText(640, 600, '', 20, '#c62828').setOrigin(0.5);
       ['1', '2', '3', '4', '5', '6', '7', '8', '9', '←', '0', 'OK'].forEach((k, i) => {
@@ -5843,7 +5858,7 @@
         '只有 2 個選項的科學題（例如熱水或冷水）不算進單字答對。',
         '所有資料只存在這台裝置的瀏覽器裡。',
       ];
-      lines.forEach((l, i) => this.paText(200, 200 + i * 44, l, 22, i >= 6 ? '#6b7c8c' : '#27384a'));
+      lines.forEach((l, i) => this.paText(200, 200 + i * 44, l, 22, i >= 6 ? '#4f5a6b' : '#2b3a55'));
     }
 
     parent_words() {
@@ -5853,13 +5868,13 @@
       const per = 9, pages = Math.max(1, Math.ceil(list.length / per));
       this.paWordPage = Math.min(this.paWordPage || 0, pages - 1);
       const head = ['單字', '中文', '答對', '答錯', '天數', '階段'], xs = [200, 360, 560, 660, 760, 860];
-      head.forEach((h, i) => this.paText(xs[i], 190, h, 20, '#6b7c8c', { fontStyle: 'bold' }));
+      head.forEach((h, i) => this.paText(xs[i], 190, h, 20, '#4f5a6b', { fontStyle: 'bold' }));
       if (!list.length) this.paText(200, 240, '還沒有作答紀錄。', 22);
       list.slice(this.paWordPage * per, this.paWordPage * per + per).forEach((w, r) => {
         const o = s.words[w], y = 232 + r * 40;
-        [w, zhOf(w), o.ok, o.miss, o.days, ['圖＋英＋中', '圖＋英', '只有英文'][o.stage]].forEach((v, i) => this.paText(xs[i], y, String(v), 20, i === 3 && o.miss > o.ok ? '#c62828' : '#27384a'));
+        [w, zhOf(w), o.ok, o.miss, o.days, ['圖＋英＋中', '圖＋英', '只有英文'][o.stage]].forEach((v, i) => this.paText(xs[i], y, String(v), 20, i === 3 && o.miss > o.ok ? '#c62828' : '#2b3a55'));
       });
-      this.paText(640, 610, '排序：答錯比答對多的字排前面　' + (this.paWordPage + 1) + ' / ' + pages, 18, '#6b7c8c').setOrigin(0.5);
+      this.paText(640, 610, '排序：答錯比答對多的字排前面　' + (this.paWordPage + 1) + ' / ' + pages, 18, '#4f5a6b').setOrigin(0.5);
       if (pages > 1) {
         this.pa(makeButton(this, 300, 610, 90, 44, 0x90a4ae, '◀', 22, () => { this.paWordPage = (this.paWordPage + pages - 1) % pages; this.openParent('words'); }));
         this.pa(makeButton(this, 980, 610, 90, 44, 0x90a4ae, '▶', 22, () => { this.paWordPage = (this.paWordPage + 1) % pages; this.openParent('words'); }));
@@ -5870,7 +5885,7 @@
       const t = this.s.touched || {};
       const rows = CURRICULUM.map((c) => ({ c, on: c.keys.some((k) => t[k]) }));
       const done = rows.filter((r) => r.on).length;
-      this.paText(200, 190, '接觸過的課綱條目：' + done + ' / ' + rows.length + '（✓ 表示玩過對應的機制）', 20, '#6b7c8c');
+      this.paText(200, 190, '接觸過的課綱條目：' + done + ' / ' + rows.length + '（✓ 表示玩過對應的機制）', 20, '#4f5a6b');
       rows.forEach((r, i) => {
         const col = i < 13 ? 0 : 1, row = i % 13;
         this.paText(200 + col * 480, 228 + row * 29, (r.on ? '✓ ' : '・ ') + r.c.name + '：' + r.c.codes, 16, r.on ? '#2e7d32' : '#9e9e9e');
@@ -5895,16 +5910,16 @@
     buildPick() {
       const c = this.modalBase(80, 200, 100, 880, 520, 0xfffaf0);
       this.pkTitle = txt(this, 640, 140, '', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.pkSay = txt(this, 640, 190, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.pkZh = txt(this, 640, 228, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.pkSay = txt(this, 640, 190, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.pkZh = txt(this, 640, 228, '', 20, '#4f5a6b').setOrigin(0.5);
       this.pkMsg = txt(this, 640, 585, '', 20, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.pkProg = txt(this, 960, 140, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.pkProg = txt(this, 960, 140, '', 20, '#4f5a6b').setOrigin(0.5);
       c.add([this.pkTitle, this.pkSay, this.pkZh, this.pkMsg, this.pkProg]);
       this.pkCards = [0, 1, 2, 3].map((i) => {
         const card = this.add.container(640 + (i - 1.5) * 190, 400);
         const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-82, -110, 164, 220, 20); bg.lineStyle(4, 0xce93d8, 1); bg.strokeRoundedRect(-82, -110, 164, 220, 20);
         const pic = this.add.graphics({ y: -10 }).setScale(1.6);
-        const zh = txt(this, 0, 90, '', 18, '#6b7c8c').setOrigin(0.5);
+        const zh = txt(this, 0, 90, '', 18, '#4f5a6b').setOrigin(0.5);
         card.add([bg, pic, zh]);
         card.setSize(164, 220).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickPick(i));
@@ -6014,14 +6029,14 @@
     buildDecorShop() {
       const c = this.modalBase(80, 200, 90, 880, 540, 0xfffaf0);
       c.add(txt(this, 640, 128, 'Decor 裝飾', 30, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.dcSub = txt(this, 640, 170, '', 19, '#6b7c8c').setOrigin(0.5);
+      this.dcSub = txt(this, 640, 170, '', 19, '#4f5a6b').setOrigin(0.5);
       this.dcMsg = txt(this, 640, 600, '', 20, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.dcSub, this.dcMsg]);
       this.dcCards = DECOR.map((d, i) => {
         const card = this.add.container(370 + (i % 3) * 270, 280 + Math.floor(i / 3) * 190);
         const bg = this.add.graphics();
         const pic = this.add.graphics({ y: -6 }).setScale(0.9); drawDecor(pic, d.k);
-        const name = txt(this, 0, 42, d.zh + ' ' + d.en, 20, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+        const name = txt(this, 0, 42, d.zh + ' ' + d.en, 20, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const info = txt(this, 0, 68, '', 17, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
         card.add([bg, pic, name, info]);
         card.setSize(240, 170).setInteractive({ useHandCursor: true });
@@ -6103,8 +6118,8 @@
     buildFix() {
       const c = this.modalBase(80, 230, 110, 820, 500, 0xfffaf0);
       this.fxTitle = txt(this, 640, 140, '', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.fxSay = txt(this, 640, 190, '', 30, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-      this.fxZh = txt(this, 640, 228, '', 20, '#6b7c8c').setOrigin(0.5);
+      this.fxSay = txt(this, 640, 190, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.fxZh = txt(this, 640, 228, '', 20, '#4f5a6b').setOrigin(0.5);
       this.fxPic = this.add.graphics({ x: 640, y: 300 }).setScale(1.2);
       this.fxMsg = txt(this, 640, 575, '', 20, '#c62828', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
       c.add([this.fxTitle, this.fxSay, this.fxZh, this.fxPic, this.fxMsg]);
@@ -6114,8 +6129,8 @@
         bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-72, -70, 144, 140, 18);
         bg.lineStyle(4, 0xbcaaa4, 1); bg.strokeRoundedRect(-72, -70, 144, 140, 18);
         const pic = this.add.graphics({ y: -16 }).setScale(1.3); drawMaterial(pic, m);
-        const en = txt(this, 0, 38, m, 24, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
-        const zh = txt(this, 0, 60, '', 16, '#6b7c8c').setOrigin(0.5);
+        const en = txt(this, 0, 38, m, 24, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const zh = txt(this, 0, 60, '', 16, '#4f5a6b').setOrigin(0.5);
         card.add([bg, pic, en, zh]);
         card.setSize(144, 140).setInteractive({ useHandCursor: true });
         card.on('pointerdown', () => this.pickMaterial(i));
@@ -6226,9 +6241,8 @@
       this.wqLens.setVisible(st >= 2 && !q.reveal);
       this.wqCards.forEach((c, i) => {
         const k = q.order[i];
-        c.bg.clear();
-        c.bg.fillStyle(0xffffff, 1); c.bg.fillRoundedRect(-85, -105, 170, 210, 24);
-        c.bg.lineStyle(4, 0xb3d4ef, 1); c.bg.strokeRoundedRect(-85, -105, 170, 210, 24);
+        drawStickerCard(c.bg, 170, 210);
+        c.card.setAngle([-2.5, 1.5, -1, 2.5][i]);
         c.icon.setVisible(showIcon); drawIcon(c.icon, k);
         c.en.setText(k).setY(showIcon ? 42 : 0);
         c.zh.setText(zh ? LIB.find((e) => e.k === k).zh : '').setY(showIcon ? 78 : 36);
@@ -6246,7 +6260,7 @@
         if (!q.recorded) L.answer(this.s.words, k, { day: this.s.day, options: 4, firstTry: q.tries === 0, peeked: q.peeked });
         this.s.askedDay = this.s.day;
         this.touch('weather');
-        c.bg.lineStyle(6, 0x43a047, 1); c.bg.strokeRoundedRect(-85, -105, 170, 210, 24);
+        c.bg.lineStyle(6, 0x2f8a5b, 1); c.bg.strokeRoundedRect(-75, -95, 150, 190, 20);
         this.tweens.add({ targets: c.card, scale: 1.12, yoyo: true, duration: 200 });
         speak(k);
         this.time.delayedCall(BOT ? 50 : 800, () => {
@@ -6285,7 +6299,7 @@
         for (let j = 0; j < 10; j++) {
           const b = this.add.container(0, 480);
           const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-36, -38, 72, 76, 14); bg.lineStyle(4, 0xffc46b, 1); bg.strokeRoundedRect(-36, -38, 72, 76, 14);
-          const t = txt(this, 0, 0, '', 40, '#27384a', { fontStyle: 'bold' }).setOrigin(0.5);
+          const t = txt(this, 0, 0, '', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
           b.add([bg, t]);
           b.setSize(72, 76).setInteractive({ useHandCursor: true });
           b.on('pointerdown', () => this.pickTile(j));
@@ -6615,14 +6629,17 @@
         slot.e = e || null;
         slot.card.setVisible(!!e);
         if (!e) return;
-        const { bg, icon, name } = slot;
+        const { bg, icon, img, name } = slot;
         drawIcon(icon, e.k);
         const got = !!this.s.lib[e.k];
-        bg.clear();
-        bg.fillStyle(got ? 0xffffff : 0xe3dccf, 1); bg.fillRoundedRect(-110, -84, 220, 168, 22);
-        bg.lineStyle(3, got ? 0xffc46b : 0xcfc6b5, 1); bg.strokeRoundedRect(-110, -84, 220, 168, 22);
-        icon.setVisible(got); name.setText(got ? e.en : '?');
-        name.setColor(got ? '#27384a' : '#9a917f');
+        // 收集到的是一張貼紙卡；還沒收集的是空著的淡色格子（等著貼）
+        drawStickerCard(bg, 220, 168, got ? 0xfdf9f0 : 0xebe3d1);
+        bg.setAlpha(got ? 1 : 0.7);
+        const tex = 'st-' + e.k, has = got && this.textures.exists(tex);
+        icon.setVisible(got && !has); img.setVisible(has);
+        if (has) img.setTexture(tex).setDisplaySize(112, 112);
+        name.setText(got ? e.en : '?');
+        name.setColor(got ? '#2b3a55' : '#9a917f');
       });
     }
 
