@@ -1442,30 +1442,36 @@
   // ---------- 標題畫面 ----------
   class Title extends Phaser.Scene {
     constructor() { super('Title'); }
+    // 貼紙在標題畫面就先載入（貼圖是全域共用的，島嶼場景直接用）
+    preload() { ART_KEYS.forEach((k) => { if (!this.textures.exists('st-' + k)) this.load.image('st-' + k, 'art/' + k + '.png'); }); }
     create() {
       if (BOT) { this.scene.start('Island'); return; }
       const g = this.add.graphics();
       g.fillGradientStyle(0x6dc0f2, 0x6dc0f2, 0xd9f1ff, 0xd9f1ff, 1); g.fillRect(0, 0, W, H);
-      g.fillStyle(0xffffff, 0.9);
-      [[200, 150, 1], [900, 110, 1.3], [1100, 260, 0.8], [520, 250, 0.9]].forEach(([x, y, s]) => {
-        g.fillCircle(x, y, 34 * s); g.fillCircle(x + 38 * s, y - 14 * s, 42 * s); g.fillCircle(x + 80 * s, y, 32 * s); g.fillRoundedRect(x - 34 * s, y, 148 * s, 34 * s, 17 * s);
+      [[120, 110, 0.9], [1010, 90, 1.2], [1110, 300, 0.7], [170, 330, 0.7]].forEach(([x, y, s]) => {
+        inkBlob(g, [[x, y, 34 * s], [x + 38 * s, y - 14 * s, 42 * s], [x + 80 * s, y, 32 * s]], [[x - 34 * s, y, 148 * s, 34 * s, 17 * s]], 0xffffff);
       });
-      g.fillStyle(0x6bbf59, 1); g.fillEllipse(640, 600, 760, 220);
-      g.fillStyle(0x8d6e4a, 1); g.fillEllipse(640, 660, 560, 120);
-      const t1 = txt(this, W / 2, 190, 'Floating Isle Diary', 80, '#27527a', { fontStyle: 'bold' }).setOrigin(0.5);
-      txt(this, W / 2, 275, '浮島日記', 44, '#27527a').setOrigin(0.5);
-      this.tweens.add({ targets: t1, y: 200, yoyo: true, repeat: -1, duration: 1800, ease: 'Sine.easeInOut' });
+      // 墨線浮島，上面站著兔子和 Pip
+      g.lineStyle(3, INK, 1);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(640, 668, 600, 130); g.strokeEllipse(640, 668, 600, 130);
+      g.fillStyle(0x6bbf59, 1); g.fillEllipse(640, 600, 780, 200); g.strokeEllipse(640, 600, 780, 200);
+      g.fillStyle(0x7ccb69, 1); g.fillEllipse(640, 588, 690, 160);
+      g.fillStyle(0x3b2f1e, 0.16); g.fillEllipse(366, 636, 110, 20); g.fillEllipse(906, 636, 110, 20);
+      this.add.image(372, 566, 'st-pip').setDisplaySize(160, 160);
+      this.add.image(906, 552, 'st-rabbit-body').setDisplaySize(180, 180);
+      // 標題：手帳的一張紙，兩角貼紙膠帶
+      const card = this.add.container(W / 2, 196);
+      const cg = this.add.graphics(); stickerPill(cg, 820, 200, 0xfdf9f0, 28, true);
+      card.add([cg, washiTape(this, -380, -88, 170, 0xf2b84b, -14), washiTape(this, 380, -88, 150, 0x7fc4dc, 12),
+        txt(this, 0, -24, 'Floating Isle Diary', 74, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5),
+        txt(this, 0, 52, '浮島日記', 40, '#4f5a6b').setOrigin(0.5)]);
+      card.setAngle(-1.5);
+      this.tweens.add({ targets: card, y: 206, yoyo: true, repeat: -1, duration: 1800, ease: 'Sine.easeInOut' });
 
-      const btn = this.add.container(W / 2, 430);
-      const bg = this.add.graphics();
-      bg.fillStyle(0x000000, 0.15); bg.fillRoundedRect(-140, -44, 280, 100, 50);
-      bg.fillStyle(0xff9f43, 1); bg.fillRoundedRect(-140, -50, 280, 100, 50);
-      btn.add([bg, txt(this, 0, 0, 'Start', 52, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5)]);
-      btn.setSize(280, 100).setInteractive({ useHandCursor: true });
-      this.tweens.add({ targets: btn, scale: 1.06, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
       const go = () => { speak('hello'); this.scene.start('Island'); };
-      btn.on('pointerdown', go);
-      txt(this, W / 2, 520, '點一下開始', 24, '#27527a').setOrigin(0.5);
+      const btn = makeButton(this, W / 2, 410, 280, 100, 0x2f8a5b, 'Start', 52, go);
+      this.tweens.add({ targets: btn, scale: 1.06, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
+      txt(this, W / 2, 492, '點一下開始', 24, '#2b3a55').setOrigin(0.5);
     }
   }
 
@@ -1473,7 +1479,7 @@
   class Island extends Phaser.Scene {
     preload() {
       // 貼紙是 tools/art/stickers.js 預先輸出的 320px PNG（2 倍解析度），顯示時縮小
-      ART_KEYS.forEach((k) => this.load.image('st-' + k, 'art/' + k + '.png'));
+      ART_KEYS.forEach((k) => { if (!this.textures.exists('st-' + k)) this.load.image('st-' + k, 'art/' + k + '.png'); });
     }
 
     constructor() { super('Island'); }
@@ -2646,27 +2652,33 @@
       const c = this.add.container(0, 0).setDepth(140).setVisible(false);
       const bg = this.add.graphics();
       bg.fillGradientStyle(0x6dc0f2, 0x6dc0f2, 0xd9f1ff, 0xd9f1ff, 1); bg.fillRect(0, 0, W, H);
-      bg.fillStyle(0xffffff, 0.8);
-      [[120, 120, 0.8], [980, 110, 1], [600, 640, 0.7], [1150, 620, 0.6]].forEach(([x, y, k]) => { bg.fillCircle(x, y, 30 * k); bg.fillCircle(x + 34 * k, y - 12 * k, 38 * k); bg.fillCircle(x + 70 * k, y, 28 * k); });
+      [[120, 150, 0.8], [1010, 170, 0.9], [600, 640, 0.7], [1150, 630, 0.6]].forEach(([x, y, k]) => inkBlob(bg, [[x, y, 30 * k], [x + 34 * k, y - 12 * k, 38 * k], [x + 70 * k, y, 28 * k]], null, 0xffffff));
       c.add(bg);
       c.add(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0).setInteractive()); // 擋住下面的點擊
-      c.add(txt(this, W / 2, 62, 'Where do you want to go?', 38, '#27527a', { fontStyle: 'bold' }).setOrigin(0.5));
-      this.mapZh = txt(this, W / 2, 108, '要去哪一座島？', 24, '#27527a').setOrigin(0.5);
-      this.mapDay = txt(this, 60, 30, '', 22, '#27527a', { fontStyle: 'bold' });
-      this.mapDust = txt(this, W - 60, 30, '', 22, '#27527a', { fontStyle: 'bold' }).setOrigin(1, 0);
+      // 上方：問句寫在一張紙上；日期、星砂是左右兩張小貼紙
+      const head = this.add.graphics({ x: W / 2, y: 82 }); stickerPill(head, 620, 116, 0xfdf9f0, 24, true);
+      const tag = (x, w) => { const t = this.add.graphics({ x, y: 44 }); stickerPill(t, w, 56, 0xfdf9f0); return t; };
+      c.add([head, washiTape(this, W / 2 - 290, 34, 120, 0xf2b84b, -20), tag(150, 230), tag(W - 120, 150)]);
+      c.add(txt(this, W / 2, 64, 'Where do you want to go?', 38, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5));
+      this.mapZh = txt(this, W / 2, 110, '要去哪一座島？', 24, '#4f5a6b').setOrigin(0.5);
+      this.mapDay = txt(this, 150, 44, '', 22, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
+      this.mapDust = txt(this, W - 120, 44, '', 24, '#2b3a55', { fontStyle: 'bold', fontFamily: FONT_EN }).setOrigin(0.5);
       c.add([this.mapZh, this.mapDay, this.mapDust]);
       this.mapIsles = MAP.map((m) => {
         const isle = this.add.container(m.x, m.y);
         const g = this.add.graphics();
-        g.fillStyle(0x000000, 0.08); g.fillEllipse(0, 70, 170, 26);
-        g.fillStyle(0x7a5a3a, 1); g.fillEllipse(0, 34, 170, 56); g.fillTriangle(-60, 40, 60, 40, 0, 88);
-        g.fillStyle(m.color, 1); g.fillEllipse(0, 18, 190, 64);
+        g.fillStyle(0x3b2f1e, 0.10); g.fillEllipse(0, 96, 150, 22);
+        // 墨線浮島：先畫墨色大一圈的形狀，再畫本體（土和三角形連在一起有一整圈輪廓）
+        g.fillStyle(INK, 1); g.fillEllipse(0, 34, 176, 62); g.fillTriangle(-64, 38, 64, 38, 0, 93);
+        g.fillStyle(0x7a5a3a, 1); g.fillEllipse(0, 34, 170, 56); g.fillTriangle(-58, 40, 58, 40, 0, 86);
+        g.fillStyle(m.color, 1); g.fillEllipse(0, 18, 190, 64); g.lineStyle(3, INK, 1); g.strokeEllipse(0, 18, 190, 64);
         const icon = this.add.graphics({ y: -10 }).setScale(1.6);
         if (m.icon === 'moon') drawMoon(icon, 2); else drawIcon(icon, m.icon);
-        const name = txt(this, 0, 104, m.en + ' ' + m.zh, 22, '#2b3a55', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
-        const need = txt(this, 0, 134, '', 17, '#455a64', { stroke: '#ffffff', strokeThickness: 4, align: 'center', wordWrap: { width: 200 } }).setOrigin(0.5, 0);
-        const here = txt(this, 0, -66, '', 18, '#e65100', { fontStyle: 'bold', stroke: '#ffffff', strokeThickness: 4 }).setOrigin(0.5);
-        isle.add([g, icon, name, need, here]);
+        const name = txt(this, 0, 112, m.en + ' ' + m.zh, 21, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const nameBg = this.add.graphics({ y: 112 }); stickerPill(nameBg, name.width + 34, 46, 0xfdf9f0);
+        const need = txt(this, 0, 140, '', 17, '#2b3a55', { stroke: '#ffffff', strokeThickness: 4, align: 'center', wordWrap: { width: 200 } }).setOrigin(0.5, 0);
+        const here = txt(this, 0, -66, '', 19, '#c2185b', { fontStyle: 'bold', fontFamily: FONT_EN, stroke: '#ffffff', strokeThickness: 5 }).setOrigin(0.5);
+        isle.add([g, icon, nameBg, name, need, here]);
         isle.setSize(210, 200).setInteractive({ useHandCursor: true });
         isle.on('pointerdown', () => this.pickIsle(m.z));
         c.add(isle);
