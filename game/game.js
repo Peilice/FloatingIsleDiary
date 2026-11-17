@@ -2823,7 +2823,7 @@
     goZone(z) {
       if (this.paused() || this.zone === z) return;
       const why = this.lockReason(z);
-      if (why) { this.floatText(z === 'forest' || z === 'research' ? 1060 : 260, z === 'research' ? 200 : 330, why, '#37474f', true); return; }
+      if (why) { this.lockTip(z === 'forest' || z === 'research' ? 1060 : 260, z === 'research' ? 200 : 330, z, why); return; }
       const from = this.zone;
       this.zone = z;
       // 平移時兩個區域都要畫，結束後只留目前的區域
@@ -2851,6 +2851,31 @@
       if (z === 'cave') return s.caveOpen ? null : (!s.beachOpen ? '先開放海灘' : '圖鑑再 ' + Math.max(0, CAVE_LIB - this.libCount()) + ' 項');
       if (z === 'lighthouse') return s.lightOpen ? null : (!s.caveOpen ? '先開放洞穴' : '再修好 ' + Math.max(0, LIGHT_NEED - this.fixedCount()) + ' 個設施（★ 修理）');
       return this.researchOpen() ? null : '要先開放其他 5 座島';
+    }
+
+    // 圖鑑還差幾項時，告訴玩家去哪裡補（依目前最容易補的順序）
+    libHint() {
+      const s = this.s, miss = (e) => !s.lib[e.k];
+      if (s.forestOpen && LIB.some((e) => e.kind === 'animal' && miss(e))) return '去森林蓋棲地，讓新的動物住進來';
+      if (LIB.some((e) => e.kind === 'plant' && miss(e))) return '種沒種過的種子（種子袋可以買新種子）';
+      const rare = LIB.find((e) => e.hint && miss(e) && (e.kind === 'bug' || e.kind === 'sky'));
+      if (rare) return rare.hint;
+      if (LIB.some((e) => e.kind === 'weather' && miss(e))) return '不同的天氣都會記進圖鑑，多玩幾天';
+      return '打開圖鑑看看還缺什麼';
+    }
+
+    // 還不能去的島：除了還差什麼，圖鑑不夠時再加一行「去哪裡補」，停留久一點
+    lockTip(x, y, z, why) {
+      const needLib = (z === 'cave' && this.s.beachOpen) || (z === 'beach' && this.libCount() < BEACH_LIB);
+      if (!needLib) { this.floatText(x, y, why, '#c62828', true); return; }
+      if (this.lockTipObj) this.lockTipObj.destroy();
+      const hint = this.libHint();
+      const t1 = txt(this, 0, -16, why, 26, '#c62828').setOrigin(0.5), t2 = txt(this, 0, 18, hint, 20, '#2b3a55').setOrigin(0.5);
+      const w = Math.max(t1.width, t2.width) + 48;
+      x = Phaser.Math.Clamp(x, w / 2 + 16, W - w / 2 - 16);
+      const bg = this.add.graphics(); paperCard(bg, -w / 2, -42, w, 84, 18, 0xfdf9f0, 0xf2b84b);
+      const c = this.lockTipObj = this.add.container(x, y, [bg, t1, t2]).setDepth(150).setScrollFactor(0);   // 地圖是 140，要蓋在地圖上
+      this.tweens.add({ targets: c, alpha: 0, delay: 2600, duration: 400, onComplete: () => { c.destroy(); if (this.lockTipObj === c) this.lockTipObj = null; } });
     }
 
     // 直接跳到某座島（從地圖選島時，不做平移動畫）
@@ -2936,7 +2961,7 @@
       if (why) {
         // 還沒開放：島晃一下，再說一次還差什麼
         this.tweens.add({ targets: it.isle, angle: 4, yoyo: true, repeat: 2, duration: 70, onComplete: () => it.isle.setAngle(0) });
-        this.floatText(it.m.x, it.m.y - 90, why, '#c62828', true);
+        this.lockTip(it.m.x, it.m.y - 90, z, why);
         return;
       }
       speak(it.m.en);
