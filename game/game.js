@@ -1345,6 +1345,18 @@
     g.fillStyle(fill, 1); g.fillRoundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, Math.max(4, r - 5));
     g.lineStyle(3, INK, 1); g.strokeRoundedRect(-w / 2 + 5, -h / 2 + 5, w - 10, h - 10, Math.max(4, r - 5));
   }
+  // 視窗裡的卡片（取代舊的白底淡色框）：白色切割邊＋卡片紙＋墨線；
+  // ring 是原本的描邊色，只有鮮明的顏色（選到的橘、冷熱的紅藍、對錯的綠紅）才畫成外圈，淡色裝飾框一律換成墨線
+  function paperCard(g, x, y, w, h, r, fill, ring) {
+    const lum = (c) => (c >> 16 & 255) * 0.3 + (c >> 8 & 255) * 0.59 + (c & 255) * 0.11;
+    const sat = (c) => { const a = [c >> 16 & 255, c >> 8 & 255, c & 255]; const mx = Math.max(...a); return mx ? (mx - Math.min(...a)) / mx : 0; };
+    const strong = ring != null && lum(ring) < 175 && sat(ring) > 0.35;
+    const e = 5, ir = Math.max(4, r - 4);
+    g.fillStyle(0x3b2f1e, 0.12); g.fillRoundedRect(x, y + 5, w, h, r);
+    g.fillStyle(strong ? ring : 0xffffff, 1); g.fillRoundedRect(x, y, w, h, r);
+    g.fillStyle(fill === 0xffffff ? 0xfdf9f0 : fill, 1); g.fillRoundedRect(x + e, y + e, w - e * 2, h - e * 2, ir);
+    g.lineStyle(3, INK, 1); g.strokeRoundedRect(x + e, y + e, w - e * 2, h - e * 2, ir);
+  }
   function stickerDisc(g, r, fill) {
     g.fillStyle(0x3b2f1e, 0.16); g.fillCircle(0, 5, r);
     g.fillStyle(0xffffff, 1); g.fillCircle(0, 0, r);
@@ -2809,8 +2821,7 @@
       this.bmCards = [0, 1, 2].map((i) => {
         const card = this.add.container(640 + (i - 1) * 220, 430);
         const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -110, 190, 220, 24);
-        bg.lineStyle(4, 0xa5d6a7, 1); bg.strokeRoundedRect(-95, -110, 190, 220, 24);
+        paperCard(bg, -95, -110, 190, 220, 24, 0xffffff, 0xa5d6a7);
         const icon = makeIcon(this, 'pond', 0, -30, 2);
         const en = txt(this, 0, 52, '', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 86, '', 20, '#4f5a6b').setOrigin(0.5);
@@ -3002,8 +3013,7 @@
       this.sqCards.forEach((c, i) => {
         const k = q.order[i];
         c.bg.clear();
-        c.bg.fillStyle(0xffffff, 1); c.bg.fillRoundedRect(-85, -100, 170, 200, 24);
-        c.bg.lineStyle(4, 0xffcc80, 1); c.bg.strokeRoundedRect(-85, -100, 170, 200, 24);
+        paperCard(c.bg, -85, -100, 170, 200, 24, 0xffffff, 0xffcc80);
         c.icon.setVisible(showIcon); drawIcon(c.icon, k);
         c.en.setText(k).setY(showIcon ? 44 : 0);
         c.zh.setText(zh ? ANIMALS[k].zh : '').setY(showIcon ? 76 : 34);
@@ -3454,8 +3464,7 @@
       this.ivCards.forEach((c, i) => {
         const d = WEEK[i], today = d === weekday(this.s.day);
         c.bg.clear();
-        c.bg.fillStyle(today ? 0xfff3e0 : 0xffffff, 1); c.bg.fillRoundedRect(-62, -60, 124, 120, 18);
-        c.bg.lineStyle(4, today ? 0xffb74d : 0xce93d8, 1); c.bg.strokeRoundedRect(-62, -60, 124, 120, 18);
+        paperCard(c.bg, -62, -60, 124, 120, 18, today ? 0xfff3e0 : 0xffffff, today ? 0xffb74d : 0xce93d8);
         c.zh.setText(this.subs() && (st === 0 || q.reveal) ? zhOf(d) : '');
         c.card.setAlpha(q.wrong[d] ? 0.35 : 1);
       });
@@ -3573,8 +3582,7 @@
       this.teaPots = ['hot', 'cold'].map((k, i) => {
         const p = this.add.container(340, 330 + i * 160);
         const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-95, -65, 190, 130, 20);
-        bg.lineStyle(4, k === 'hot' ? 0xef5350 : 0x42a5f5, 1); bg.strokeRoundedRect(-95, -65, 190, 130, 20);
+        paperCard(bg, -95, -65, 190, 130, 20, 0xffffff, k === 'hot' ? 0xef5350 : 0x42a5f5);
         const pot = this.add.graphics({ x: -30, y: 0 });
         pot.fillStyle(k === 'hot' ? 0xef5350 : 0x42a5f5, 1); pot.fillRoundedRect(-26, -22, 52, 46, 12); pot.fillTriangle(24, -10, 44, -24, 26, 6);
         pot.lineStyle(4, 0x555555, 1); pot.beginPath(); pot.arc(-28, 0, 12, Math.PI * 0.5, Math.PI * 1.5, false); pot.strokePath();
@@ -4448,8 +4456,7 @@
       u.fillStyle(0x90a4ae, 1); u.fillRect(-12, 14, 24, 14);
       // 開關
       const sg = this.ciSwG; sg.clear();
-      sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-50, -24, 100, 48, 12);
-      sg.lineStyle(4, q.check && !q.sw ? 0xe53935 : 0x90a4ae, 1); sg.strokeRoundedRect(-50, -24, 100, 48, 12);
+      paperCard(sg, -50, -24, 100, 48, 12, 0xffffff, q.check && !q.sw ? 0xe53935 : 0x90a4ae);
       sg.fillStyle(0x546e7a, 1); sg.fillCircle(-30, 0, 6); sg.fillCircle(30, 0, 6);
       sg.lineStyle(6, 0x546e7a, 1);
       if (q.sw) sg.lineBetween(-30, 0, 30, 0); else sg.lineBetween(-30, 0, 22, -20);
@@ -4461,15 +4468,13 @@
         if (!has) return;
         const m = q.gaps[i];
         gp.bg.clear();
-        gp.bg.fillStyle(0xfffaf0, 1); gp.bg.fillRoundedRect(-48, -36, 96, 72, 12);
-        gp.bg.lineStyle(4, q.check ? (chk[i] ? 0x43a047 : 0xe53935) : 0xffb74d, 1); gp.bg.strokeRoundedRect(-48, -36, 96, 72, 12);
+        paperCard(gp.bg, -48, -36, 96, 72, 12, 0xfffaf0, q.check ? (chk[i] ? 0x43a047 : 0xe53935) : 0xffb74d);
         gp.m.clear(); if (m) drawPart(gp.m, m);
       });
       this.ciTray.forEach((t) => {
         const used = q.gaps.includes(t.k);
         t.bg.clear();
-        t.bg.fillStyle(0xffffff, 1); t.bg.fillRoundedRect(-100, -38, 200, 76, 14);
-        t.bg.lineStyle(q.sel === t.k ? 5 : 3, q.sel === t.k ? 0xff9800 : 0xd7ccc8, 1); t.bg.strokeRoundedRect(-100, -38, 200, 76, 14);
+        paperCard(t.bg, -100, -38, 200, 76, 14, 0xffffff, q.sel === t.k ? 0xff9800 : 0xd7ccc8);
         t.b.setAlpha(used ? 0.35 : 1);
       });
       if (!q.check) this.ciMsg.setText('');
@@ -4536,8 +4541,7 @@
       this.muItems = INSTR.map((k, i) => {
         const x = 640 + (i - 1.5) * 200;
         const b = this.add.container(x, 360);
-        const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-85, -95, 170, 190, 20);
-        bg.lineStyle(3, 0xd1c4e9, 1); bg.strokeRoundedRect(-85, -95, 170, 190, 20);
+        const bg = this.add.graphics(); paperCard(bg, -85, -95, 170, 190, 20, 0xffffff, 0xd1c4e9);
         const ic = this.add.graphics({ y: -20 }).setScale(1.6); drawInstr(ic, k);
         const waves = this.add.graphics({ y: -20 });
         const nm = txt(this, 0, 52, k, 26, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -4721,8 +4725,7 @@
       this.drCards = DRILL.map((d, i) => {
         const card = this.add.container(640 + (i - 1) * 230, 390);
         const bg = this.add.graphics();
-        bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-100, -110, 200, 220, 22);
-        bg.lineStyle(4, 0xffcc80, 1); bg.strokeRoundedRect(-100, -110, 200, 220, 22);
+        paperCard(bg, -100, -110, 200, 220, 22, 0xffffff, 0xffcc80);
         const pic = this.add.graphics().setScale(1.5);
         card.add([bg, pic]);
         card.setSize(200, 220).setInteractive({ useHandCursor: true });
@@ -4752,8 +4755,7 @@
         b.card.setVisible(bag);
         b.bg.clear();
         const on = !!q.sel[i];
-        b.bg.fillStyle(on ? 0xfff3e0 : 0xffffff, 1); b.bg.fillRoundedRect(-85, -68, 170, 136, 18);
-        b.bg.lineStyle(on ? 6 : 3, on ? 0xff9800 : 0xd7ccc8, 1); b.bg.strokeRoundedRect(-85, -68, 170, 136, 18);
+        paperCard(b.bg, -85, -68, 170, 136, 18, on ? 0xfff3e0 : 0xffffff, on ? 0xff9800 : 0xd7ccc8);
       });
       this.bagPack.setVisible(bag);
       this.bagSkip.setVisible(bag);
@@ -5406,8 +5408,7 @@
     rxButton(x, y, w, h, color, label, size, fn) { return this.rx(makeButton(this, x, y, w, h, color, label, size, fn)); }
     rxCard(x, y, w, h, draw, fn) {
       const card = this.add.container(x, y);
-      const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-w / 2, -h / 2, w, h, 18);
-      bg.lineStyle(4, 0xb2dfdb, 1); bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 18);
+      const bg = this.add.graphics(); paperCard(bg, -w / 2, -h / 2, w, h, 18, 0xffffff, 0xb2dfdb);
       card.add(bg);
       draw(card);
       card.setSize(w, h).setInteractive({ useHandCursor: true });
@@ -6063,8 +6064,7 @@
       this.dcCards.forEach((c) => {
         const own = !!s.decor[c.d.k], open = n >= c.d.lib;
         c.bg.clear();
-        c.bg.fillStyle(own ? 0xe8f5e9 : (open ? 0xffffff : 0xeeeeee), 1); c.bg.fillRoundedRect(-120, -85, 240, 170, 18);
-        c.bg.lineStyle(3, own ? 0x66bb6a : 0xd7ccc8, 1); c.bg.strokeRoundedRect(-120, -85, 240, 170, 18);
+        paperCard(c.bg, -120, -85, 240, 170, 18, own ? 0xe8f5e9 : (open ? 0xffffff : 0xeeeeee), own ? 0x66bb6a : 0xd7ccc8);
         c.card.setAlpha(open || own ? 1 : 0.5);
         c.info.setText(own ? '已經擺在草地上' : (open ? '★' + c.d.price : '圖鑑 ' + c.d.lib + ' 項才能買'));
         c.info.setColor(own ? '#2e7d32' : (open ? '#e65100' : '#757575'));
@@ -6298,7 +6298,7 @@
         this.dyTiles = [];
         for (let j = 0; j < 10; j++) {
           const b = this.add.container(0, 480);
-          const bg = this.add.graphics(); bg.fillStyle(0xffffff, 1); bg.fillRoundedRect(-36, -38, 72, 76, 14); bg.lineStyle(4, 0xffc46b, 1); bg.strokeRoundedRect(-36, -38, 72, 76, 14);
+          const bg = this.add.graphics(); paperCard(bg, -36, -38, 72, 76, 14, 0xffffff, 0xffc46b);
           const t = txt(this, 0, 0, '', 40, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
           b.add([bg, t]);
           b.setSize(72, 76).setInteractive({ useHandCursor: true });
@@ -6344,8 +6344,7 @@
         const w = q.options[i];
         o.b.setVisible(!q.done && !q.spell);
         o.bg.clear();
-        o.bg.fillStyle(0xffffff, 1); o.bg.fillRoundedRect(-110, -48, 220, 96, 24);
-        o.bg.lineStyle(4, 0xffc46b, 1); o.bg.strokeRoundedRect(-110, -48, 220, 96, 24);
+        paperCard(o.bg, -110, -48, 220, 96, 24, 0xffffff, 0xffc46b);
         const zh = st === 0 && this.subs();
         o.en.setText(w).setY(zh ? -10 : 0);
         o.zh.setText(zh ? zhOf(w) : '');
