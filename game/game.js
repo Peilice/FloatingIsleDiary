@@ -753,7 +753,8 @@
     }
   }
   // 水果：同一種水果有不同顏色（市集訂單要同時看數量、顏色、品項）
-  function drawFruit(g, item, color) {
+  function drawFruit(g, item, color) { inked(g, (g2) => drawFruitRaw(g2, item, color), 2); }
+  function drawFruitRaw(g, item, color) {
     g.clear();
     const c = COLORS[color];
     if (item === 'apple') {
@@ -771,7 +772,8 @@
   }
 
   // 月相：ph 0 新月 … 4 滿月（右邊先亮，北半球漸盈的樣子）。用「右半圓＋明暗交界線」畫亮的部分
-  function drawMoon(g, ph) {
+  function drawMoon(g, ph) { inked(g, (g2) => drawMoonRaw(g2, ph), 2); }
+  function drawMoonRaw(g, ph) {
     g.clear();
     const r = 26, k = ph / 4;
     g.fillStyle(0x37474f, 1); g.fillCircle(0, 0, r);
@@ -807,7 +809,8 @@
   }
 
   // 電路零件
-  function drawPart(g, k) {
+  function drawPart(g, k) { inked(g, (g2) => drawPartRaw(g2, k), 2); }
+  function drawPartRaw(g, k) {
     g.clear();
     if (k === 'wire') { g.lineStyle(6, 0xd2691e, 1); g.beginPath(); g.arc(0, 0, 14, Math.PI, 0, false); g.strokePath(); g.lineBetween(-26, 0, -14, 0); g.lineBetween(14, 0, 26, 0); }
     else if (k === 'lead') { g.fillStyle(0x424242, 1); g.fillRect(-26, -4, 52, 8); g.fillStyle(0x757575, 1); g.fillRect(-26, -4, 52, 3); }
@@ -919,12 +922,13 @@
     else if (i === 1) { g.lineStyle(3, 0xefebe9, 1); g.lineBetween(-140, 0, -100, 0); for (let k = 0; k < 5; k++) g.lineBetween(-134 + k * 8, -8, -134 + k * 8, 8); g.fillStyle(0xefebe9, 1); g.fillTriangle(-100, 0, -88, -8, -88, 8); }
     else { g.fillStyle(0x4e342e, 1); g.fillEllipse(-120, 0, 30, 40); g.lineStyle(2, 0xbcaaa4, 1); for (let k = -12; k <= 12; k += 6) g.lineBetween(-133, k, -107, k); }
   }
-  function labIcon(g, k) {
+  function labIcon(g, k) { inked(g, (g2) => labIconRaw(g2, k), 2); }
+  function labIconRaw(g, k) {
     g.clear();
-    if (k === 'water') drawIcon(g, 'rainy');
+    if (k === 'water') drawIconRaw(g, 'rainy');
     else if (k === 'typhoon') { mapSymbol(g, 'T'); g.setScale(0.8 * g.scaleX); }
     else if (k === 'food') foxIcon(g);
-    else if (k === 'photo') drawIcon(g, 'sun');
+    else if (k === 'photo') drawIconRaw(g, 'sun');
     else if (k === 'spell') { g.fillStyle(0x00897b, 1); [-18, 0, 18].forEach((x) => g.fillRoundedRect(x - 8, -8, 16, 16, 3)); }
     else if (k === 'pitch') { g.fillStyle(0x8d6e63, 1); g.fillRoundedRect(-14, -18, 8, 30, 3); g.fillRoundedRect(4, -6, 8, 18, 3); }
     else { g.fillStyle(0x8d6e63, 1); g.fillRect(-24, -14, 48, 10); g.fillStyle(0xbcaaa4, 1); g.fillRect(-24, -4, 48, 10); g.fillStyle(0x5d4037, 1); g.fillRect(-24, 6, 48, 10); }
@@ -943,7 +947,8 @@
   }
 
   // 植物部位的示意圖（不畫出是哪一種作物）
-  function drawPartIcon(g, part) {
+  function drawPartIcon(g, part) { inked(g, (g2) => drawPartIconRaw(g2, part), 2); }
+  function drawPartIconRaw(g, part) {
     g.clear();
     if (part === 'root') { g.lineStyle(4, 0x8d6e4a, 1); g.lineBetween(0, -20, 0, 6); g.lineBetween(0, 0, -12, 18); g.lineBetween(0, 2, 12, 20); g.lineBetween(-6, 10, -16, 10); g.lineBetween(6, 12, 16, 14); g.fillStyle(0x7cb342, 1); g.fillEllipse(0, -22, 18, 6); }
     else if (part === 'seed') { g.fillStyle(0x8d6e4a, 1); [[-10, -4], [4, -8], [10, 6], [-4, 8]].forEach(([x, y]) => g.fillEllipse(x, y, 10, 7)); }
@@ -1157,7 +1162,8 @@
     g.fillStyle(0xe53935, 1); g.fillRect(-34, -30, 68, 12);
     g.fillStyle(0xcfd8dc, 1); for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) g.fillRect(-28 + c * 10, 4 + r * 7, 6, 4);
   }
-  function drawFamily(g, k) {
+  function drawFamily(g, k) { inked(g, (g2) => drawFamilyRaw(g2, k), 2); }
+  function drawFamilyRaw(g, k) {
     g.clear();
     const old = k === 'grandfather' || k === 'grandmother';
     const size = k === 'baby' ? 0.55 : (k === 'brother' || k === 'sister' ? 0.8 : 1);
@@ -1176,7 +1182,8 @@
     if (k === 'baby') { g.fillStyle(0x4fc3f7, 1); g.fillCircle(0, sz(-6), 5); g.fillRect(-1, sz(-10), 2, 4); }
   }
   // 節慶的圖
-  function drawFestival(g, pic) {
+  function drawFestival(g, pic) { inked(g, (g2) => drawFestivalRaw(g2, pic), 2); }
+  function drawFestivalRaw(g, pic) {
     g.clear();
     if (pic === 'pumpkin') { g.fillStyle(0xfb8c00, 1); g.fillEllipse(-10, 6, 26, 30); g.fillEllipse(10, 6, 26, 30); g.fillEllipse(0, 6, 26, 32); g.fillStyle(0x43a047, 1); g.fillRect(-2, -16, 5, 9); g.fillStyle(0x3e2723, 1); g.fillTriangle(-12, 0, -4, 0, -8, -6); g.fillTriangle(4, 0, 12, 0, 8, -6); g.fillTriangle(-10, 12, 10, 12, 0, 18); }
     else if (pic === 'cake') { g.fillStyle(0xf8bbd0, 1); g.fillRect(-24, 0, 48, 22); g.fillStyle(0xffffff, 1); g.fillRect(-24, -2, 48, 6); g.fillStyle(0x4fc3f7, 1); [-12, 0, 12].forEach((x) => g.fillRect(x - 2, -16, 4, 14)); g.fillStyle(0xffca28, 1); [-12, 0, 12].forEach((x) => g.fillCircle(x, -18, 3)); }
@@ -1184,7 +1191,8 @@
   }
 
   // 裝飾
-  function drawDecor(g, k) {
+  function drawDecor(g, k) { inked(g, (g2) => drawDecorRaw(g2, k), 2); }
+  function drawDecorRaw(g, k) {
     g.clear();
     if (k === 'flowerbed') { g.fillStyle(0x8d6e4a, 1); g.fillEllipse(0, 6, 90, 22); [[-30, 0xe53956], [-12, 0xffd54a], [6, 0xba68c8], [24, 0xff8a65]].forEach(([x, c]) => { g.fillStyle(0x43a047, 1); g.fillRect(x - 1, -10, 3, 12); g.fillStyle(c, 1); g.fillCircle(x, -12, 6); }); }
     else if (k === 'fence') { g.fillStyle(0xd7ccc8, 1); for (let i = -4; i <= 4; i++) { g.fillRect(i * 24 - 4, -24, 8, 30); g.fillTriangle(i * 24 - 4, -24, i * 24 + 4, -24, i * 24, -30); } g.fillRect(-100, -18, 200, 5); g.fillRect(-100, -6, 200, 5); }
@@ -1195,7 +1203,8 @@
   }
 
   // 設施：fixed 修好、crack 有裂痕；壞掉的是灰色、缺了幾塊
-  function drawFacility(g, k, fixed, crack) {
+  function drawFacility(g, k, fixed, crack) { inked(g, (g2) => drawFacilityRaw(g2, k, fixed, crack), 2); }
+  function drawFacilityRaw(g, k, fixed, crack) {
     g.clear();
     const c1 = fixed ? null : 0x9e9e9e;
     if (k === 'well') {
@@ -1222,16 +1231,18 @@
     if (crack) { g.lineStyle(3, 0x3e2723, 1); g.lineBetween(-14, -16, -4, -2); g.lineBetween(-4, -2, -12, 8); g.lineBetween(-12, 8, -2, 20); }
   }
   // 材料
-  function drawMaterial(g, m) {
+  function drawMaterial(g, m) { inked(g, (g2) => drawMaterialRaw(g2, m), 2); }
+  function drawMaterialRaw(g, m) {
     g.clear();
     if (m === 'wood') { g.fillStyle(0xa1887f, 1); g.fillRoundedRect(-24, -10, 48, 20, 8); g.fillStyle(0x8d6e63, 1); g.fillEllipse(-24, 0, 12, 20); g.lineStyle(2, 0x6d4c41, 1); g.strokeEllipse(-24, 0, 6, 10); }
-    else if (m === 'stone') drawSoil(g, 'rock', 1);
+    else if (m === 'stone') drawSoilRaw(g, 'rock', 1);
     else if (m === 'metal') { g.fillStyle(0xb0bec5, 1); g.fillRect(-24, -8, 48, 16); g.fillStyle(0xeceff1, 1); g.fillRect(-24, -8, 48, 4); g.fillStyle(0x78909c, 1); g.fillRect(-24, 4, 48, 4); }
     else { g.fillStyle(0xb3e5fc, 0.7); g.fillRect(-20, -18, 40, 36); g.lineStyle(2, 0x81d4fa, 1); g.strokeRect(-20, -18, 40, 36); g.lineStyle(2, 0xffffff, 0.9); g.lineBetween(-12, -10, -4, -16); }
   }
 
   // 磁鐵站的東西
-  function drawMagItem(g, k) {
+  function drawMagItem(g, k) { inked(g, (g2) => drawMagItemRaw(g2, k), 2); }
+  function drawMagItemRaw(g, k) {
     g.clear();
     switch (k) {
       case 'nail': g.fillStyle(0x78909c, 1); g.fillRect(-3, -20, 6, 34); g.fillRect(-10, -22, 20, 5); g.fillTriangle(-3, 14, 3, 14, 0, 22); break;
@@ -1247,7 +1258,8 @@
     }
   }
   // 石頭、沙子、泥巴；amount 是堆的多寡（0～1），樣本用 1
-  function drawSoil(g, k, amount) {
+  function drawSoil(g, k, amount) { inked(g, (g2) => drawSoilRaw(g2, k, amount), 2); }
+  function drawSoilRaw(g, k, amount) {
     g.clear();
     if (amount <= 0) { g.lineStyle(2, 0xbcaaa4, 1); g.strokeEllipse(0, 14, 60, 16); return; }
     const sc = 0.5 + amount * 0.5;
