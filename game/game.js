@@ -516,7 +516,9 @@
     }, extra || {}));
   }
 
-  function drawIcon(g, key) {
+  // 程式繪製的圖示一律加墨線外框（手帳貼紙風）；drawIconRaw 是沒有外框的原始畫法
+  function drawIcon(g, key) { inked(g, (g2) => drawIconRaw(g2, key), 2); }
+  function drawIconRaw(g, key) {
     g.clear();
     switch (key) {
       case 'carrot':
@@ -556,7 +558,7 @@
         for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.lineBetween(Math.cos(a) * 15, Math.sin(a) * 15, Math.cos(a) * 22, Math.sin(a) * 22); }
         g.fillStyle(0xffd54a, 1); g.fillCircle(0, 0, 11);
         break;
-      case 'sunny': drawIcon(g, 'sun'); break;
+      case 'sunny': drawIconRaw(g, 'sun'); break;
       case 'cloudy':
         g.fillStyle(0xb7c3cd, 1); g.fillCircle(-12, 2, 12); g.fillCircle(2, -6, 15); g.fillCircle(15, 2, 11); g.fillRoundedRect(-24, 2, 50, 12, 6);
         break;
@@ -1326,6 +1328,39 @@
         g.fillStyle(wilt ? 0xb98a8a : 0xe53956, 1); g.fillCircle(3, -h - 8, 5);
       }
     }
+  }
+
+  // 幫程式繪製的圖加墨線外框：fn(g) 畫兩次，第一次每個形狀都放大一圈、全部用墨色（半透明的高光跳過），第二次正常畫
+  // fn 裡的 g.clear() 兩次都不會真的清除（一開始先清一次）
+  function inked(g, fn, w) {
+    w = w || 2.5;
+    g.clear();
+    let skip = false;
+    const pass = (t, k) => { const v = t[k]; return typeof v === 'function' ? v.bind(t) : v; };
+    const real = new Proxy(g, { get: (t, k) => (k === 'clear' ? () => real : pass(t, k)) });
+    const grow = (pts) => {
+      const cx = pts.reduce((a, p) => a + p.x, 0) / pts.length, cy = pts.reduce((a, p) => a + p.y, 0) / pts.length;
+      return pts.map((p) => { const dx = p.x - cx, dy = p.y - cy, l = Math.hypot(dx, dy) || 1; return { x: p.x + dx / l * w * 1.4, y: p.y + dy / l * w * 1.4 }; });
+    };
+    const ink = new Proxy(g, {
+      get: (t, k) => {
+        switch (k) {
+          case 'clear': return () => ink;
+          case 'fillStyle': return (c, a) => { skip = a != null && a < 1; t.fillStyle(INK, 1); return ink; };
+          case 'lineStyle': return (lw, c, a) => { skip = a != null && a < 1; t.lineStyle(lw + w * 2, INK, 1); return ink; };
+          case 'fillEllipse': return (x, y, ew, eh) => { if (!skip) t.fillEllipse(x, y, ew + w * 2, eh + w * 2); return ink; };
+          case 'fillCircle': return (x, y, r) => { if (!skip) t.fillCircle(x, y, r + w); return ink; };
+          case 'fillRect': return (x, y, rw, rh) => { if (!skip) t.fillRect(x - w, y - w, rw + w * 2, rh + w * 2); return ink; };
+          case 'fillRoundedRect': return (x, y, rw, rh, r) => { if (!skip) t.fillRoundedRect(x - w, y - w, rw + w * 2, rh + w * 2, (typeof r === 'number' ? r : 0) + w); return ink; };
+          case 'fillTriangle': return (a, b, c, d, e, f) => { if (!skip) { const p = grow([{ x: a, y: b }, { x: c, y: d }, { x: e, y: f }]); t.fillTriangle(p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y); } return ink; };
+          case 'fillPoints': return (pts, close) => { if (!skip) t.fillPoints(grow(pts.map((p) => (Array.isArray(p) ? { x: p[0], y: p[1] } : p))), close); return ink; };
+          case 'lineBetween': case 'strokeCircle': case 'strokeEllipse': case 'strokeRect': case 'strokeRoundedRect': case 'strokePath': case 'strokePoints':
+            return (...a) => { if (!skip) t[k](...a); return ink; };
+          default: return pass(t, k);
+        }
+      },
+    });
+    fn(ink); fn(real);
   }
 
   // 對話框（手帳風）：白底、墨線、暖色落影，尾巴朝下
@@ -6985,7 +7020,7 @@
           g.fillStyle(Phaser.Display.Color.GetColor(c.r, c.g, c.b), 1); g.fillEllipse(0, 6, 140, 56);
           g.lineStyle(3, INK, 1); g.strokeEllipse(0, 6, 140, 56);
           g.lineStyle(2, 0x3b2f1e, 0.25); g.lineBetween(-40, 0, -14, 0); g.lineBetween(10, 12, 38, 12);
-          if (p.plant) drawPlant(o.plant, p.plant, p.progress, p.water < 0.08); else o.plant.clear();
+          if (p.plant) inked(o.plant, (g2) => drawPlant(g2, p.plant, p.progress, p.water < 0.08)); else o.plant.clear();   // 作物也有墨線外框
         }
         // 輕輕搖擺
         o.plant.rotation = Math.sin(tSec * (s.weather === 'windy' ? 4 : 1.5) + i) * (s.weather === 'windy' ? 0.1 : 0.03);
