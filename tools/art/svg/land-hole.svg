@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#bb9f8a"/><stop offset="0.55" stop-color="#8a5a36"/><stop offset="1" stop-color="#765036"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#c4cbcf"/><stop offset="0.55" stop-color="#9aa5ad"/><stop offset="1" stop-color="#848d98"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#cfeefe" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <rect x="30" y="168" width="180" height="50" fill="#8bc66a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="110" cy="188" rx="46" ry="14" fill="#3b2a1e" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M150 178 Q170 150 196 178Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M182 128 L166 176" fill="none" stroke="#2b3a55" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="156" y="168" width="22" height="14" rx="3" fill="url(#g1)" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f9b388"/><stop offset="0.55" stop-color="#f57c32"/><stop offset="1" stop-color="#ce6c33"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#f9b388"/><stop offset="0.55" stop-color="#f57c32"/><stop offset="1" stop-color="#ce6c33"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="30" y="168" width="180" height="50" fill="#7a8a6a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M70 196 L170 196 L156 170 L84 170Z" fill="#6d6475" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M100 144.4 Q118 163.6 113.2 176.8 Q100 185.2 86.8 176.8 Q82 163.6 100 144.4Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M100 160 Q108.4 172 105.4 178 Q100 181.6 94.6 178 Q91.6 172 100 160Z" fill="#ffd54a" />
+    <path d="M140 139.8 Q161 162.2 155.4 177.6 Q140 187.4 124.6 177.6 Q119 162.2 140 139.8Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M140 158 Q149.8 172 146.3 179 Q140 183.2 133.7 179 Q130.2 172 140 158Z" fill="#ffd54a" />
+    <circle cx="101.2" cy="100.2" r="13.7" fill="#2b3a55" /><circle cx="118" cy="93.2" r="17.9" fill="#2b3a55" /><circle cx="134.8" cy="100.2" r="13.7" fill="#2b3a55" /><circle cx="118" cy="103" r="15.1" fill="#2b3a55" /><circle cx="101.2" cy="100.2" r="11.2" fill="#5f646b" /><circle cx="118" cy="93.2" r="15.399999999999999" fill="#5f646b" /><circle cx="134.8" cy="100.2" r="11.2" fill="#5f646b" /><circle cx="118" cy="103" r="12.6" fill="#5f646b" /><circle cx="115.6" cy="67.1" r="16.1" fill="#2b3a55" /><circle cx="136" cy="58.6" r="21.2" fill="#2b3a55" /><circle cx="156.4" cy="67.1" r="16.1" fill="#2b3a55" /><circle cx="136" cy="70.5" r="17.799999999999997" fill="#2b3a55" /><circle cx="115.6" cy="67.1" r="13.6" fill="#5f646b" /><circle cx="136" cy="58.6" r="18.7" fill="#5f646b" /><circle cx="156.4" cy="67.1" r="13.6" fill="#5f646b" /><circle cx="136" cy="70.5" r="15.299999999999999" fill="#5f646b" />
+    <circle cx="71.2" cy="64.2" r="13.7" fill="#2b3a55" /><circle cx="88" cy="57.2" r="17.9" fill="#2b3a55" /><circle cx="104.8" cy="64.2" r="13.7" fill="#2b3a55" /><circle cx="88" cy="67" r="15.1" fill="#2b3a55" /><circle cx="71.2" cy="64.2" r="11.2" fill="#6f747b" /><circle cx="88" cy="57.2" r="15.399999999999999" fill="#6f747b" /><circle cx="104.8" cy="64.2" r="11.2" fill="#6f747b" /><circle cx="88" cy="67" r="12.6" fill="#6f747b" /><circle cx="85.6" cy="31.1" r="16.1" fill="#2b3a55" /><circle cx="106" cy="22.6" r="21.2" fill="#2b3a55" /><circle cx="126.4" cy="31.1" r="16.1" fill="#2b3a55" /><circle cx="106" cy="34.5" r="17.799999999999997" fill="#2b3a55" /><circle cx="85.6" cy="31.1" r="13.6" fill="#6f747b" /><circle cx="106" cy="22.6" r="18.7" fill="#6f747b" /><circle cx="126.4" cy="31.1" r="13.6" fill="#6f747b" /><circle cx="106" cy="34.5" r="15.299999999999999" fill="#6f747b" />
+  </g>
+</svg>

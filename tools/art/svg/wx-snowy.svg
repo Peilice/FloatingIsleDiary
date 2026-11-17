@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#9fb6cf" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <circle cx="88.8" cy="77.8" r="23.3" fill="#2b3a55" /><circle cx="120" cy="64.8" r="31.1" fill="#2b3a55" /><circle cx="151.2" cy="77.8" r="23.3" fill="#2b3a55" /><circle cx="120" cy="83" r="25.900000000000002" fill="#2b3a55" /><circle cx="88.8" cy="77.8" r="20.8" fill="#eef2f5" /><circle cx="120" cy="64.8" r="28.6" fill="#eef2f5" /><circle cx="151.2" cy="77.8" r="20.8" fill="#eef2f5" /><circle cx="120" cy="83" r="23.400000000000002" fill="#eef2f5" />
+    <path d="M61.0 116.0 L79.0 116.0 M65.5 108.2 L74.5 123.8 M74.5 108.2 L65.5 123.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="70" cy="116" r="2.5" fill="#ffffff" />
+    <path d="M101.0 132.0 L119.0 132.0 M105.5 124.2 L114.5 139.8 M114.5 124.2 L105.5 139.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="110" cy="132" r="2.5" fill="#ffffff" />
+    <path d="M141.0 112.0 L159.0 112.0 M145.5 104.2 L154.5 119.8 M154.5 104.2 L145.5 119.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="150" cy="112" r="2.5" fill="#ffffff" />
+    <path d="M171.0 146.0 L189.0 146.0 M175.5 138.2 L184.5 153.8 M184.5 138.2 L175.5 153.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="180" cy="146" r="2.5" fill="#ffffff" />
+    <path d="M81.0 152.0 L99.0 152.0 M85.5 144.2 L94.5 159.8 M94.5 144.2 L85.5 159.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="90" cy="152" r="2.5" fill="#ffffff" />
+    <path d="M127.0 158.0 L145.0 158.0 M131.5 150.2 L140.5 165.8 M140.5 150.2 L131.5 165.8 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="136" cy="158" r="2.5" fill="#ffffff" />
+    <rect x="30" y="168" width="180" height="50" fill="#ffffff" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

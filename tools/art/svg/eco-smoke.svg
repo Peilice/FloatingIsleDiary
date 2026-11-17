@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#c4cbcf"/><stop offset="0.55" stop-color="#9aa5ad"/><stop offset="1" stop-color="#848d98"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#b1bfc6"/><stop offset="0.55" stop-color="#78909c"/><stop offset="1" stop-color="#687c8a"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#b1bfc6"/><stop offset="0.55" stop-color="#78909c"/><stop offset="1" stop-color="#687c8a"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="30" y="168" width="180" height="50" fill="#7a8a6a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="60" y="110" width="110" height="70" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="130" y="60" width="22" height="60" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="84" y="70" width="18" height="50" fill="url(#g2)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="133.2" cy="50.2" r="13.7" fill="#2b3a55" /><circle cx="150" cy="43.2" r="17.9" fill="#2b3a55" /><circle cx="166.8" cy="50.2" r="13.7" fill="#2b3a55" /><circle cx="150" cy="53" r="15.1" fill="#2b3a55" /><circle cx="133.2" cy="50.2" r="11.2" fill="#5f646b" /><circle cx="150" cy="43.2" r="15.399999999999999" fill="#5f646b" /><circle cx="166.8" cy="50.2" r="11.2" fill="#5f646b" /><circle cx="150" cy="53" r="12.6" fill="#5f646b" /><circle cx="147.6" cy="17.1" r="16.1" fill="#2b3a55" /><circle cx="168" cy="8.6" r="21.2" fill="#2b3a55" /><circle cx="188.4" cy="17.1" r="16.1" fill="#2b3a55" /><circle cx="168" cy="20.5" r="17.799999999999997" fill="#2b3a55" /><circle cx="147.6" cy="17.1" r="13.6" fill="#5f646b" /><circle cx="168" cy="8.6" r="18.7" fill="#5f646b" /><circle cx="188.4" cy="17.1" r="13.6" fill="#5f646b" /><circle cx="168" cy="20.5" r="15.299999999999999" fill="#5f646b" />
+    <circle cx="81.2" cy="60.2" r="13.7" fill="#2b3a55" /><circle cx="98" cy="53.2" r="17.9" fill="#2b3a55" /><circle cx="114.8" cy="60.2" r="13.7" fill="#2b3a55" /><circle cx="98" cy="63" r="15.1" fill="#2b3a55" /><circle cx="81.2" cy="60.2" r="11.2" fill="#6f747b" /><circle cx="98" cy="53.2" r="15.399999999999999" fill="#6f747b" /><circle cx="114.8" cy="60.2" r="11.2" fill="#6f747b" /><circle cx="98" cy="63" r="12.6" fill="#6f747b" /><circle cx="95.6" cy="27.1" r="16.1" fill="#2b3a55" /><circle cx="116" cy="18.6" r="21.2" fill="#2b3a55" /><circle cx="136.4" cy="27.1" r="16.1" fill="#2b3a55" /><circle cx="116" cy="30.5" r="17.799999999999997" fill="#2b3a55" /><circle cx="95.6" cy="27.1" r="13.6" fill="#6f747b" /><circle cx="116" cy="18.6" r="18.7" fill="#6f747b" /><circle cx="136.4" cy="27.1" r="13.6" fill="#6f747b" /><circle cx="116" cy="30.5" r="15.299999999999999" fill="#6f747b" />
+    <rect x="72" y="140" width="20" height="20" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="108" y="140" width="20" height="20" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

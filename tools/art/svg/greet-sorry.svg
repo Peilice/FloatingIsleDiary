@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fae0c8"/><stop offset="0.55" stop-color="#f6c9a0"/><stop offset="1" stop-color="#cfab8d"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#a08d81"/><stop offset="0.55" stop-color="#5b3a26"/><stop offset="1" stop-color="#503629"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <path d="M120.0 152.0 L102.0 200.0" fill="none" stroke="#2b3a55" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/><path d="M120.0 152.0 L102.0 200.0" fill="none" stroke="#3d6fb5" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M120.0 152.0 L138.0 200.0" fill="none" stroke="#2b3a55" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/><path d="M120.0 152.0 L138.0 200.0" fill="none" stroke="#3d6fb5" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="102" cy="202" rx="11" ry="7" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="138" cy="202" rx="11" ry="7" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M114.0 98.0 L120.0 152.0" fill="none" stroke="#2b3a55" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/><path d="M114.0 98.0 L120.0 152.0" fill="none" stroke="#8e4fb5" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><path d="M114.0 98.0 L108.0 140.0" fill="none" stroke="#2b3a55" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><path d="M114.0 98.0 L108.0 140.0" fill="none" stroke="#8e4fb5" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="108" cy="140" r="7" fill="#f6c9a0" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="M114.0 98.0 L132.0 140.0" fill="none" stroke="#2b3a55" stroke-width="19" stroke-linecap="round" stroke-linejoin="round"/><path d="M114.0 98.0 L132.0 140.0" fill="none" stroke="#8e4fb5" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><circle cx="132" cy="140" r="7" fill="#f6c9a0" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="108" cy="74" r="26" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M82 73 Q81 43.32 108 44.879999999999995 Q135 43.32 134 73 Q122.3 57.879999999999995 108 58.4 Q93.7 57.879999999999995 82 73Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/><path d="M93.7 77.12 Q98.12 81.54 102.54 77.12 M113.46 77.12 Q117.88 81.54 122.3 77.12" fill="none" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><ellipse cx="91.88" cy="85.7" rx="5.2" ry="3.224" fill="#f48fa6" opacity=".55"/><ellipse cx="124.12" cy="85.7" rx="5.2" ry="3.224" fill="#f48fa6" opacity=".55"/>
+    <path d="M78 40 Q84 32 90 40 M96 30 Q102 22 108 30" fill="none" stroke="#5ab4e6" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="184" cy="210" rx="30" ry="7" fill="#f6a93b" opacity=".85"/>
+    <g transform="rotate(80 184 196)">
+    <path d="M170 182 L198 182 L194 214 L174 214Z" fill="#e8f6fd" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

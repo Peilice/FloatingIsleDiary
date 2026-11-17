@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#b3da9f"/><stop offset="0.55" stop-color="#7cbf5a"/><stop offset="1" stop-color="#6ba354"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#cfeefe" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <path d="M30 192 Q120 70 210 192Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="30" y="186" width="180" height="30" fill="#8bc66a" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="96" cy="144" r="4.5" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="101.70627037817076" cy="148.14568654990293" r="4.5" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="99.5270713040442" cy="154.85384054292967" r="4.5" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="92.47382820800944" cy="154.8544940512241" r="4.5" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="90.2933861022088" cy="148.146743994604" r="4.5" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="96" cy="150" r="3.3000000000000003" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="140" cy="134" r="4.5" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="145.70627037817076" cy="138.14568654990293" r="4.5" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="143.5270713040442" cy="144.85384054292967" r="4.5" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="136.47382820800945" cy="144.8544940512241" r="4.5" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="134.29338610220879" cy="138.146743994604" r="4.5" fill="#ffd54a" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="140" cy="140" r="3.3000000000000003" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

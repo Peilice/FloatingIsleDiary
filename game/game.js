@@ -294,11 +294,22 @@
   const COUNT = ['six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
   const ZOO = ['dog', 'pig', 'chicken', 'elephant', 'lion', 'tiger', 'bear', 'panda', 'snake', 'deer', 'dolphin', 'whale'];
   const BODY = ['head', 'eye', 'ear', 'nose', 'mouth', 'arm', 'hand', 'leg', 'foot'];
-  const ACTS = { run: 'running', walk: 'walking', jump: 'jumping', sit: 'sitting', stand: 'standing', sleep: 'sleeping', read: 'reading', write: 'writing', sing: 'singing', dance: 'dancing', wash: 'washing', drink: 'drinking', kick: 'kicking', throw: 'throwing' };
+  const ACTS = { run: 'running', walk: 'walking', jump: 'jumping', sit: 'sitting', stand: 'standing', sleep: 'sleeping', read: 'reading', write: 'writing', sing: 'singing a song', dance: 'dancing', wash: 'washing', drink: 'drinking', kick: 'kicking', throw: 'throwing', listen: 'listening', take: 'taking an apple' };
   const FEELS = ['happy', 'sad', 'tired', 'thirsty', 'hungry'];
   const DAYTIME = ['morning', 'afternoon', 'evening', 'night'];
   const SPOTS = ['lake', 'sea', 'mountain', 'road', 'kitchen', 'bedroom', 'classroom', 'farm'];
   const THINGS = ['robot', 'clock', 'fan', 'computer', 'bike', 'ball', 'rope', 'flute', 'mirror', 'shirt', 'pants', 'dress'];
+  // 第四批單字（2026-11-17）：每張卡都是貼紙；make 自己出題（答案卡和干擾卡來自不同清單），rec 是要記錄的字
+  const pickOne = (a) => a[Math.floor(Math.random() * a.length)];
+  const pickSet = (yes, no, rec, text, zh) => { const answer = pickOne(yes); return { answer, spots: L.shuffle([answer].concat(L.shuffle(no).slice(0, 3))), rec, text, zh }; };
+  const INSECTS = ['ant', 'bee', 'butterfly'], FLYERS = ['bird', 'duck', 'bee', 'butterfly'];
+  const NOT_INSECT = ['bird', 'fish', 'frog', 'duck', 'snake', 'rabbit', 'cow', 'dog'];
+  const NO_FLY = ['fish', 'dog', 'snake', 'cow', 'pig', 'frog', 'elephant', 'rabbit', 'horse', 'panda'];
+  const ELECTRIC = ['fan', 'computer', 'robot'], NOT_ELECTRIC = ['ball', 'rope', 'flute', 'mirror', 'shirt', 'pants', 'dress'];
+  const DANGERS = ['danger-stove', 'danger-road', 'danger-plug', 'danger-glass'], SAFE_ACTS = ['act-read', 'act-sleep', 'act-sit', 'act-write', 'act-drink', 'act-sing', 'act-walk'];
+  const ECO_GOOD = ['eco-recycle', 'eco-tree', 'eco-bike', 'eco-light'], ECO_BAD = ['eco-smoke', 'eco-car', 'eco-litter', 'eco-burn'], ECO_AIR = ['eco-smoke', 'eco-car', 'eco-burn'];
+  const HOMES = { ocean: ['whale', 'dolphin'], farm: ['cow', 'pig', 'chicken'], lake: ['duck', 'frog'], mountain: ['bear', 'deer'] };
+  const NUM_SHOW = { two: '2', ten: '10', twelve: '12', twenty: '20', hundred: '100', eleven: '11' };
   const PICK_ORDERS = {
     way:    { list: PLACES, draw: (g, k) => drawPlace(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'This is the ' + k + '. Thank you!' },
     job:    { list: JOBS, draw: (g, k) => drawJob(g, k), say: (k) => 'Who is the ' + (k === 'police' ? 'police officer' : k) + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Thank you for your help!' },
@@ -309,11 +320,49 @@
     count:  { list: COUNT, art: (k) => 'stars-' + (COUNT.indexOf(k) + 6), draw: (g, k) => drawStars(g, COUNT.indexOf(k) + 6), say: (k) => 'Find ' + k + ' stars.', zh: (k) => '找出 ' + (COUNT.indexOf(k) + 6) + ' 顆星星', thanks: (k) => cap(k) + ' stars. Thank you!' },
     zoo:    { list: ZOO, draw: (g, k) => drawZoo(g, k), say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: (k) => 'I see the ' + k + '! Thank you!' },
     body:   { list: BODY, art: (k) => 'body-' + k, draw: (g, k) => drawBody(g, k), say: (k) => 'Point to the ' + k + '.', zh: (k) => '指出' + zhOf(k) + '。', thanks: () => 'Good job!' },
-    act:    { list: Object.keys(ACTS), art: (k) => 'act-' + k, draw: (g, k) => drawAct(g, k), say: (k) => 'Who is ' + ACTS[k] + '?', zh: (k) => '誰在' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    act:    { list: Object.keys(ACTS), art: (k) => 'act-' + k, draw: (g, k) => drawAct(g, k), say: (k) => 'Who is ' + ACTS[k] + '?', zh: (k) => '誰在' + zhOf(k) + (k === 'sing' ? '歌' : k === 'take' ? '蘋果' : '') + '？',
+      rec: (k) => (k === 'sing' ? ['sing', 'song'] : [k]), thanks: () => 'Yes! Thank you!' },
     feel:   { list: FEELS, art: (k) => 'feel-' + k, draw: (g, k) => drawFeel(g, k), say: (k) => 'Who is ' + k + '?', zh: (k) => '誰覺得' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     time:   { list: DAYTIME, draw: (g, k) => drawDaytime(g, k), say: (k) => 'Which one is ' + (k === 'night' ? 'night' : 'the ' + k) + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     spot:   { list: SPOTS, draw: (g, k) => drawSpot(g, k), say: (k) => 'Which one is the ' + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
     thing:  { list: THINGS, draw: (g, k) => drawThing(g, k), say: (k) => (k === 'pants' ? 'Where are the pants?' : 'Where is the ' + k + '?'), zh: (k) => zhOf(k) + '在哪裡？', thanks: () => 'There it is! Thank you!' },
+    // ---- 第四批 ----
+    people: { list: ['boy', 'girl', 'man', 'woman'], art: (k) => 'person-' + k, say: (k) => 'Who is the ' + k + '?', zh: (k) => '哪一位是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    size:   { list: ['tall', 'short', 'thin', 'big'], art: (k) => 'size-' + k, cardZh: (k) => ({ tall: '高', short: '矮', thin: '瘦', big: '胖' })[k], say: (k) => 'Who is ' + k + '?', zh: (k) => ({ tall: '誰比較高？', short: '誰比較矮？', thin: '誰比較瘦？', big: '誰比較胖？' })[k], thanks: () => 'Yes! Thank you!' },
+    wx:     { list: ['sunny', 'cloudy', 'rainy', 'windy', 'snowy'], extList: ['foggy'], art: (k) => 'wx-' + k, say: (k) => (k === 'snowy' ? 'It is snowy. I like snow!' : 'It is ' + k + ' today.') + ' Which picture?', zh: (k) => '今天' + zhOf(k).replace(/的$/, '') + '，是哪一張？',
+      rec: (k) => (k === 'snowy' ? ['snowy', 'snow'] : [k]), thanks: () => 'Yes! Thank you!' },
+    temp:   { list: ['hot', 'warm', 'cool', 'cold'], art: (k) => 'temp-' + k, say: (k) => 'Which one is ' + k + '?', zh: (k) => '哪一個是' + zhOf(k).replace(/的$/, '') + '的？', thanks: () => 'Yes! Thank you!' },
+    num:    { list: Object.keys(NUM_SHOW), ask: ['twenty', 'twelve', 'two'], extAsk: ['hundred'], art: () => 'numcard', label: (k) => NUM_SHOW[k], labelSize: 64, noZh: true,
+      say: (k) => 'Which number is ' + (k === 'hundred' ? 'one hundred' : k) + '?', zh: (k) => '哪一個數字是' + (k === 'hundred' ? '一百' : zhOf(k)) + '？', thanks: () => 'Yes! Thank you!' },
+    greet:  { list: ['hi', 'goodbye', 'sorry', 'stop'], art: (k) => 'greet-' + k, noZh: true, say: (k) => 'Who is saying "' + cap(k) + '"?', zh: (k) => '誰在說「' + zhOf(k) + '」？', thanks: () => 'Yes! Thank you!' },
+    abody:  { list: ['tail', 'wing', 'eye', 'leg'], art: (k) => 'bird-' + k, noZh: true, say: (k) => 'Point to the bird\'s ' + k + '.', zh: (k) => '指出小鳥的' + zhOf(k) + '。', thanks: () => 'Good job!' },
+    kind:   { make: () => (Math.random() < 0.5
+      ? pickSet(INSECTS, NOT_INSECT, ['insect'], 'Which one is an insect?', '哪一個是昆蟲？')
+      : (Math.random() < 0.5 ? pickSet(FLYERS, NO_FLY, ['fly'], 'Which one can fly?', '哪一個會飛？') : pickSet(FLYERS, NO_FLY, ['wing'], 'Which one has wings?', '哪一個有翅膀？'))),
+      thanks: () => 'Yes! Thank you!' },
+    sky:    { list: ['sun', 'moon', 'star', 'planet'], ext: true, art: (k) => 'sky-' + k, say: (k) => 'Which one is ' + (k === 'sun' || k === 'moon' ? 'the ' : 'a ') + k + '?', zh: (k) => '哪一張是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    heat:   { list: ['fire', 'boil', 'ice', 'snow'], art: (k) => 'heat-' + k, noZh: true,
+      say: (k) => ({ fire: 'Where is the fire?', boil: 'Which water is boiling?', ice: 'Where is the ice?', snow: 'Where is the snow?' })[k], zh: (k) => ({ fire: '火在哪裡？', boil: '哪一鍋水在煮沸？', ice: '冰在哪裡？', snow: '雪在哪裡？' })[k], thanks: () => 'Yes! Be careful!' },
+    danger: { make: () => pickSet(DANGERS, SAFE_ACTS, ['danger', 'careful'], 'Be careful! Where is the danger?', '小心！哪裡有危險？'), cardWord: () => '', noZh: true, thanks: () => 'Yes! Be careful!' },
+    elec:   { make: () => (Math.random() < 0.5 ? pickSet(ELECTRIC, NOT_ELECTRIC, ['electric'], 'Which one is electric?', '哪一個要用電？') : pickSet(ELECTRIC, NOT_ELECTRIC, ['machine'], 'Which one is a machine?', '哪一個是機器？')),
+      thanks: () => 'Yes! Thank you!' },
+    stuff:  { list: ['wood', 'stone', 'glass', 'gold', 'paper'], art: (k) => 'mat-' + k, say: (k) => 'Which one is ' + k + '?', zh: (k) => '哪一個是' + zhOf(k) + '？', thanks: () => 'Yes! Thank you!' },
+    land:   { list: ['hole', 'hill', 'rock', 'mud'], art: (k) => 'land-' + k, say: (k) => 'Where is the ' + k + '?', zh: (k) => zhOf(k) + '在哪裡？', thanks: () => 'Yes! Thank you!' },
+    home:   { art: (k) => (k === 'ocean' ? 'sea' : k), make: () => {
+      const place = Math.random() < 0.5 ? 'ocean' : pickOne(['farm', 'lake', 'mountain']), who = pickOne(HOMES[place]);
+      return { answer: place, spots: L.shuffle(Object.keys(HOMES)), rec: [place], who: who, text: 'Where does the ' + who + ' live?', zh: zhOf(who) + '住在哪裡？' };
+    }, thanks: (k, o) => 'Yes! The ' + o.animal + ' lives ' + (k === 'ocean' ? 'in the ocean.' : k === 'farm' ? 'on the farm.' : k === 'lake' ? 'in the lake.' : 'in the mountains.') },
+    eco:    { ext: true, cardWord: () => '', noZh: true, make: () => {
+      const r = Math.random();
+      if (r < 0.4) return pickSet(ECO_GOOD, ECO_BAD, ['protect', 'environment'], 'Who protects the environment?', '誰在保護環境？');
+      if (r < 0.7) return pickSet(ECO_AIR, ECO_GOOD, ['air'], 'What makes the air dirty?', '什麼讓空氣變髒？');
+      return pickSet(ECO_BAD, ECO_GOOD, ['pollution'], 'Which one makes pollution?', '哪一個會造成汙染？');
+    }, thanks: (k, o) => (o.rec[0] === 'protect' ? 'Yes! Let\'s protect the environment!' : 'Yes. That is pollution.') },
+    dir:    { art: (k) => (['up', 'down', 'left', 'right'].includes(k) ? 'arrow-' : 'compass-') + k, noZh: true, make: () => {
+      const set = Math.random() < 0.4 ? ['up', 'down', 'left', 'right'] : ['north', 'south', 'east', 'west'];
+      const answer = set[0] === 'up' && Math.random() < 0.6 ? 'down' : pickOne(set);   // 上下左右裡 down 是要補的字，問多一點
+      return { answer, spots: L.shuffle(set.slice()), rec: [answer], text: 'Which arrow points ' + answer + '?', zh: '哪一個箭頭指向' + zhOf(answer) + '？' };
+    }, thanks: () => 'Yes! Thank you!' },
     month:  { list: MONTHS, art: () => 'calendar', draw: (g) => drawMonth(g), label: (k) => cap(k), say: (k) => 'My birthday is in ' + cap(k) + '.', zh: (k) => '我的生日在' + zhOf(k) + '，是哪一頁？', thanks: (k) => 'Yes! ' + cap(k) + '. Thank you!' },
   };
   // 家人（§4.17）：每週六 Family Day，從 4 位家人裡選出問的那一位
@@ -1577,7 +1626,16 @@
   class Title extends Phaser.Scene {
     constructor() { super('Title'); }
     // 貼紙在標題畫面就先載入（貼圖是全域共用的，島嶼場景直接用）
-    preload() { ART_KEYS.forEach((k) => { if (!this.textures.exists('st-' + k)) this.load.image('st-' + k, 'art/' + k + '.png'); }); }
+    preload() {
+      // 第一次開啟要下載全部貼紙（約 1.5 MB）：畫一條紙膠帶色的進度條
+      const bar = this.add.graphics();
+      const draw = (v) => { bar.clear(); bar.fillStyle(0xfdf9f0, 1); bar.fillRoundedRect(W / 2 - 204, H / 2 - 16, 408, 32, 16); bar.lineStyle(3, INK, 1); bar.strokeRoundedRect(W / 2 - 204, H / 2 - 16, 408, 32, 16);
+        bar.fillStyle(0xf2b84b, 1); bar.fillRoundedRect(W / 2 - 198, H / 2 - 10, Math.max(20, 396 * v), 20, 10); };
+      draw(0);
+      this.load.on('progress', draw);
+      this.load.once('complete', () => bar.destroy());
+      ART_KEYS.forEach((k) => { if (!this.textures.exists('st-' + k)) this.load.image('st-' + k, 'art/' + k + '.png'); });
+    }
     create() {
       if (BOT) { this.scene.start('Island'); return; }
       const g = this.add.graphics();
@@ -3349,15 +3407,29 @@
       // 單字補充（顏色、食物、季節、數字、動物園、身體）各 0.6
       const kinds = [['fruit', 3], ['clothes', 2], ['way', 1.2], ['job', 1], ['school', 1],
         ['color', 0.6], ['meal', 0.6], ['season', 0.6], ['count', 0.6], ['zoo', 0.6], ['body', 0.6],
-        ['act', 0.6], ['feel', 0.5], ['time', 0.5], ['spot', 0.5], ['thing', 0.6]].concat(this.researchOpen() ? [['month', 0.8]] : []);
+        ['act', 0.6], ['feel', 0.5], ['time', 0.5], ['spot', 0.5], ['thing', 0.6],
+        // 第四批（人物、天氣、溫度、數字、打招呼、小鳥部位、昆蟲、冷熱、危險、電器、地形、住哪裡、方向、材料）各 0.35；延伸層（天空、環境）研究島開放後才有
+        ['people', 0.35], ['size', 0.35], ['wx', 0.35], ['temp', 0.35], ['num', 0.35], ['greet', 0.35], ['abody', 0.35], ['kind', 0.35],
+        ['heat', 0.35], ['danger', 0.35], ['elec', 0.35], ['land', 0.35], ['home', 0.35], ['dir', 0.35], ['stuff', 0.35]]
+        .concat(this.researchOpen() ? [['month', 0.8], ['sky', 0.35], ['eco', 0.35]] : []);
       let r = Math.random() * kinds.reduce((a, k) => a + k[1], 0), kind = 'fruit';
       for (const [k, w] of kinds) { if (r < w) { kind = k; break; } r -= w; }
       if (PICK_ORDERS[kind]) {
         // 指路、找人、找學校用品、找月份：4 張圖卡選 1 張
-        const P = PICK_ORDERS[kind];
-        const spots = L.shuffle(P.list).slice(0, 4);
-        const answer = spots[Math.floor(Math.random() * 4)];
-        o = { type: kind, pick: true, who, spots, answer, words: [answer], text: P.say(answer), zh: P.zh(answer), wrong: {} };
+        const P = PICK_ORDERS[kind], ext = this.researchOpen();
+        if (P.make) {
+          const m = P.make();
+          o = { type: kind, pick: true, who, spots: m.spots, answer: m.answer, rec: m.rec, animal: m.who, words: m.rec, text: m.text, zh: m.zh, wrong: {} };
+        } else {
+          // ask：只問這幾個字（其他當干擾卡）；extList／extAsk 是延伸層，研究島開放後才加入
+          const list = P.list.concat(ext && P.extList ? P.extList : []);
+          const ask = P.ask ? P.ask.concat(ext && P.extAsk ? P.extAsk : []) : null;
+          const answer = ask ? pickOne(ask) : null;
+          const spots = answer ? L.shuffle([answer].concat(L.shuffle(list.filter((k) => k !== answer && (ext || !(P.extAsk || []).includes(k)))).slice(0, 3))) : L.shuffle(list).slice(0, 4);
+          const ans = answer || spots[Math.floor(Math.random() * 4)];
+          const rec = P.rec ? P.rec(ans) : [ans];
+          o = { type: kind, pick: true, who, spots, answer: ans, rec, words: rec, text: P.say(ans), zh: P.zh(ans), wrong: {} };
+        }
       } else if (kind === 'fruit') {
         const bin = Math.floor(Math.random() * BINS.length), n = 1 + Math.floor(Math.random() * NUMS.length);
         const [item, color] = BINS[bin];
@@ -3408,13 +3480,14 @@
         if (useImg) c.img.setTexture(tex).setDisplaySize(158, 158);
         // 身體部位的小人比較細，放大一點才看得清楚五官
         c.pic.setScale(o.type === 'body' ? 2.2 : road ? 1.9 : 1.7).setY(o.type === 'body' ? -4 : -14);
-        P.draw(c.pic, k);
+        if (P.draw) P.draw(c.pic, k); else c.pic.clear();
         c.en.setText(P.label ? P.label(k) : '');
         // 月曆貼紙的空白區比較窄：September 之類的長字縮小字級，放在紅色頁首下方
         c.en.setY(useImg ? -2 : -14);
-        for (let fs = 30; fs >= 20; fs -= 2) { c.en.setFontSize(fs); if (!useImg || c.en.width <= 124) break; }
+        for (let fs = P.labelSize || 30; fs >= 20; fs -= 2) { c.en.setFontSize(fs); if (!useImg || c.en.width <= (P.labelSize ? 100 : 124)) break; }
+        c.en.setY(P.labelSize ? 8 : c.en.y);
         c.zh.setFontSize(road ? 30 : 20);
-        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' ? (o.type === 'color' ? zhOf(k).split('；')[0] : zhOf(k)) : '');   // 顏色題的 orange 只寫「橘色」
+        c.zh.setText(this.subs() && st === 0 && o.type !== 'body' && !P.noZh ? (P.cardZh ? P.cardZh(k) : o.type === 'color' ? zhOf(k).split('；')[0] : zhOf(k)) : '');   // 顏色題的 orange 只寫「橘色」
         c.stamp.setVisible(!!o.done && k === o.answer);
         c.card.setAlpha(o.wrong[k] ? 0.35 : 1);
       });
@@ -3499,10 +3572,11 @@
       const right = k === o.answer;
       const st = this.stats[o.type] || (this.stats[o.type] = { q: 0, first: 0 });
       if (o.tries === 0) { st.q += 1; if (right) st.first += 1; }
-      if (!o.recorded) { L.answer(s.words, o.answer, { day: s.day, options: 4, firstTry: right, peeked: false }); o.recorded = true; }
-      speak(k);
+      if (!o.recorded) { (o.rec || [o.answer]).forEach((w) => L.answer(s.words, w, { day: s.day, options: 4, firstTry: right, peeked: false })); o.recorded = true; }
+      const P = PICK_ORDERS[o.type], said = P.cardWord ? P.cardWord(k) : k;   // 情境卡（危險、環境）沒有單字可念
+      if (said) speak(said);
       if (right) {
-        speak(PICK_ORDERS[o.type].thanks(k));
+        speak(P.thanks(k, o));
         c.stamp.setVisible(true).setAlpha(0).setScale(1.8);
         this.tweens.add({ targets: c.stamp, alpha: 1, scale: 1, duration: 260, ease: 'Back.easeOut' });
         this.orderDone();

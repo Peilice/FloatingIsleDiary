@@ -161,12 +161,12 @@ function kid(pose) {
   const shirt = o.shirt || '#f08a4a', pants = o.pants || '#3d6fb5';
   const p = Object.assign({ head: [0, -26], sh: [0, -16], hip: [0, 4], arms: [[[-10, -2]], [[10, -2]]], legs: [[[-6, 22]], [[6, 22]]] }, pose);
   let s = o.behind || '';
-  p.legs.forEach((l) => { s += stroke2(kpath([p.hip, ...l]), pants, 13); });
+  p.legs.forEach((l) => { s += stroke2(kpath([p.hip, ...l]), pants, o.leg || 13); });
   p.legs.forEach((l) => { const [x, y] = KT(...l[l.length - 1]); s += E(x, y + 2, 11, 7, '#3b4a5f', ink(3)); });
-  s += stroke2(kpath([p.sh, p.hip]), shirt, 30);
-  p.arms.forEach((a) => { s += stroke2(kpath([p.sh, ...a]), shirt, 11); const [x, y] = KT(...a[a.length - 1]); s += C(x, y, 7, SKIN, ink(3)); });
+  s += stroke2(kpath([p.sh, p.hip]), shirt, o.torso || 30);
+  p.arms.forEach((a) => { s += stroke2(kpath([p.sh, ...a]), shirt, o.arm || 11); const [x, y] = KT(...a[a.length - 1]); s += C(x, y, 7, SKIN, ink(3)); });
   const [hx, hy] = KT(...p.head);
-  s += kidHead(hx, hy, 26, o);
+  s += kidHead(hx, hy, o.headR || 26, o);
   return s + (o.front || '');
 }
 // 小道具
@@ -252,6 +252,82 @@ function bananaPiece(cx, cy, R, t, a0, a1, c) {
   const d = `M${pt(a0, R - t * 0.5)} Q${pt(a0 + 0.02, R)} ${pt(a0 + 0.14, R)} A${R} ${R} 0 0 1 ${pt(a1 - 0.08, R)} L${pt(a1, R - t * 0.2)} L${pt(a1, r + t * 0.2)} L${pt(a1 - 0.08, r)} A${r} ${r} 0 0 0 ${pt(a0 + 0.14, r)} Q${pt(a0 + 0.02, r)} ${pt(a0, R - t * 0.5)}Z`;
   return P(d, G(c), ink()) + P(`M${pt(a0, R - t * 0.5)} L${pt(a0 + 0.05, R - t * 0.5)}`, 'none', ink(7));
 }
+
+
+// ---- 第四批單字（人物、天氣、溫度、打招呼、天空、冷熱、危險、環境、方向…）----
+// 以腳底 (120, 214) 為基準縮放（小孩比大人小）
+const grp = (sc, ...parts) => `<g transform="translate(120 214) scale(${sc}) translate(-120 -214)">${parts.join('')}</g>`;
+// 身高尺：高矮胖瘦題每張都有同一把尺當參考
+const ruler = () => RR(190, 36, 22, 180, 4, '#fff3c4', ink(3.5)) + P([0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `M190 ${52 + i * 19} L${i % 2 ? 200 : 205} ${52 + i * 19}`).join(' '), 'none', ink(2.5));
+// 雲：先畫整圈墨線再填色，得到一整塊輪廓
+function cloud(x, y, s, c = '#ffffff') {
+  const cs = [[-24, 6, 16], [0, -4, 22], [24, 6, 16], [0, 10, 18]].map(([dx, dy, r]) => [x + dx * s, y + dy * s, r * s]);
+  return cs.map(([cx, cy, r]) => C(cx, cy, r + 2.5, INK)).join('') + cs.map(([cx, cy, r]) => C(cx, cy, r, c)).join('');
+}
+function flake(x, y, r) {
+  let d = '';
+  for (let i = 0; i < 3; i++) { const a = i * Math.PI / 3; d += `M${(x - Math.cos(a) * r).toFixed(1)} ${(y - Math.sin(a) * r).toFixed(1)} L${(x + Math.cos(a) * r).toFixed(1)} ${(y + Math.sin(a) * r).toFixed(1)} `; }
+  return P(d, 'none', 'stroke="#ffffff" stroke-width="4" stroke-linecap="round"') + C(x, y, 2.5, '#ffffff');
+}
+const drop = (x, y) => P(`M${x} ${y} Q${x - 7} ${y + 12} ${x} ${y + 16} Q${x + 7} ${y + 12} ${x} ${y}Z`, G('#4f9de6'), ink(2.5));
+// 溫度計：level 0～1
+function thermo(level, c, extra) {
+  const top = 46, bot = 168, y = bot - (bot - top) * level;
+  return [RR(100, 34, 40, 150, 20, '#ffffff', ink()), RR(110, y, 20, bot - y + 10, 6, G(c)), C(120, 182, 26, G(c), ink()),
+    RR(100, 34, 40, 150, 20, 'none', ink()), P([0, 1, 2, 3, 4].map((i) => `M140 ${60 + i * 24} L152 ${60 + i * 24}`).join(' '), 'none', ink(3)),
+    shine(112, 70, 4, 16, 0), extra || ''];
+}
+// 小鳥側面（指出部位）：身體、翅膀、尾巴、眼睛、腳
+const BIRD_SPOT = { tail: [36, 120, 24], wing: [112, 124, 32], eye: [162, 96, 16], leg: [120, 196, 22] };
+function birdPart(part) {
+  const s = [
+    P('M108 172 L102 204 M132 172 L136 204', 'none', 'stroke="#f08a2a" stroke-width="7" stroke-linecap="round"'),
+    P('M92 206 L112 206 M126 206 L146 206', 'none', 'stroke="#f08a2a" stroke-width="6" stroke-linecap="round"'),
+    P('M56 118 L18 96 L22 120 L14 140 L58 134Z', G('#3d8fd8'), ink()),
+    E(120, 120, 72, 58, G('#5aa9ec'), ink()),
+    E(124, 146, 42, 22, '#e6f3fd', 'opacity=".9"'),
+    P('M80 116 Q108 92 146 118 Q114 152 80 116Z', G('#3d8fd8'), ink(3.5)),
+    P('M184 100 L212 110 L184 120Z', G('#ffb02e'), ink(3.5)),
+    eye(162, 96, 8), cheek(160, 122, 8),
+  ];
+  const [x, y, r] = BIRD_SPOT[part];
+  s.push(C(x, y, r, 'none', 'stroke="#ffffff" stroke-width="11"'), C(x, y, r, 'none', 'stroke="#e5484d" stroke-width="5.5"'));
+  return s;
+}
+// 箭頭卡：deg 0 往右、90 往下
+function arrowCard(deg) {
+  return [RR(30, 30, 180, 180, 26, '#fff8e6', ink()),
+    `<g transform="rotate(${deg} 120 120)">`, P('M64 108 L134 108 L134 82 L184 120 L134 158 L134 132 L64 132Z', G('#3d9a5b'), ink()), `</g>`];
+}
+// 指北針：上面用線條畫 N，紅色箭頭指向 deg
+function compassCard(deg) {
+  return [C(120, 124, 86, '#fff8e6', ink()), C(120, 124, 70, 'none', 'stroke="#d7c9a8" stroke-width="3" stroke-dasharray="4 8"'),
+    P('M110 60 L110 38 L130 60 L130 38', 'none', ink(5)),
+    P('M120 66 L120 74 M120 174 L120 182 M62 124 L70 124 M170 124 L178 124', 'none', ink(4)),
+    `<g transform="rotate(${deg} 120 124)">`,
+    P('M78 114 L140 114 L140 98 L172 124 L140 150 L140 134 L78 134Z', G('#e5484d'), ink()), `</g>`, C(120, 124, 8, INK)];
+}
+function flameP(x, y, s) {
+  return P(`M${x} ${y - 46 * s} Q${x + 30 * s} ${y - 14 * s} ${x + 22 * s} ${y + 8 * s} Q${x} ${y + 22 * s} ${x - 22 * s} ${y + 8 * s} Q${x - 30 * s} ${y - 14 * s} ${x} ${y - 46 * s}Z`, G('#f57c32'), ink(3.5))
+    + P(`M${x} ${y - 20 * s} Q${x + 14 * s} ${y} ${x + 9 * s} ${y + 10 * s} Q${x} ${y + 16 * s} ${x - 9 * s} ${y + 10 * s} Q${x - 14 * s} ${y} ${x} ${y - 20 * s}Z`, '#ffd54a');
+}
+const smokeP = (x, y, c) => cloud(x, y, 0.7, c) + cloud(x + 18, y - 34, 0.85, c);
+const tree = (x, y, s = 1) => R(x - 6 * s, y - 30 * s, 12 * s, 34 * s, G('#8a5a36'), ink(3)) + C(x, y - 48 * s, 28 * s, G('#4caf50'), ink());
+function car(x, y, c) {
+  return P(`M${x - 46} ${y} L${x - 46} ${y - 18} L${x - 26} ${y - 20} L${x - 14} ${y - 38} L${x + 20} ${y - 38} L${x + 32} ${y - 20} L${x + 46} ${y - 16} L${x + 46} ${y}Z`, G(c), ink())
+    + R(x - 10, y - 34, 26, 14, '#cfeefe', ink(2.5)) + C(x - 26, y + 2, 11, '#3b4a5f', ink(3)) + C(x + 26, y + 2, 11, '#3b4a5f', ink(3));
+}
+function bin(x, y, c) {
+  return P(`M${x - 24} ${y - 40} L${x + 24} ${y - 40} L${x + 20} ${y} L${x - 20} ${y}Z`, G(c), ink()) + RR(x - 28, y - 48, 56, 10, 4, G(c), ink(3))
+    + P(`M${x - 8} ${y - 26} L${x + 8} ${y - 26} L${x} ${y - 14}Z`, 'none', 'stroke="#ffffff" stroke-width="3.5" stroke-linejoin="round"');
+}
+function stopSign(x, y, r) {
+  let d = '';
+  for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4; d += (i ? 'L' : 'M') + (x + Math.cos(a) * r).toFixed(1) + ' ' + (y + Math.sin(a) * r).toFixed(1) + ' '; }
+  return P(d + 'Z', G('#e5484d'), ink()) + RR(x - r * 0.6, y - r * 0.16, r * 1.2, r * 0.32, 3, '#ffffff');
+}
+const house = (x, y) => R(x - 30, y - 44, 60, 44, G('#f6d5a0'), ink(3)) + P(`M${x - 38} ${y - 42} L${x} ${y - 74} L${x + 38} ${y - 42}Z`, G('#e5484d'), ink(3)) + R(x - 9, y - 26, 18, 26, '#8a5a36', ink(2.5));
+const land = (c = '#8bc66a') => R(30, 168, 180, 50, c, ink(3));
 
 const ART = {
   panda: () => [
@@ -757,6 +833,137 @@ const ART = {
     front: smallBall(194, 160, 20, '#ffffff') + P('M194 146 L204 154 L200 166 L188 166 L184 154Z', INK) })],
   'act-throw': () => [kid({ head: [-6, -24], sh: [-6, -14], hip: [-6, 4], arms: [[[-16, -4]], [[2, -26], [8, -32]]], shirt: '#ef6a5e',
     front: smallBall(196, 44, 15, '#e5484d') + P('M150 50 L170 48 M152 62 L172 62', 'none', 'stroke="#90a4ae" stroke-width="4" stroke-linecap="round"') })],
+  // ---- 人物：小孩比大人小一號 ----
+  'person-boy': () => [grp(0.8, kid({ shirt: '#3d7fd6', pants: '#2b3a55' }))],
+  'person-girl': () => [grp(0.8, kid({ shirt: '#f48fb1', pants: SKIN, hair: '#6b3f22',
+    behind: C(86, 62, 13, G('#6b3f22'), ink(3)) + C(154, 62, 13, G('#6b3f22'), ink(3)),
+    front: P('M100 136 L140 136 L156 172 L84 172Z', G('#e5484d'), ink()) })), ],
+  'person-man': () => [kid({ head: [0, -31], sh: [0, -20], hip: [0, 4], arms: [[[-12, 0]], [[12, 0]]], legs: [[[-6, 25]], [[6, 25]]], shirt: '#5aa83f', pants: '#5d4037', hair: '#3b2a1e',
+    front: P('M108 55 Q114 50 120 54 Q126 50 132 55 Q126 60 120 57 Q114 60 108 55Z', '#3b2a1e') + P('M120 78 L114 88 L120 112 L126 88Z', G('#e5484d'), ink(3)) })],
+  'person-woman': () => [kid({ head: [0, -31], sh: [0, -20], hip: [0, 4], arms: [[[-12, 0]], [[12, 0]]], legs: [[[-6, 25]], [[6, 25]]], shirt: '#8e4fb5', pants: SKIN, hair: '#5b3a26',
+    behind: P('M90 30 Q84 80 92 98 L148 98 Q156 80 150 30Z', G('#5b3a26'), ink()),
+    front: P('M100 100 L140 100 L160 168 L80 168Z', G('#8e4fb5'), ink()) })],
+  // ---- 高、矮、瘦、胖：旁邊都有同一把尺 ----
+  'size-tall': () => [ruler(), `<g transform="translate(-14 0)">`, kid({ head: [0, -33], sh: [0, -23], hip: [0, 4], arms: [[[-11, 2]], [[11, 2]]], legs: [[[-5, 26]], [[5, 26]]], shirt: '#3d9a5b', headR: 22 }), `</g>`],
+  'size-short': () => [ruler(), `<g transform="translate(-14 0)">`, grp(0.6, kid({ shirt: '#f6c43a' })), `</g>`],
+  'size-thin': () => [ruler(), `<g transform="translate(-14 0)">`, grp(0.85, kid({ shirt: '#5ab4e6', torso: 14, arm: 7, leg: 8, headR: 22 })), `</g>`],
+  'size-big': () => [ruler(), `<g transform="translate(-14 0)">`, grp(0.85, kid({ shirt: '#ef6a5e', torso: 58, arm: 16, leg: 18, arms: [[[-16, -2]], [[16, -2]]], legs: [[[-8, 22]], [[8, 22]]] })), `</g>`],
+  // ---- 天氣 ----
+  'wx-sunny': () => scene('#bfe6f6', [sunRays(120, 100, 34), land()]),
+  'wx-cloudy': () => scene('#c9d6e0', [cloud(90, 90, 1.1, '#eef2f5'), cloud(150, 124, 1.2, '#dfe6ec'), land('#7fae62')]),
+  'wx-rainy': () => scene('#aebccb', [cloud(120, 80, 1.4, '#dfe6ec'), drop(84, 122), drop(116, 136), drop(148, 120), drop(100, 156), drop(140, 152), land('#6f9d58')]),
+  'wx-windy': () => scene('#cfeefe', [land(), `<g transform="rotate(14 88 172)">`, tree(88, 172, 1.1), `</g>`,
+    P('M120 70 Q160 60 176 74 Q186 86 172 92 M110 104 Q156 96 190 108 M126 136 Q160 130 182 140', 'none', 'stroke="#ffffff" stroke-width="7" stroke-linecap="round"'),
+    P('M120 70 Q160 60 176 74 Q186 86 172 92 M110 104 Q156 96 190 108 M126 136 Q160 130 182 140', 'none', 'stroke="#7fb7d6" stroke-width="2.5" stroke-linecap="round"')]),
+  'wx-snowy': () => scene('#9fb6cf', [cloud(120, 70, 1.3, '#eef2f5'), ...[[70, 116], [110, 132], [150, 112], [180, 146], [90, 152], [136, 158]].map(([x, y]) => flake(x, y, 9)), land('#ffffff')]),
+  'wx-foggy': () => scene('#d5dbe0', [land('#9fbf8e'), house(146, 168), tree(80, 168, 0.9), R(30, 34, 180, 172, '#eef1f4', 'opacity=".55"'),
+    P('M44 92 L196 92 M30 124 L170 124 M60 152 L210 152', 'none', 'stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity=".95"')]),
+  // ---- 溫度計 ----
+  'temp-hot': () => thermo(0.95, '#e5484d', sunRays(186, 62, 14)),
+  'temp-warm': () => thermo(0.68, '#f08a2a'),
+  'temp-cool': () => thermo(0.4, '#7fc4e6'),
+  'temp-cold': () => thermo(0.12, '#3d7fd6', C(186, 62, 20, '#3d7fd6', ink(3)) + flake(186, 62, 12)),
+  // ---- 打招呼 ----
+  'greet-hi': () => [R(30, 34, 74, 140, G('#c98b52'), ink()), C(92, 106, 4, INK),
+    kid({ head: [6, -26], sh: [6, -16], hip: [6, 4], arms: [[[-4, -2]], [[18, -22], [22, -34]]], legs: [[[0, 22]], [[12, 22]]], shirt: '#5ab4e6' }),
+    P('M200 60 Q208 72 200 84 M210 52 Q222 72 210 92', 'none', ink(3.5))],
+  'greet-goodbye': () => [house(64, 200), kid({ head: [16, -26], sh: [14, -16], hip: [12, 4], arms: [[[2, -26], [-4, -36]], [[22, -2]]], legs: [[[4, 22]], [[22, 20]]], shirt: '#f6c43a',
+    behind: RR(150, 92, 30, 40, 8, G('#e5484d'), ink(3.5)) }), P('M70 36 Q78 48 70 60 M58 30 Q70 48 58 66', 'none', ink(3.5)), speedLines(196, [180, 194])],
+  'greet-sorry': () => [kid({ head: [-4, -20], sh: [-2, -12], hip: [0, 6], arms: [[[-4, 2]], [[4, 2]]], legs: [[[-6, 22]], [[6, 22]]], shirt: '#8e4fb5', closed: true }),
+    P('M78 40 Q84 32 90 40 M96 30 Q102 22 108 30', 'none', 'stroke="#5ab4e6" stroke-width="4" stroke-linecap="round"'),
+    E(184, 210, 30, 7, '#f6a93b', 'opacity=".85"'), `<g transform="rotate(80 184 196)">`, P('M170 182 L198 182 L194 214 L174 214Z', '#e8f6fd', ink(3.5)), `</g>`],
+  'greet-stop': () => [stopSign(186, 70, 28), P('M186 98 L186 170', 'none', ink(6)), P('M186 98 L186 170', 'none', 'stroke="#b0bec5" stroke-width="2.5"'),
+    kid({ head: [-12, -26], sh: [-12, -16], hip: [-12, 4], arms: [[[-24, -2]], [[4, -12], [8, -18]]], legs: [[[-18, 22]], [[-6, 22]]], shirt: '#ef6a5e' })],
+  // ---- 動作補充：聽、拿 ----
+  'act-listen': () => [kid({ head: [-12, -26], sh: [-12, -16], hip: [-12, 4], arms: [[[-24, -2]], [[2, -14], [-2, -26]]], legs: [[[-18, 22]], [[-6, 22]]], shirt: '#43a047' }),
+    RR(170, 120, 44, 34, 8, G('#8d6e63'), ink(3.5)), C(184, 137, 9, '#3b4a5f', ink(2.5)), musicNote(176, 100), P('M152 128 Q146 118 152 108 M144 134 Q134 118 144 100', 'none', ink(3))],
+  'act-take': () => [RR(150, 150, 70, 16, 4, G('#c98b52'), ink(3.5)), P('M160 166 L156 212 M210 166 L214 212', 'none', ink(5)),
+    P('M156 150 Q156 118 185 118 Q214 118 214 150Z', G('#d9a35a'), ink(3.5)), C(176, 126, 11, G('#e8443a'), ink(3)), C(198, 124, 11, G('#8cc63f'), ink(3)),
+    kid({ head: [-14, -26], sh: [-14, -16], hip: [-14, 4], arms: [[[-26, -2]], [[2, -12], [14, -12]]], legs: [[[-20, 22]], [[-8, 22]]], shirt: '#3d7fd6',
+      front: C(162, 98, 11, G('#e8443a'), ink(3)) })],
+  // ---- 昆蟲 ----
+  ant: () => [P('M78 132 L58 166 M100 136 L94 176 M128 136 L140 174 M150 130 L176 160 M96 120 L80 92 M150 116 L168 90', 'none', ink(5)),
+    E(70, 130, 30, 24, G('#5d3a2a'), ink()), C(120, 128, 20, G('#5d3a2a'), ink()), C(170, 112, 26, G('#5d3a2a'), ink()),
+    P('M176 90 Q178 60 196 52 M186 94 Q200 70 218 70', 'none', ink(4)), eye(180, 110, 6), shine(62, 120, 10, 6)],
+  bee: () => [E(100, 82, 30, 20, '#e6f3fd', ink(3.5) + ' transform="rotate(-20 100 82)"'), E(140, 80, 28, 18, '#e6f3fd', ink(3.5) + ' transform="rotate(20 140 80)"'),
+    P('M58 134 L40 134', 'none', ink(5)), E(120, 134, 64, 46, G('#f6c43a'), ink()),
+    `<clipPath id="beeb"><ellipse cx="120" cy="134" rx="64" ry="46"/></clipPath>`, `<g clip-path="url(#beeb)">`, P('M98 80 Q90 134 98 190 M130 80 Q122 134 130 190', 'none', `stroke="${INK}" stroke-width="14"`), `</g>`,
+    E(120, 134, 64, 46, 'none', ink()), eye(160, 124, 7), smile(166, 148, 6), P('M168 92 Q174 70 188 64 M176 98 Q190 80 204 82', 'none', ink(3.5))],
+  butterfly: () => [E(84, 92, 40, 44, G('#f48fb1'), ink()), E(156, 92, 40, 44, G('#f48fb1'), ink()), E(90, 156, 30, 30, G('#f6c43a'), ink()), E(150, 156, 30, 30, G('#f6c43a'), ink()),
+    C(84, 92, 12, '#ffffff', 'opacity=".7"'), C(156, 92, 12, '#ffffff', 'opacity=".7"'),
+    RR(110, 76, 20, 110, 10, G('#5d3a2a'), ink()), P('M114 78 Q104 50 92 44 M126 78 Q136 50 148 44', 'none', ink(3.5)), C(92, 44, 4, INK), C(148, 44, 4, INK)],
+  // ---- 小鳥部位 ----
+  'bird-tail': () => birdPart('tail'), 'bird-wing': () => birdPart('wing'), 'bird-eye': () => birdPart('eye'), 'bird-leg': () => birdPart('leg'),
+  // ---- 天空 ----
+  'sky-sun': () => [RR(30, 30, 180, 180, 26, '#bfe6f6', ink()), sunRays(120, 120, 42)],
+  'sky-moon': () => [RR(30, 30, 180, 180, 26, '#1f2f6b', ink()), '<clipPath id="mn"><circle cx="112" cy="124" r="60"/></clipPath>', C(112, 124, 58, G('#fff3b0'), ink()),
+    '<g clip-path="url(#mn)">', C(144, 104, 50, '#1f2f6b', ink()), '</g>', C(176, 176, 3, '#fff'), C(64, 58, 3, '#fff')],
+  'sky-star': () => [RR(30, 30, 180, 180, 26, '#1f2f6b', ink()), starShape(120, 124, 62)],
+  'sky-planet': () => [RR(30, 30, 180, 180, 26, '#1f2f6b', ink()),
+    `<g transform="rotate(-18 120 122)">`, P('M34 122 A86 24 0 0 1 206 122', 'none', `stroke="${INK}" stroke-width="16" stroke-linecap="round"`), P('M34 122 A86 24 0 0 1 206 122', 'none', 'stroke="#f6d38a" stroke-width="8" stroke-linecap="round"'), `</g>`,
+    C(120, 122, 46, G('#f0a868'), ink()), P('M80 108 Q120 98 160 108 M76 130 Q120 122 164 130', 'none', 'stroke="#c97a3a" stroke-width="5" stroke-linecap="round"'),
+    `<g transform="rotate(-18 120 122)">`, P('M34 122 A86 24 0 0 0 206 122', 'none', `stroke="${INK}" stroke-width="16" stroke-linecap="round"`), P('M34 122 A86 24 0 0 0 206 122', 'none', 'stroke="#f6d38a" stroke-width="8" stroke-linecap="round"'), `</g>`,
+    C(60, 60, 3, '#fff'), C(182, 184, 3, '#fff'), C(186, 56, 2.5, '#fff')],
+  // ---- 冷熱 ----
+  'heat-fire': () => [P('M70 200 L170 176 M70 176 L170 200', 'none', `stroke="${INK}" stroke-width="22" stroke-linecap="round"`), P('M70 200 L170 176 M70 176 L170 200', 'none', 'stroke="#8a5a36" stroke-width="14" stroke-linecap="round"'),
+    flameP(120, 144, 1.7)],
+  'heat-boil': () => [RR(56, 190, 128, 18, 6, G('#78909c'), ink(3.5)), flameP(98, 202, 0.4), flameP(142, 202, 0.4),
+    P('M60 108 L180 108 L172 186 L68 186Z', G('#9aa5ad'), ink()), P('M46 112 L60 112 M180 112 L194 112', 'none', ink(8)), E(120, 108, 60, 12, G('#5ab4e6'), ink(3.5)),
+    C(100, 104, 6, '#ffffff', ink(2)), C(126, 100, 8, '#ffffff', ink(2)), C(146, 106, 5, '#ffffff', ink(2)),
+    P('M96 84 Q88 70 96 58 Q104 46 96 34 M124 84 Q116 70 124 58 Q132 46 124 34 M150 84 Q142 70 150 58', 'none', 'stroke="#b0bec5" stroke-width="5" stroke-linecap="round"')],
+  'heat-ice': () => [P('M54 120 L110 104 L126 160 L70 176Z', G('#bfe8fb'), ink()), P('M120 90 L176 84 L184 142 L128 148Z', G('#d6f1fd'), ink()), P('M98 150 L150 142 L160 196 L106 204Z', G('#a9def7'), ink()),
+    shine(80, 128, 10, 4), shine(146, 100, 10, 4), shine(118, 160, 10, 4)],
+  'heat-snow': () => [RR(30, 30, 180, 180, 26, '#9fb6cf', ink()), P('M30 170 Q80 150 120 166 Q170 146 210 168 L210 184 Q210 210 184 210 L56 210 Q30 210 30 184Z', '#ffffff', ink(3.5)),
+    ...[[64, 70, 12], [120, 56, 14], [176, 76, 12], [90, 116, 10], [154, 124, 12]].map(([x, y, r]) => flake(x, y, r))],
+  // ---- 危險 ----
+  'danger-stove': () => [RR(110, 150, 104, 60, 6, G('#cfd8dc'), ink()), flameP(162, 150, 0.45), P('M128 108 L196 108 L190 146 L134 146Z', G('#78909c'), ink()),
+    P('M140 96 Q134 84 140 72 M162 96 Q156 84 162 72', 'none', 'stroke="#b0bec5" stroke-width="5" stroke-linecap="round"'),
+    kid({ head: [-22, -26], sh: [-22, -16], hip: [-22, 4], arms: [[[-34, -2]], [[-8, -14], [0, -14]]], legs: [[[-28, 22]], [[-16, 22]]], shirt: '#f6c43a', mouth: 'o' })],
+  'danger-road': () => scene('#cfeefe', [R(30, 120, 180, 96, '#8a9099'), P('M40 168 L70 168 M100 168 L130 168 M160 168 L190 168', 'none', 'stroke="#ffffff" stroke-width="6"'),
+    car(74, 160, '#3d7fd6'), smallBall(164, 180, 16, '#e5484d'), speedLines(128, [140, 152])]),
+  'danger-plug': () => [RR(110, 70, 90, 110, 14, G('#f5f1e6'), ink()), RR(136, 100, 12, 24, 4, INK), RR(162, 100, 12, 24, 4, INK),
+    P('M126 144 L112 132 M190 144 L204 132 M156 154 L156 172', 'none', 'stroke="#f6c43a" stroke-width="5" stroke-linecap="round"'),
+    kid({ head: [-24, -26], sh: [-24, -16], hip: [-24, 4], arms: [[[-36, -2]], [[-10, -10], [2, -10]]], legs: [[[-30, 22]], [[-18, 22]]], shirt: '#5ab4e6' }),
+    P('M128 104 L142 110', 'none', ink(6)), P('M128 104 L142 110', 'none', 'stroke="#b0bec5" stroke-width="3"')],
+  'danger-glass': () => [land('#e8dcc4'), P('M60 196 L84 180 L92 200Z', '#d6f1fd', ink(3)), P('M110 190 L140 176 L132 204Z', '#d6f1fd', ink(3)), P('M150 200 L176 186 L182 206Z', '#d6f1fd', ink(3)),
+    `<g transform="rotate(20 120 130)">`, P('M96 106 L144 106 L138 154 L102 154Z', '#e8f6fd', ink()), P('M100 130 L118 120 L126 138 L140 128', 'none', ink(3)), `</g>`,
+    P('M70 70 L80 50 M120 60 L120 38 M170 70 L160 50', 'none', 'stroke="#e5484d" stroke-width="6" stroke-linecap="round"')],
+  // ---- 環境：保護與汙染 ----
+  'eco-recycle': () => [bin(166, 206, '#3d7fd6'), kid({ head: [-22, -26], sh: [-22, -16], hip: [-22, 4], arms: [[[-34, -2]], [[-6, -14], [6, -16]]], legs: [[[-28, 22]], [[-16, 22]]], shirt: '#43a047',
+    front: RR(128, 72, 16, 34, 6, G('#7fd0f5'), ink(3)) })],
+  'eco-tree': () => [land('#a0744a'), tree(170, 172, 0.8), kid({ head: [-20, -22], sh: [-20, -12], hip: [-20, 8], arms: [[[-4, 4]], [[4, 2]]], legs: [[[-28, 22]], [[-12, 22]]], shirt: '#f08a4a' }),
+    P('M122 180 L150 150', 'none', ink(5)), RR(142, 140, 20, 14, 3, G('#9aa5ad'), ink(3))],
+  'eco-bike': () => [C(70, 180, 28, 'none', ink(6)), C(170, 180, 28, 'none', ink(6)), P('M70 180 L104 140 L150 140 L170 180 M104 140 L120 180 L150 140', 'none', 'stroke="#3d9a5b" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"'),
+    kid({ head: [2, -38], sh: [0, -28], hip: [-4, -8], arms: [[[10, -18]], [[12, -16]]], legs: [[[4, 4], [0, 15]], [[0, 6], [2, 15]]], shirt: '#ef6a5e' }), tree(200, 120, 0.5)],
+  'eco-light': () => [RR(56, 40, 128, 160, 16, '#2f3d63', ink()), C(120, 92, 26, '#cfd8dc', ink()), RR(110, 116, 20, 14, 3, '#9aa5ad', ink(3)),
+    RR(150, 150, 30, 40, 6, '#ffffff', ink(3.5)), RR(158, 166, 14, 18, 3, '#b0bec5', ink(2.5)), C(160, 142, 10, SKIN, ink(3))],
+  'eco-smoke': () => [land('#7a8a6a'), R(60, 110, 110, 70, G('#9aa5ad'), ink()), R(130, 60, 22, 60, G('#78909c'), ink()), R(84, 70, 18, 50, G('#78909c'), ink()),
+    smokeP(150, 46, '#5f646b'), smokeP(98, 56, '#6f747b'), R(72, 140, 20, 20, '#ffd54a', ink(2.5)), R(108, 140, 20, 20, '#ffd54a', ink(2.5))],
+  'eco-car': () => [land('#8a9099'), car(134, 178, '#f6c43a'), cloud(66, 164, 0.7, '#5f646b'), cloud(48, 134, 0.6, '#6f747b')],
+  'eco-litter': () => [land(), P('M66 196 L86 186 L94 200Z', '#e8f6fd', ink(2.5)), RR(120, 190, 24, 12, 3, '#e5484d', ink(2.5)), E(176, 198, 14, 6, '#cfd8dc', ink(2.5)),
+    kid({ head: [-16, -26], sh: [-16, -16], hip: [-16, 4], arms: [[[-28, -2]], [[2, -12], [12, -4]]], legs: [[[-22, 22]], [[-10, 22]]], shirt: '#9aa5ad' }),
+    `<g transform="rotate(30 166 150)">`, RR(158, 140, 16, 22, 3, '#e8f6fd', ink(2.5)), `</g>`],
+  'eco-burn': () => [land('#7a8a6a'), P('M70 196 L170 196 L156 170 L84 170Z', '#6d6475', ink()), flameP(100, 172, 0.6), flameP(140, 172, 0.7), smokeP(118, 96, '#5f646b'), smokeP(88, 60, '#6f747b')],
+  // ---- 方向 ----
+  'arrow-up': () => arrowCard(-90), 'arrow-down': () => arrowCard(90), 'arrow-left': () => arrowCard(180), 'arrow-right': () => arrowCard(0),
+  'compass-north': () => compassCard(-90), 'compass-south': () => compassCard(90), 'compass-east': () => compassCard(0), 'compass-west': () => compassCard(180),
+  // ---- 地形 ----
+  'land-hole': () => scene('#cfeefe', [land(), E(110, 188, 46, 14, '#3b2a1e', ink(3.5)), P('M150 178 Q170 150 196 178Z', G('#8a5a36'), ink(3.5)), P('M182 128 L166 176', 'none', ink(6)), RR(156, 168, 22, 14, 3, G('#9aa5ad'), ink(3))]),
+  'land-hill': () => scene('#cfeefe', [P('M30 192 Q120 70 210 192Z', G('#7cbf5a'), ink()), R(30, 186, 180, 30, '#8bc66a', ink(3)), flower(96, 150, '#f48fb1', 6), flower(140, 140, '#ffd54a', 6)]),
+  'land-rock': () => scene('#cfeefe', [land(), P('M56 180 L74 120 L124 98 L170 120 L188 180Z', G('#9aa5ad'), ink()), P('M96 130 L110 150 M140 120 L150 140', 'none', ink(3))]),
+  'land-mud': () => scene('#cfeefe', [land(), E(120, 186, 76, 20, G('#7a5236'), ink()), C(96, 182, 6, '#5d3a2a'), C(140, 190, 5, '#5d3a2a'), shine(100, 178, 14, 3, 0)]),
+  // ---- 材料 ----
+  'mat-wood': () => [RR(40, 96, 150, 64, 30, G('#b07a48'), ink()), E(186, 128, 26, 32, G('#e2b47c'), ink()), E(186, 128, 14, 18, 'none', ink(3)), E(186, 128, 5, 7, 'none', ink(2.5)),
+    P('M64 112 L150 112 M70 140 L160 140', 'none', 'stroke="#8a5a36" stroke-width="4" stroke-linecap="round"')],
+  'mat-stone': () => [P('M44 176 Q34 130 70 108 Q100 82 146 92 Q196 100 202 146 Q206 184 160 192 L80 194 Q50 192 44 176Z', G('#9aa5ad'), ink()), P('M90 130 L104 146 M150 120 L140 140', 'none', ink(3)), shine(92, 112, 18, 7)],
+  'mat-glass': () => [P('M70 50 L170 50 L160 196 L80 196Z', '#e8f6fd', ink() + ' opacity=".95"'), P('M76 92 L164 92 L160 196 L80 196Z', G('#bfe8fb')), P('M70 50 L170 50 L160 196 L80 196Z', 'none', ink()),
+    P('M92 70 L88 176', 'none', 'stroke="#ffffff" stroke-width="7" stroke-linecap="round"')],
+  'mat-gold': () => [P('M40 186 L60 150 L120 150 L140 186Z', G('#f2c230'), ink()), P('M100 186 L120 150 L180 150 L200 186Z', G('#f2c230'), ink()), P('M70 148 L90 112 L150 112 L170 148Z', G('#f6d34a'), ink()),
+    P('M60 150 L120 150 M90 112 L150 112', 'none', 'stroke="#fff3b0" stroke-width="4"'), P('M182 72 L188 86 L202 92 L188 98 L182 112 L176 98 L162 92 L176 86Z', '#ffffff', ink(2.5)), P('M58 86 L62 96 L72 100 L62 104 L58 114 L54 104 L44 100 L54 96Z', '#ffffff', ink(2.5))],
+  'mat-paper': () => [P('M60 40 L156 40 L184 68 L184 200 L60 200Z', G('#ffffff'), ink()), P('M156 40 L156 68 L184 68Z', '#e3e8ec', ink(3.5)),
+    P('M80 96 L164 96 M80 120 L164 120 M80 144 L164 144 M80 168 L140 168', 'none', 'stroke="#9fc3e0" stroke-width="4" stroke-linecap="round"')],
+  // ---- 數字卡：數字由遊戲疊上去 ----
+  numcard: () => [RR(34, 40, 172, 164, 20, G('#ffffff'), ink()), R(84, 28, 72, 24, '#f2b84b', 'opacity=".9" transform="rotate(-4 120 40)"')],
   // ---- 月份：月曆頁，月份名稱由遊戲疊上去（Andika）----
   calendar: () => [
     RR(28, 46, 184, 164, 18, G('#ffffff'), ink()),

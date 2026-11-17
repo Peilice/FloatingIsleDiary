@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="30" y="30" width="180" height="180" rx="26" fill="#9fb6cf" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M30 170 Q80 150 120 166 Q170 146 210 168 L210 184 Q210 210 184 210 L56 210 Q30 210 30 184Z" fill="#ffffff" stroke="#2b3a55" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M52.0 70.0 L76.0 70.0 M58.0 59.6 L70.0 80.4 M70.0 59.6 L58.0 80.4 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="64" cy="70" r="2.5" fill="#ffffff" />
+    <path d="M106.0 56.0 L134.0 56.0 M113.0 43.9 L127.0 68.1 M127.0 43.9 L113.0 68.1 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="120" cy="56" r="2.5" fill="#ffffff" />
+    <path d="M164.0 76.0 L188.0 76.0 M170.0 65.6 L182.0 86.4 M182.0 65.6 L170.0 86.4 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="176" cy="76" r="2.5" fill="#ffffff" />
+    <path d="M80.0 116.0 L100.0 116.0 M85.0 107.3 L95.0 124.7 M95.0 107.3 L85.0 124.7 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="90" cy="116" r="2.5" fill="#ffffff" />
+    <path d="M142.0 124.0 L166.0 124.0 M148.0 113.6 L160.0 134.4 M160.0 113.6 L148.0 134.4 " fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/><circle cx="154" cy="124" r="2.5" fill="#ffffff" />
+  </g>
+</svg>

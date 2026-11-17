@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#fadd8d"/><stop offset="0.55" stop-color="#f6c43a"/><stop offset="1" stop-color="#cfa73a"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <rect x="30" y="168" width="180" height="50" fill="#8a9099" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M88 178 L88 160 L108 158 L120 140 L154 140 L166 158 L180 162 L180 178Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="124" y="144" width="26" height="14" fill="#cfeefe" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="108" cy="180" r="11" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><circle cx="160" cy="180" r="11" fill="#3b4a5f" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="49.2" cy="168.2" r="13.7" fill="#2b3a55" /><circle cx="66" cy="161.2" r="17.9" fill="#2b3a55" /><circle cx="82.8" cy="168.2" r="13.7" fill="#2b3a55" /><circle cx="66" cy="171" r="15.1" fill="#2b3a55" /><circle cx="49.2" cy="168.2" r="11.2" fill="#5f646b" /><circle cx="66" cy="161.2" r="15.399999999999999" fill="#5f646b" /><circle cx="82.8" cy="168.2" r="11.2" fill="#5f646b" /><circle cx="66" cy="171" r="12.6" fill="#5f646b" />
+    <circle cx="33.6" cy="137.6" r="12.1" fill="#2b3a55" /><circle cx="48" cy="131.6" r="15.7" fill="#2b3a55" /><circle cx="62.4" cy="137.6" r="12.1" fill="#2b3a55" /><circle cx="48" cy="140" r="13.299999999999999" fill="#2b3a55" /><circle cx="33.6" cy="137.6" r="9.6" fill="#6f747b" /><circle cx="48" cy="131.6" r="13.2" fill="#6f747b" /><circle cx="62.4" cy="137.6" r="9.6" fill="#6f747b" /><circle cx="48" cy="140" r="10.799999999999999" fill="#6f747b" />
+  </g>
+</svg>

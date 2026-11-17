@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99c6f1"/><stop offset="0.55" stop-color="#4f9de6"/><stop offset="1" stop-color="#4687c7"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99c6f1"/><stop offset="0.55" stop-color="#4f9de6"/><stop offset="1" stop-color="#4687c7"/></radialGradient>
+    <radialGradient id="g2" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99c6f1"/><stop offset="0.55" stop-color="#4f9de6"/><stop offset="1" stop-color="#4687c7"/></radialGradient>
+    <radialGradient id="g3" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99c6f1"/><stop offset="0.55" stop-color="#4f9de6"/><stop offset="1" stop-color="#4687c7"/></radialGradient>
+    <radialGradient id="g4" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#99c6f1"/><stop offset="0.55" stop-color="#4f9de6"/><stop offset="1" stop-color="#4687c7"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <clipPath id="sc"><rect x="30" y="34" width="180" height="172" rx="26"/></clipPath>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="#aebccb" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <g clip-path="url(#sc)">
+    <circle cx="86.4" cy="88.4" r="24.9" fill="#2b3a55" /><circle cx="120" cy="74.4" r="33.3" fill="#2b3a55" /><circle cx="153.6" cy="88.4" r="24.9" fill="#2b3a55" /><circle cx="120" cy="94" r="27.7" fill="#2b3a55" /><circle cx="86.4" cy="88.4" r="22.4" fill="#dfe6ec" /><circle cx="120" cy="74.4" r="30.799999999999997" fill="#dfe6ec" /><circle cx="153.6" cy="88.4" r="22.4" fill="#dfe6ec" /><circle cx="120" cy="94" r="25.2" fill="#dfe6ec" />
+    <path d="M84 122 Q77 134 84 138 Q91 134 84 122Z" fill="url(#g0)" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M116 136 Q109 148 116 152 Q123 148 116 136Z" fill="url(#g1)" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M148 120 Q141 132 148 136 Q155 132 148 120Z" fill="url(#g2)" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M100 156 Q93 168 100 172 Q107 168 100 156Z" fill="url(#g3)" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M140 152 Q133 164 140 168 Q147 164 140 152Z" fill="url(#g4)" stroke="#2b3a55" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <rect x="30" y="168" width="180" height="50" fill="#6f9d58" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    </g>
+    <rect x="30" y="34" width="180" height="172" rx="26" fill="none" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>
