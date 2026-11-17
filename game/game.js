@@ -115,7 +115,10 @@
 
   // 洞穴（M4）：在海灘左邊。§5 原定「圖鑑 20 項」解鎖，但目前圖鑑只有 14 項，先暫定 12 項，圖鑑擴充後改回
   const COFF = -2560;
-  const CAVE_LIB = 20;     // §5：圖鑑 20 項（圖鑑擴充到 23 項後改回原定值）
+  const CAVE_LIB = 20;
+  // 生態研究所：圖鑑 23 項開放。固定項數、不是「全部」：圖鑑之後陸續擴充，開放時間也不會跟著變晚
+  // （目前圖鑑剛好 23 項，等於原本的「全部收集」，認真玩約第 11～12 天開放）
+  const ECO_LIB = 23;     // §5：圖鑑 20 項（圖鑑擴充到 23 項後改回原定值）
   const CAVE = [
     { k: 'light', x: 330, en: 'Light', zh: '找植物', color: 0xf9a825 },
     { k: 'moon',  x: 640, en: 'Moon',  zh: '月亮',   color: 0x3949ab },
@@ -279,7 +282,23 @@
     { k: 'lamppost',  zh: '路燈',   en: 'lamp',     lib: 17, price: 45, x: 330,  y: 470 },
     { k: 'flag',      zh: '旗子',   en: 'flag',     lib: 20, price: 55, x: 870,  y: 430 },
     { k: 'fountain',  zh: '噴水池', en: 'fountain', lib: 23, price: 80, x: 190,  y: 582 },
+    // 其他島的裝飾（2026-11-17）：島開放就能買，貼紙擺在島上（x、y 是島內座標，y 是底部落點），size 是顯示大小
+    { k: 'birdhouse',  zone: 'forest',     zh: '鳥屋',     en: 'bird house', price: 60,  x: 850,  y: 450, size: 110 },
+    { k: 'log',        zone: 'forest',     zh: '圓木椅',   en: 'log',        price: 70,  x: 480,  y: 450, size: 100 },
+    { k: 'signpost',   zone: 'forest',     zh: '路標',     en: 'sign',       price: 80,  x: 160,  y: 560, size: 110 },
+    { k: 'sandcastle', zone: 'beach',      zh: '沙堡',     en: 'sand castle', price: 70, x: 325,  y: 470, size: 90 },
+    { k: 'shells',     zone: 'beach',      zh: '貝殼',     en: 'shells',     price: 80,  x: 745,  y: 470, size: 92 },
+    { k: 'parasol',    zone: 'beach',      zh: '海灘傘',   en: 'umbrella',   price: 90,  x: 955,  y: 480, size: 120 },
+    { k: 'mushrooms',  zone: 'cave',       zh: '發光蘑菇', en: 'mushrooms',  price: 90,  x: 190,  y: 620, size: 100 },
+    { k: 'crystals',   zone: 'cave',       zh: '水晶',     en: 'crystals',   price: 100, x: 485,  y: 600, size: 100 },
+    { k: 'lantern',    zone: 'cave',       zh: '燈籠',     en: 'lantern',    price: 110, x: 800,  y: 590, size: 120 },
+    { k: 'windmill',   zone: 'lighthouse', zh: '風車',     en: 'windmill',   price: 100, x: 130,  y: 580, size: 140 },
+    { k: 'telescope',  zone: 'lighthouse', zh: '望遠鏡',   en: 'telescope',  price: 120, x: 915,  y: 600, size: 110 },
+    { k: 'kite',       zone: 'lighthouse', zh: '風箏',     en: 'kite',       price: 150, x: 430,  y: 330, size: 110 },
   ];
+  DECOR.forEach((d) => { d.zone = d.zone || 'meadow'; d.lib = d.lib || 0; });
+  const zoneOff = (z) => ({ meadow: 0, forest: OFF, beach: BOFF, cave: COFF, lighthouse: LOFF, research: ROFF })[z];
+  const DECOR_TABS = [['meadow', '草地'], ['forest', '森林'], ['beach', '海灘'], ['cave', '洞穴'], ['lighthouse', '燈塔']];
 
   // 指路（§4.17）：市集的第三種訂單 Where is the zoo?，十字路口四個方向各有一個地點
   const PLACES = ['zoo', 'park', 'library', 'hospital', 'school', 'store'];
@@ -1704,11 +1723,11 @@
       const before = new Set(this.children.list);
       const zoneObjs = {};
       const grab = (z, fn) => { const b = new Set(this.children.list); fn(); zoneObjs[z] = this.children.list.filter((o) => !b.has(o)); };
-      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); this.buildCritter(); this.buildDecorObjs(); });
-      grab('forest', () => { this.buildForest(); this.buildFacility('bridge'); });
-      grab('beach', () => { this.buildBeach(); this.buildFacility('dock'); });
-      grab('cave', () => { this.buildCave(); this.buildFacility('stairs'); });
-      grab('lighthouse', () => this.buildLighthouse());
+      grab('meadow', () => { this.buildIsland(); this.buildPlots(); this.buildRabbit(); this.buildPip(); this.buildFacility('well'); this.buildCritter(); this.buildDecorObjs('meadow'); });
+      grab('forest', () => { this.buildForest(); this.buildFacility('bridge'); this.buildDecorObjs('forest'); });
+      grab('beach', () => { this.buildBeach(); this.buildFacility('dock'); this.buildDecorObjs('beach'); });
+      grab('cave', () => { this.buildCave(); this.buildFacility('stairs'); this.buildDecorObjs('cave'); });
+      grab('lighthouse', () => { this.buildLighthouse(); this.buildDecorObjs('lighthouse'); });
       grab('research', () => this.buildResearch());
       const world = new Set(this.children.list.filter((o) => !before.has(o)));
       this.buildToolbar();
@@ -5634,12 +5653,12 @@
       const s = this.s;
       if (gk === 'weather') return !!(s.forestOpen && s.beachOpen && s.caveOpen && s.lightOpen);
       if (gk === 'geo') return !!(s.lightOpen && (s.lightDone || 0) >= GEO_NEED);
-      return this.libCount() >= LIB.length;
+      return this.libCount() >= ECO_LIB;
     }
     groupNeed(gk) {
       if (gk === 'weather') return '要先開放草地、海灘、森林、洞穴、燈塔 5 區';
       if (gk === 'geo') return '燈塔實驗再完成 ' + Math.max(0, GEO_NEED - (this.s.lightDone || 0)) + ' 回合';
-      return '圖鑑還差 ' + Math.max(0, LIB.length - this.libCount()) + ' 項';
+      return '圖鑑還差 ' + Math.max(0, ECO_LIB - this.libCount()) + ' 項';
     }
     researchOpen() { return RGROUPS.some((g) => this.groupOpen(g.k)); }
 
@@ -6314,11 +6333,18 @@
       this.time.delayedCall(BOT ? 20 : 1600, () => { if (this.pk === cur && this.modal === 'pick') this.closeModal(); });
     }
 
-    // ---------- 裝飾：圖鑑達到項數後用星砂買，擺在草地上 ----------
-    buildDecorObjs() {
-      this.decorObjs = {};
-      DECOR.forEach((d) => { this.decorObjs[d.k] = this.add.graphics({ x: d.x, y: d.y }).setDepth(d.k === 'fence' ? 5 : 8).setVisible(false); drawDecor(this.decorObjs[d.k], d.k); });
+    // ---------- 裝飾：草地的要圖鑑達到項數，其他島的要島開放；用星砂買，擺在那座島上 ----------
+    buildDecorObjs(zone) {
+      this.decorObjs = this.decorObjs || {};
+      DECOR.filter((d) => d.zone === zone).forEach((d) => {
+        const x = zoneOff(zone) + d.x;
+        this.decorObjs[d.k] = this.textures.exists('st-decor-' + d.k)
+          ? this.add.image(x, d.y, 'st-decor-' + d.k).setOrigin(0.5, 0.9).setDisplaySize(d.size, d.size).setDepth(8).setVisible(false)
+          : this.add.graphics({ x, y: d.y }).setDepth(d.k === 'fence' ? 5 : 8).setVisible(false);
+        if (this.decorObjs[d.k].type === 'Graphics') drawDecor(this.decorObjs[d.k], d.k);
+      });
     }
+    decorOpen(d) { return d.zone === 'meadow' ? this.libCount() >= d.lib : !this.lockReason(d.zone); }
 
     renderDecor() { if (this.decorObjs) DECOR.forEach((d) => this.decorObjs[d.k].setVisible(!!this.s.decor[d.k])); }
 
@@ -6328,17 +6354,29 @@
       this.dcSub = txt(this, 640, 170, '', 19, '#4f5a6b').setOrigin(0.5);
       this.dcMsg = txt(this, 640, 600, '', 20, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5);
       c.add([this.dcSub, this.dcMsg]);
-      this.dcCards = DECOR.map((d, i) => {
-        const card = this.add.container(370 + (i % 3) * 270, 280 + Math.floor(i / 3) * 190);
+      // 島嶼分頁：每頁最多 6 張卡（草地 6 樣，其他島各 3 樣）
+      this.dcTab = 'meadow';
+      this.dcTabs = DECOR_TABS.map(([z, zh], i) => {
+        const b = this.add.container(424 + i * 108, 212);
+        const bg = this.add.image(0, 0, '__DEFAULT');
+        const t = txt(this, 0, 0, zh, 20, '#2b3a55').setOrigin(0.5);
+        b.add([bg, t]); b.setSize(100, 44).setInteractive({ useHandCursor: true });
+        b.on('pointerdown', () => { if (this.modal !== 'decor') return; this.dcTab = z; this.dcArm = null; this.dcMsg.setText(this.lockReason(z) ? '還不能去' + zh + '：' + this.lockReason(z) : ''); this.renderDecorShop(); });
+        c.add(b);
+        return { b, bg, z };
+      });
+      this.dcCards = [0, 1, 2, 3, 4, 5].map((i) => {
+        const card = this.add.container(370 + (i % 3) * 270, 330 + Math.floor(i / 3) * 160);
         const bg = this.add.graphics();
-        const pic = this.add.graphics({ y: -6 }).setScale(0.9); drawDecor(pic, d.k);
-        const name = txt(this, 0, 42, d.zh + ' ' + d.en, 20, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
-        const info = txt(this, 0, 68, '', 17, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
-        card.add([bg, pic, name, info]);
-        card.setSize(240, 170).setInteractive({ useHandCursor: true });
-        card.on('pointerdown', () => this.buyDecor(d.k));
+        const pic = this.add.graphics({ y: -16 }).setScale(0.8);
+        const img = this.add.image(0, -18, '__DEFAULT');
+        const name = txt(this, 0, 30, '', 19, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
+        const info = txt(this, 0, 54, '', 17, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5);
+        card.add([bg, pic, img, name, info]);
+        card.setSize(240, 148).setInteractive({ useHandCursor: true });
+        card.on('pointerdown', () => { if (card.d) this.buyDecor(card.d.k); });
         c.add(card);
-        return { card, bg, info, d };
+        return { card, bg, pic, img, name, info };
       });
       this.closeButton(c, 1050, 120, () => this.closeModal());
       this.dcBox = c;
@@ -6355,13 +6393,27 @@
 
     renderDecorShop() {
       const s = this.s, n = this.libCount();
-      this.dcSub.setText('圖鑑越完整，能買的裝飾越多（目前圖鑑 ' + n + ' / ' + LIB.length + ' 項，★ ' + s.stardust + '）');
-      this.dcCards.forEach((c) => {
-        const own = !!s.decor[c.d.k], open = n >= c.d.lib;
+      this.dcSub.setText(this.dcTab === 'meadow' ? '圖鑑越完整，能買的裝飾越多（目前圖鑑 ' + n + ' 項，★ ' + s.stardust + '）' : '島開放了就能買，會擺在那座島上（★ ' + s.stardust + '）');
+      this.dcTabs.forEach((t) => {
+        const on = t.z === this.dcTab, locked = !!this.lockReason(t.z);
+        stickerPill(t.bg, 100, 44, on ? 0xf2b84b : 0xfdf9f0);
+        t.b.setAlpha(locked && !on ? 0.5 : 1).setY(on ? 208 : 212);
+      });
+      const list = DECOR.filter((d) => d.zone === this.dcTab);
+      const zhOfZone = (DECOR_TABS.find((t) => t[0] === this.dcTab) || [])[1];
+      this.dcCards.forEach((c, i) => {
+        const d = list[i];
+        c.card.d = d; c.card.setVisible(!!d);
+        if (!d) return;
+        const own = !!s.decor[d.k], open = this.decorOpen(d);
+        const hasArt = this.textures.exists('st-decor-' + d.k);
+        c.img.setVisible(hasArt); c.pic.setVisible(!hasArt);
+        if (hasArt) c.img.setTexture('st-decor-' + d.k).setDisplaySize(84, 84); else drawDecor(c.pic, d.k);
+        c.name.setText(d.zh + ' ' + d.en);
         c.bg.clear();
-        paperCard(c.bg, -120, -85, 240, 170, 18, own ? 0xe8f5e9 : (open ? 0xffffff : 0xeeeeee), own ? 0x66bb6a : 0xd7ccc8);
+        paperCard(c.bg, -120, -74, 240, 148, 18, own ? 0xe8f5e9 : (open ? 0xffffff : 0xeeeeee), own ? 0x66bb6a : 0xd7ccc8);
         c.card.setAlpha(open || own ? 1 : 0.5);
-        c.info.setText(own ? '已經擺在草地上' : (open ? '★' + c.d.price : '圖鑑 ' + c.d.lib + ' 項才能買'));
+        c.info.setText(own ? '已經擺在' + zhOfZone + '上' : (open ? '★' + d.price : (d.zone === 'meadow' ? '圖鑑 ' + d.lib + ' 項才能買' : zhOfZone + '開放後才能買')));
         c.info.setColor(own ? '#2e7d32' : (open ? '#e65100' : '#757575'));
       });
     }
@@ -6369,7 +6421,7 @@
     buyDecor(k) {
       const s = this.s, d = DECOR.find((x) => x.k === k);
       if (this.modal !== 'decor' || s.decor[k]) return;
-      if (this.libCount() < d.lib) { this.dcMsg.setText('圖鑑要 ' + d.lib + ' 項才能買' + d.zh); return; }
+      if (!this.decorOpen(d)) { this.dcMsg.setText(d.zone === 'meadow' ? '圖鑑要 ' + d.lib + ' 項才能買' + d.zh : '這座島還沒開放'); return; }
       // 點一下顯示價格，3 秒內再點一次才買
       if (this.dcArm !== k) {
         this.dcArm = k;
@@ -6383,7 +6435,7 @@
       s.decor[k] = true;
       this.touch('decor');
       speak('It looks nice!');
-      this.dcMsg.setText(d.zh + '擺好了！回草地看看');
+      this.dcMsg.setText(d.zh + '擺好了！去' + DECOR_TABS.find((t) => t[0] === d.zone)[1] + '看看');
       this.renderDecorShop();
       this.refreshAll();
     }

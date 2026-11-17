@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="g0" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#c8ac90"/><stop offset="0.55" stop-color="#a0703f"/><stop offset="1" stop-color="#88623e"/></radialGradient>
+    <radialGradient id="g1" cx="0.36" cy="0.3" r="0.85"><stop offset="0" stop-color="#eed4b3"/><stop offset="0.55" stop-color="#e2b47c"/><stop offset="1" stop-color="#bf9a70"/></radialGradient>
+    <filter id="sticker" x="-12%" y="-12%" width="124%" height="130%">
+      <feMorphology in="SourceAlpha" operator="dilate" radius="9" result="d"/>
+      <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+      <feGaussianBlur in="d" stdDeviation="4" result="b"/><feOffset in="b" dy="6" result="o"/>
+      <feFlood flood-color="#3b2f1e" flood-opacity=".3"/><feComposite in2="o" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#sticker)">
+    <ellipse cx="120" cy="200" rx="86" ry="12" fill="#3b2f1e" opacity=".18"/>
+    <rect x="40" y="130" width="150" height="64" rx="30" fill="url(#g0)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="186" cy="162" rx="26" ry="32" fill="url(#g1)" stroke="#2b3a55" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <ellipse cx="186" cy="162" rx="14" ry="18" fill="none" stroke="#2b3a55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M60 148 L150 148 M66 176 L160 176" fill="none" stroke="#7a5236" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="70" cy="121" r="5.25" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="76.65731544119922" cy="125.83663430822007" r="5.25" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="74.1149165213849" cy="133.66281396675132" r="5.25" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="65.88613290934434" cy="133.6635763930948" r="5.25" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="63.34228378591026" cy="125.83786799370468" r="5.25" fill="#f48fb1" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/><circle cx="70" cy="128" r="3.8500000000000005" fill="#fff3b0" stroke="#2b3a55" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+</svg>

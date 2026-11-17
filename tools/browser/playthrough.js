@@ -124,9 +124,12 @@
   const cropFor = (want, s) => (PART_OF[want] ? want : Object.keys(PART_OF).find((k) => PART_OF[k] === want && (s.inv[k] || 0) > 0) || Object.keys(PART_OF).find((k) => PART_OF[k] === want && s.seeds.includes(k)));
 
   // 裝飾：圖鑑夠、星砂多（留 30 顆）就買下一樣
-  const DECOR = [['flowerbed', 8, 20], ['fence', 10, 25], ['bench', 14, 35], ['lamppost', 17, 45], ['flag', 20, 55], ['fountain', 23, 80]];
+  const DECOR = [['flowerbed', 8, 20], ['fence', 10, 25], ['bench', 14, 35], ['lamppost', 17, 45], ['flag', 20, 55], ['fountain', 23, 80],
+    // 其他島的裝飾：島開放就能買（buyDecor 會擋還沒開放的島）
+    ['birdhouse', 0, 60, 'forest'], ['log', 0, 70, 'forest'], ['signpost', 0, 80, 'forest'], ['sandcastle', 0, 70, 'beach'], ['shells', 0, 80, 'beach'], ['parasol', 0, 90, 'beach'],
+    ['mushrooms', 0, 90, 'cave'], ['crystals', 0, 100, 'cave'], ['lantern', 0, 110, 'cave'], ['windmill', 0, 100, 'lighthouse'], ['telescope', 0, 120, 'lighthouse'], ['kite', 0, 150, 'lighthouse']];
   function decor(sc, s) {
-    const d = DECOR.find(([k, lib, price]) => !s.decor[k] && sc.libCount() >= lib && s.stardust >= price + 30);
+    const d = DECOR.find(([k, lib, price, zone]) => !s.decor[k] && sc.libCount() >= lib && s.stardust >= price + 30 && (!zone || !sc.lockReason(zone)));
     if (!d) return;
     sc.openDecor(); if (sc.modal !== 'decor') return;
     sc.buyDecor(d[0]); sc.buyDecor(d[0]); sc.closeModal();
