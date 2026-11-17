@@ -1351,6 +1351,16 @@
     return img;
   }
 
+  // bakeIn：容器 c 裡的靜態 Graphics g 換成烘焙好的 Image，放在 g 原本的圖層順序
+  function bakeIn(scene, c, g, x0, y0, w, h) {
+    const key = 'bake-' + (bakeN++);
+    bakeTex(scene, g, key, x0, y0, w, h);
+    const img = scene.add.image(x0, y0, key).setOrigin(0);
+    c.addAt(img, c.getIndex(g));
+    g.destroy();
+    return img;
+  }
+
   // 幫程式繪製的圖加墨線外框：fn(g) 畫兩次，第一次每個形狀都放大一圈、全部用墨色（半透明的高光跳過），第二次正常畫
   // fn 裡的 g.clear() 兩次都不會真的清除（一開始先清一次）
   function inked(g, fn, w) {
@@ -1779,6 +1789,8 @@
         t.fillStyle(0xffffff, 0.22); t.fillEllipse(OFF + x - 18, y - 30, 16, 9);
       });
 
+      bakeGfx(this, g, X - 540, 160, 1080, 560);   // 整座島（含背景）烘焙成一張圖
+      bakeGfx(this, t, OFF + 180, 340, 1020, 120);
       this.lotObjs = LOT_X.map((lx, i) => {
         const x = OFF + lx, y = LOT_Y;
         const base = this.add.graphics({ x, y }).setDepth(6);
@@ -3615,6 +3627,7 @@
       g.fillStyle(0xffccbc, 1); g.fillCircle(X - 470, 590, 9); g.fillCircle(X + 120, 600, 7); g.fillCircle(X + 455, 585, 8);
       g.fillStyle(0xff8a65, 1);
       [[X - 120, 598], [X + 330, 602]].forEach(([x, y]) => { for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + k * 2 * Math.PI / 5; g.fillTriangle(x, y, x + Math.cos(a - 0.3) * 6, y + Math.sin(a - 0.3) * 6, x + Math.cos(a) * 14, y + Math.sin(a) * 14); g.fillTriangle(x, y, x + Math.cos(a + 0.3) * 6, y + Math.sin(a + 0.3) * 6, x + Math.cos(a) * 14, y + Math.sin(a) * 14); } });
+      bakeGfx(this, g, X - 540, 160, 1080, 560);   // 整座島（含背景）烘焙成一張圖
       // 四個實驗站
       this.beachStations = BEACH.map((st, i) => {
         const x = BOFF + st.x, y = 520;
@@ -3628,6 +3641,7 @@
         const label = txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 74, st.zh, 18, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
         c.add([sg, icon, label, zh]);
+        bakeIn(this, c, sg, -80, -130, 160, 200);
         const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.openStation(st.k));
         return c;
@@ -4104,9 +4118,10 @@
       g.fillStyle(0x8d8796, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0x9e98a8, 1); g.fillEllipse(X, 545, 940, 250);
       // 後方的岩壁和洞口
-      g.fillStyle(0x6d6475, 1); g.fillEllipse(X, 430, 860, 230);
-      g.fillStyle(0x2b2633, 1); g.fillEllipse(X, 460, 300, 170);
+      g.fillStyle(0x6d6475, 1); g.fillEllipse(X, 430, 860, 230); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 430, 860, 230);
+      g.fillStyle(0x2b2633, 1); g.fillEllipse(X, 460, 300, 170); g.strokeEllipse(X, 460, 300, 170);
       g.fillStyle(0x6d6475, 1); [[-120, 360], [-40, 352], [40, 356], [120, 362]].forEach(([dx, y]) => g.fillTriangle(X + dx - 18, y, X + dx + 18, y, X + dx, y + 46));
+      bakeGfx(this, g, X - 540, 160, 1080, 560);   // 整座島（含背景）烘焙成一張圖
       this.caveStations = CAVE.map((st) => {
         const x = COFF + st.x, y = 500;
         const c = this.add.container(x, y).setDepth(9);
@@ -4117,6 +4132,7 @@
         const icon = this.add.graphics({ y: -40 }).setScale(1.5);
         if (st.k === 'moon') drawMoon(icon, 2); else if (st.k === 'push') drawIcon(icon, 'box'); else drawIcon(icon, 'lamp');
         c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4a4458', strokeThickness: 4 }).setOrigin(0.5)]);
+        bakeIn(this, c, sg, -80, -130, 160, 200);
         const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.openCave(st.k));
         return c;
@@ -4462,6 +4478,10 @@
       g.fillStyle(0x37474f, 1); g.fillRect(tx - 32, 200, 64, 32);
       g.fillStyle(0xfff59d, 1); g.fillRect(tx - 24, 206, 48, 20);
       g.fillStyle(0xe53935, 1); g.fillTriangle(tx - 36, 202, tx + 36, 202, tx, 172);
+      g.lineStyle(3, INK, 1);
+      g.strokePoints([{ x: tx - 40, y: 440 }, { x: tx + 40, y: 440 }, { x: tx + 26, y: 230 }, { x: tx - 26, y: 230 }], true);
+      g.strokeRect(tx - 32, 200, 64, 32); g.strokeTriangle(tx - 36, 202, tx + 36, 202, tx, 172);
+      bakeGfx(this, g, X - 540, 160, 1080, 560);   // 整座島（含背景）烘焙成一張圖
       LIGHTHOUSE.forEach((st) => {
         const x = LOFF + st.x, y = 500;
         const c = this.add.container(x, y).setDepth(9);
@@ -4471,6 +4491,7 @@
         sg.fillStyle(0x3b2f1e, 0.14); sg.fillRoundedRect(-75, -121, 150, 50, 16); sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-75, -125, 150, 50, 16); sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-70, -120, 140, 40, 12);
         const icon = makeIcon(this, st.icon, 0, -40, 1.5);
         c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4e6b41', strokeThickness: 4 }).setOrigin(0.5)]);
+        bakeIn(this, c, sg, -80, -130, 160, 200);
         const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.openLighthouse(st.k));
       });
@@ -5470,6 +5491,7 @@
         g.fillStyle(gr.color, 0.25); g.fillRoundedRect(ROFF + gr.x0, 360, gr.x1 - gr.x0, 220, 24);
         txt(this, ROFF + (gr.x0 + gr.x1) / 2, 380, gr.zh, 22, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 5 }).setOrigin(0.5).setDepth(8);
       });
+      bakeGfx(this, g, X - 540, 160, 1080, 560);   // 整座島（含背景）烘焙成一張圖
       this.rsSigns = RLABS.map((st) => {
         const x = ROFF + st.x, y = 500;
         const c = this.add.container(x, y).setDepth(9);
@@ -5481,6 +5503,7 @@
         const zh = txt(this, 0, 62, st.zh, 15, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 4 }).setOrigin(0.5);
         const lock = txt(this, 0, -18, '', 30, '#78909c', { fontStyle: 'bold' }).setOrigin(0.5);
         c.add([sg, icon, en, zh, lock]);
+        bakeIn(this, c, sg, -80, -130, 160, 200);
         const zone = this.add.zone(x, y - 10, 130, 140).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.openLab(st.k));
         return { c, icon, lock, st };
