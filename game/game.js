@@ -1688,22 +1688,23 @@
     buildForest() {
       const X = OFF + 640;
       const g = this.add.graphics().setDepth(3);
-      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 690, 1020, 200);
       g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
-      g.fillStyle(0x5aa64a, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x5aa64a, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0x66b556, 1); g.fillEllipse(X, 540, 940, 250);
       const t = this.add.graphics().setDepth(4);
       [[260, 410], [390, 392], [700, 400], [1010, 395], [1120, 410]].forEach(([x, y]) => {
-        t.fillStyle(0x6b4a2b, 1); t.fillRect(OFF + x - 8, y, 16, 34);
-        t.fillStyle(0x2f7d3b, 1); t.fillCircle(OFF + x, y - 10, 38);
+        t.fillStyle(0x6b4a2b, 1); t.fillRect(OFF + x - 8, y, 16, 34); t.lineStyle(3, INK, 1); t.strokeRect(OFF + x - 8, y, 16, 34);
+        inkBlob(t, [[OFF + x, y - 10, 38]], null, 0x2f7d3b);
         t.fillStyle(0x3d9a4a, 1); t.fillCircle(OFF + x - 10, y - 20, 24);
+        t.fillStyle(0xffffff, 0.22); t.fillEllipse(OFF + x - 18, y - 30, 16, 9);
       });
 
       this.lotObjs = LOT_X.map((lx, i) => {
         const x = OFF + lx, y = LOT_Y;
         const base = this.add.graphics({ x, y }).setDepth(6);
         const hab = this.add.graphics({ x, y: y - 8 }).setDepth(7).setScale(1.6);
-        const animal = this.add.graphics({ x, y: y - 46 }).setDepth(9).setScale(1.3);
+        const animal = this.critterArt(x, y - 46, 1.3, 104).setDepth(9);
         const price = txt(this, x, y + 2, '', 22, '#ffffff', { fontStyle: 'bold', stroke: '#6d4c2f', strokeThickness: 4, align: 'center' }).setOrigin(0.5).setDepth(8);
         const zone = this.add.zone(x, y - 20, 112, 150).setDepth(20).setInteractive();
         zone.on('pointerdown', () => this.onLot(i));
@@ -1711,7 +1712,7 @@
       });
 
       // 來訪的動物與牠說的話
-      this.visitorG = this.add.graphics({ x: OFF + VISITOR.x, y: VISITOR.y }).setDepth(10).setScale(1.8);
+      this.visitorG = this.critterArt(OFF + VISITOR.x, VISITOR.y, 1.8, 150).setDepth(10);
       this.tweens.add({ targets: this.visitorG, y: VISITOR.y - 8, yoyo: true, repeat: -1, duration: 700, ease: 'Sine.easeInOut' });
       this.visitorBubble = this.add.container(OFF + VISITOR.x - 400, VISITOR.y - 335).setDepth(15);
       const vg = this.add.graphics(); drawBubble(vg, 0, 0, 420, 108, 400);
@@ -1733,6 +1734,22 @@
 
       // 森林裡同時只有一位居民提出願望，氣泡跟著那位居民移動
       this.forestWish = this.makeWishBubble(OFF + LOT_X[0] - 120, LOT_Y - 330, () => this.onBubble(this.s.fwho));
+    }
+
+    // 動物：有貼紙就用貼紙，沒有就用程式繪製的圖示；回傳容器（動畫作用在容器上），用 .draw(key) 換圖、.draw(null) 清空
+    critterArt(x, y, iconScale, size) {
+      const c = this.add.container(x, y);
+      const g = this.add.graphics().setScale(iconScale);
+      const img = this.add.image(0, -size * 0.12, 'st-panda').setDisplaySize(size, size).setVisible(false);
+      c.add([g, img]);
+      c.draw = (k) => {
+        g.clear();
+        const tex = k && 'st-' + k, has = !!k && this.textures.exists(tex);
+        img.setVisible(has);
+        if (has) img.setTexture(tex).setDisplaySize(size, size);
+        else if (k) drawIcon(g, k);
+      };
+      return c;
     }
 
     buildPip() {
@@ -2923,25 +2940,25 @@
         o.base.clear();
         o.zone.input.enabled = open || next;
         o.price.setText(next ? '+\n★' + LOT_PRICE[i] : '');
-        if (!open && !next) { o.hab.clear(); o.animal.clear(); return; }
+        if (!open && !next) { o.hab.clear(); o.animal.draw(null); return; }
         o.base.fillStyle(0x000000, 0.1); o.base.fillEllipse(0, 12, 112, 44);
         if (next) {
           o.base.lineStyle(3, 0x8d6e4a, 0.8); o.base.strokeEllipse(0, 6, 104, 38);
           o.base.fillStyle(0xc5b38f, 0.5); o.base.fillEllipse(0, 6, 104, 38);
-          o.hab.clear(); o.animal.clear();
+          o.hab.clear(); o.animal.draw(null);
           return;
         }
         o.base.fillStyle(lot.hab ? 0x8bc34a : 0xa1887f, 1); o.base.fillEllipse(0, 6, 104, 38);
         if (!lot.hab && s.visitor) { o.base.lineStyle(4, 0xffffff, 0.9); o.base.strokeEllipse(0, 6, 112, 46); }
         if (lot.hab) drawIcon(o.hab, lot.hab); else o.hab.clear();
-        if (lot.animal) drawIcon(o.animal, lot.animal); else o.animal.clear();
+        o.animal.draw(lot.animal || null);
       });
       const v = s.visitor;
       this.visitorG.setVisible(!!v);
       this.visitorBubble.setVisible(!!v);
       if (v) {
         const A = ANIMALS[v];
-        drawIcon(this.visitorG, v);
+        this.visitorG.draw(v);
         const st = L.stage(s.words, A.clue);
         this.visitorEn.setText('I am ' + art(v) + '. ' + A.say);
         this.visitorZh.setText(this.subs() && (st === 0 || this.vq.reveal) ? '我是' + A.zh + '，' + A.sayZh : '');
@@ -3511,9 +3528,9 @@
     buildBeach() {
       const X = BOFF + 640;
       const g = this.add.graphics().setDepth(3);
-      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 690, 1020, 200);
       g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
-      g.fillStyle(0xe8cf8f, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0xe8cf8f, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0xf1dca6, 1); g.fillEllipse(X, 545, 940, 250);
       // 貝殼與海星（裝飾）
       g.fillStyle(0xffccbc, 1); g.fillCircle(X - 470, 590, 9); g.fillCircle(X + 120, 600, 7); g.fillCircle(X + 455, 585, 8);
@@ -3524,10 +3541,10 @@
         const x = BOFF + st.x, y = 520;
         const c = this.add.container(x, y).setDepth(9);
         const sg = this.add.graphics();
-        sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 52, 150, 30);
-        sg.fillStyle(0xa1887f, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(0x3b2f1e, 0.14); sg.fillEllipse(0, 52, 150, 30);
+        sg.fillStyle(0xa1887f, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-62, -10, 124, 62, 10);
         sg.fillStyle(0x8d6e63, 1); sg.fillRect(-62, -10, 124, 10);
-        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        sg.fillStyle(0x3b2f1e, 0.14); sg.fillRoundedRect(-75, -121, 150, 50, 16); sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-75, -125, 150, 50, 16); sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-70, -120, 140, 40, 12);
         const icon = makeIcon(this, st.icon, 0, -40, 1.5);
         const label = txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 74, st.zh, 18, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -4003,9 +4020,9 @@
     buildCave() {
       const X = COFF + 640;
       const g = this.add.graphics().setDepth(3);
-      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 690, 1020, 200);
       g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
-      g.fillStyle(0x8d8796, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x8d8796, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0x9e98a8, 1); g.fillEllipse(X, 545, 940, 250);
       // 後方的岩壁和洞口
       g.fillStyle(0x6d6475, 1); g.fillEllipse(X, 430, 860, 230);
@@ -4016,8 +4033,8 @@
         const c = this.add.container(x, y).setDepth(9);
         const sg = this.add.graphics();
         sg.fillStyle(0x000000, 0.15); sg.fillEllipse(0, 52, 150, 30);
-        sg.fillStyle(0x5d4037, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
-        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        sg.fillStyle(0x5d4037, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(0x3b2f1e, 0.14); sg.fillRoundedRect(-75, -121, 150, 50, 16); sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-75, -125, 150, 50, 16); sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-70, -120, 140, 40, 12);
         const icon = this.add.graphics({ y: -40 }).setScale(1.5);
         if (st.k === 'moon') drawMoon(icon, 2); else if (st.k === 'push') drawIcon(icon, 'box'); else drawIcon(icon, 'lamp');
         c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4a4458', strokeThickness: 4 }).setOrigin(0.5)]);
@@ -4355,9 +4372,9 @@
     buildLighthouse() {
       const X = LOFF + 640;
       const g = this.add.graphics().setDepth(3);
-      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 690, 1020, 200);
       g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
-      g.fillStyle(0x8fbf7a, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x8fbf7a, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0x9ccb86, 1); g.fillEllipse(X, 545, 940, 250);
       // 後方的燈塔（紅白條紋）
       const tx = X + 360;
@@ -4370,9 +4387,9 @@
         const x = LOFF + st.x, y = 500;
         const c = this.add.container(x, y).setDepth(9);
         const sg = this.add.graphics();
-        sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 52, 150, 30);
-        sg.fillStyle(0x8d6e63, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10);
-        sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12);
+        sg.fillStyle(0x3b2f1e, 0.14); sg.fillEllipse(0, 52, 150, 30);
+        sg.fillStyle(0x8d6e63, 1); sg.fillRoundedRect(-62, -10, 124, 62, 10); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-62, -10, 124, 62, 10);
+        sg.fillStyle(0x3b2f1e, 0.14); sg.fillRoundedRect(-75, -121, 150, 50, 16); sg.fillStyle(0xffffff, 1); sg.fillRoundedRect(-75, -125, 150, 50, 16); sg.fillStyle(st.color, 1); sg.fillRoundedRect(-70, -120, 140, 40, 12); sg.lineStyle(3, INK, 1); sg.strokeRoundedRect(-70, -120, 140, 40, 12);
         const icon = makeIcon(this, st.icon, 0, -40, 1.5);
         c.add([sg, icon, txt(this, 0, -100, st.en, 22, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5), txt(this, 0, 74, st.zh, 18, '#ffffff', { fontStyle: 'bold', stroke: '#4e6b41', strokeThickness: 4 }).setOrigin(0.5)]);
         const zone = this.add.zone(x, y - 20, 170, 200).setDepth(20).setInteractive();
@@ -5365,9 +5382,9 @@
     buildResearch() {
       const X = ROFF + 640;
       const g = this.add.graphics().setDepth(3);
-      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200);
+      g.fillStyle(0x7a5a3a, 1); g.fillEllipse(X, 690, 1020, 200); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 690, 1020, 200);
       g.fillStyle(0x6b4e31, 1); g.fillEllipse(X, 720, 700, 120);
-      g.fillStyle(0x80cbc4, 1); g.fillEllipse(X, 560, 1060, 300);
+      g.fillStyle(0x80cbc4, 1); g.fillEllipse(X, 560, 1060, 300); g.lineStyle(3, INK, 1); g.strokeEllipse(X, 560, 1060, 300);
       g.fillStyle(0x8fd3cc, 1); g.fillEllipse(X, 545, 940, 250);
       // 三組的底板與名稱
       RGROUPS.forEach((gr) => {
@@ -5379,8 +5396,7 @@
         const c = this.add.container(x, y).setDepth(9);
         const sg = this.add.graphics();
         sg.fillStyle(0x000000, 0.12); sg.fillEllipse(0, 48, 120, 24);
-        sg.fillStyle(0xeceff1, 1); sg.fillRoundedRect(-58, -62, 116, 104, 14);
-        sg.lineStyle(4, RGROUPS.find((g2) => g2.k === st.g).color, 1); sg.strokeRoundedRect(-58, -62, 116, 104, 14);
+        paperCard(sg, -58, -62, 116, 104, 14, 0xfdf9f0, RGROUPS.find((g2) => g2.k === st.g).color);
         const icon = this.add.graphics({ y: -18 }).setScale(1.2); labIcon(icon, st.k);
         const en = txt(this, 0, 24, st.en, 17, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
         const zh = txt(this, 0, 62, st.zh, 15, '#ffffff', { fontStyle: 'bold', stroke: '#37474f', strokeThickness: 4 }).setOrigin(0.5);
