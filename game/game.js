@@ -1481,6 +1481,13 @@
     t.fillStyle(0x000000, 0.06); t.fillRect(-w / 2, 14, w, 4);
     return t;
   }
+  // 視窗標題：寫在芥末紙膠帶上（粉圓、墨線色、跟著膠帶轉 -2°），膠帶寬度依字數
+  function tapeTitle(scene, x, y, label) {
+    const wide = [...label].reduce((a, ch) => a + (/[\u0000-\u00ff]/.test(ch) ? 12 : 23), 0);
+    const c = scene.add.container(x, y).setAngle(-2);
+    c.add([washiTape(scene, 0, 0, wide + 64, 0xf2b84b, 0), txt(scene, 0, -1, label, 23, '#2b3a55').setOrigin(0.5)]);
+    return c;
+  }
   // 手帳內頁：米白紙、淡褐點格、珊瑚色裝訂線
   function notebookPage(scene, x0, y0, w, h) {
     const key = 'nb-' + w + 'x' + h;
@@ -3711,7 +3718,7 @@
     // --- 甜茶（§4.7）：選熱水或冷水；熱水糖很快溶化，冷水要攪很多下 ---
     buildTea() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Tea 甜茶', 28, '#bf360c', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Tea 甜茶'));
       this.teaTalk = this.talkRow(c, 130);
       this.teaPots = ['hot', 'cold'].map((k, i) => {
         const p = this.add.container(340, 330 + i * 160);
@@ -3829,7 +3836,7 @@
     // --- 紫色花汁（§4.8）：滴下去看顏色，粉紅＝酸、紫＝甜、綠＝苦 ---
     buildAcid() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Flower Juice 紫色花汁', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Flower Juice 紫色花汁'));
       this.acTalk = this.talkRow(c, 130);
       this.acCup = this.add.graphics({ x: 360, y: 400 });
       this.acQ = txt(this, 360, 400, '?', 54, '#90a4ae', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -3934,7 +3941,7 @@
     // --- 磁鐵（§4.12）：先猜會不會被吸，再用磁鐵驗證；銅幣、鋁罐是「不會被吸的金屬」 ---
     buildMagnet() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Magnet 磁鐵', 28, '#c62828', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Magnet 磁鐵'));
       this.mgTitle = txt(this, 640, 150, 'Will the magnet pull it?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.mgZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.mgMsg = txt(this, 640, 470, '', 22, '#6d4c2f', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
@@ -4043,7 +4050,7 @@
     // --- 挖掘分類（§4.15）：挖到的東西放進 rock、sand、mud ---
     buildDig() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Dig 挖挖看', 28, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Dig 挖挖看'));
       this.dgTitle = txt(this, 640, 150, 'Rock, sand, or mud?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.dgZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.dgSample = this.add.graphics({ x: 640, y: 300 }).setScale(1.6);
@@ -4161,7 +4168,7 @@
     // --- 光（§4.9）：洞裡很暗，看不到植物；照指令 Move the lamp to the left. 移動燈，照到植物才會出現 ---
     buildLight() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0x1f2633);
-      c.add(txt(this, 640, 98, 'Light 光', 28, '#ffd54a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Light 光'));
       const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
       this.ltSay = txt(this, 352, 140, '', 30, '#2b3a55', { fontStyle: 'bold' });
       this.ltZh = txt(this, 352, 182, '', 20, '#4f5a6b');
@@ -4285,10 +4292,10 @@
     // --- 月亮（§4.10）：第一張固定新月，把其餘排成盈虧順序到滿月 ---
     buildMoon() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0x1a237e);
-      c.add(txt(this, 640, 98, 'Moon 月亮', 28, '#fff59d', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Moon 月亮'));
       this.mnTitle = txt(this, 640, 150, 'Put the moons in order.', 32, '#ffffff', { fontStyle: 'bold' }).setOrigin(0.5);
       this.mnZh = txt(this, 640, 190, '', 20, '#c5cae9').setOrigin(0.5);
-      this.mnMsg = txt(this, 640, 600, '', 22, '#fff59d', { fontStyle: 'bold' }).setOrigin(0.5);
+      this.mnMsg = txt(this, 580, 600, '', 20, '#fff59d', { fontStyle: 'bold', wordWrap: { width: 640 }, align: 'center' }).setOrigin(0.5);   // 右邊留給檢查鈕
       c.add([this.mnTitle, this.mnZh, this.mnMsg]);
       // 上排：5 個排好的位置；下排：4 張打散的卡片
       this.mnSlots = [0, 1, 2, 3, 4].map((i) => {
@@ -4388,7 +4395,7 @@
     // --- 推與拉（§4.14）：Push the box to the left. 從 4 張只有圖的卡片選 ---
     buildPush() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Push and Pull 推與拉', 28, '#5d4037', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Push and Pull 推與拉'));
       const bub = this.add.graphics(); drawBubble(bub, 330, 125, 620, 96, 360);
       this.puSay = txt(this, 352, 140, '', 30, '#2b3a55', { fontStyle: 'bold' });
       this.puZh = txt(this, 352, 182, '', 20, '#4f5a6b');
@@ -4519,7 +4526,7 @@
     // --- 電路（§4.13）：缺口補上導體、打開開關，燈才會亮；有檢查模式 ---
     buildCircuit() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Circuit 電路', 28, '#f57f17', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Circuit 電路'));
       const bub = this.add.graphics(); drawBubble(bub, 250, 125, 560, 80, 300);
       this.ciSay = txt(this, 272, 136, '', 30, '#2b3a55', { fontStyle: 'bold' });
       this.ciZh = txt(this, 272, 174, '', 18, '#4f5a6b');
@@ -4674,7 +4681,7 @@
     // --- 修樂器（§4.11 B）：點樂器聽聽看，正常的會振動；找出卡住不振動的那個 ---
     buildMusic() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfffaf0);
-      c.add(txt(this, 640, 98, 'Music 樂器', 28, '#6a1b9a', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Music 樂器'));
       this.muTitle = txt(this, 640, 150, 'Which one is broken?', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.muZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.muMsg = txt(this, 640, 610, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -4758,7 +4765,7 @@
     // --- 霧中找動物（§4.11 A）：看波紋、聽聲音往哪邊走；走對會 louder，走錯會 quieter ---
     buildFog() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xcfd8dc);
-      c.add(txt(this, 640, 98, 'Fog 霧中找朋友', 28, '#37474f', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Fog 霧中找朋友'));
       this.fgTitle = txt(this, 640, 150, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.fgZh = txt(this, 640, 188, '', 20, '#546e7a').setOrigin(0.5);
       this.fgField = this.add.graphics();
@@ -4840,7 +4847,7 @@
 
     buildDrill() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfff8e1);
-      c.add(txt(this, 640, 98, 'Drill Day 防災演練日', 28, '#e65100', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Drill Day 防災演練日'));
       this.drSay = txt(this, 640, 150, '', 32, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.drZh = txt(this, 640, 190, '', 20, '#4f5a6b').setOrigin(0.5);
       this.drMsg = txt(this, 640, 612, '', 22, '#6d4c2f', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -5001,7 +5008,7 @@
     // ---------- 回收站（§4.18）：A 垃圾分類、B 找出池塘汙染的來源 ----------
     buildRecycle() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xf1f8e9);
-      c.add(txt(this, 640, 98, 'Recycle 回收與環境', 28, '#2e7d32', { fontStyle: 'bold' }).setOrigin(0.5));
+      c.add(tapeTitle(this, 640, 96, 'Recycle 回收與環境'));
       this.rcSay = txt(this, 640, 150, '', 30, '#2b3a55', { fontStyle: 'bold' }).setOrigin(0.5);
       this.rcZh = txt(this, 640, 188, '', 20, '#4f5a6b').setOrigin(0.5);
       this.rcMsg = txt(this, 640, 612, '', 22, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
@@ -5535,7 +5542,8 @@
     // 共用的實驗室視窗：外框固定，內容每次打開時重建
     buildLab() {
       const c = this.modalBase(80, 170, 70, 940, 590, 0xfafafa);
-      this.rxTitle = txt(this, 640, 98, '', 28, '#00695c', { fontStyle: 'bold' }).setOrigin(0.5);
+      c.add(washiTape(this, 640, 96, 340, 0xf2b84b, -2));
+      this.rxTitle = txt(this, 640, 95, '', 23, '#2b3a55').setOrigin(0.5).setAngle(-2);
       this.rxSay = txt(this, 640, 148, '', 28, '#2b3a55', { fontStyle: 'bold', align: 'center' }).setOrigin(0.5);
       this.rxZh = txt(this, 640, 186, '', 19, '#4f5a6b').setOrigin(0.5);
       this.rxMsg = txt(this, 640, 615, '', 21, '#33691e', { fontStyle: 'bold' }).setOrigin(0.5);
